@@ -1,0 +1,22 @@
+@charset "utf-8";
+html,body{overflow:auto;height:100%;}
+.w1000{margin:0 auto; width:870px;}
+.pos{ position:relative;}
+.l_top{overflow:hidden;border-bottom:2px solid #1566B7;height:80px;background:#FFFFFF;}
+.logo{ display:inline-block;height:80px;}
+.l_main{position:absolute;top:82px;left:0;right:0;bottom:80px;overflow:auto;}
+.loginBanner{float:left;width:530px; height:260px; margin-top:105px; background:url(images/login/loginBanner.jpg) no-repeat;}
+.login{float:left;margin-top:70px; padding:20px 40px; width:248px; background:#FAFAFA;border:1px solid #CECECE; font-size:14px;}
+.zhdl{color:#707070;font-size:18px;font-family:"Microsoft YaHei", "微软雅黑", Helvetica, "黑体", Arial, Tahoma;}
+.box{margin-bottom:25px; padding:11px 1px 9px; overflow:hidden; border:1px solid #C8C8C8; background:#FFFFFF;}
+.userbg,.passwordbg{ float:left; margin:0 15px 0 19px; width:24px; height:24px; background:url(images/login/bg_user.gif) no-repeat;}
+.passwordbg{ background:url(images/login/bg_password.gif) no-repeat;}
+#userId,#password{width:182px; height:24px; border:0; background:none; line-height:24px; color:#C8C8C8;}
+#login_pass_tips{position:absolute; top:0; right:0; width:187px; height:42px; line-height:45px; color:#C8C8C8;}
+.rp{margin-bottom:20px;text-align:right;font-size:12px;}
+.forget_pwd{color:#4065C6;text-decoration:none;}
+.forget_pwd:hover{text-decoration:underline;}
+.btn_login{ display:block; width:250px; height:50px; background:url(images/login/btn_login.png) no-repeat;}
+.l_foot{text-align:center;line-height:22px;color:#FFFFFF;background:#727171;position:absolute;bottom:0;left:0;right:0;height:80px;}
+.login_err_panel{color:#D70000;margin-left:-4px;margin-top:10px;font-size:13px;display:none;}
+.icon24-login{margin:0 auto; width:24px; height:24px; vertical-align:middle;display:inline-block;background:url(images/login/icon24_login.png) no-repeat -24px 0px;}

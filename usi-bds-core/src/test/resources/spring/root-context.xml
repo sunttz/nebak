@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+				http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+				http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<context:annotation-config />
+	<context:component-scan base-package="usi.*" use-default-filters="false">
+		<!-- 根据数据库类型扫描不同注解的dao实现类，并排除controller注解的bean -->
+<!-- 	<context:include-filter type="annotation" expression="usi.common.annotation.MysqlDb" />	-->
+		<context:include-filter type="annotation" expression="usi.common.annotation.OracleDb" />
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service" />
+	</context:component-scan>
+
+	<!-- 支持定时任务、异步方法等 -->
+	<task:annotation-driven />
+	<!-- 支持缓存 -->
+	<cache:annotation-driven />
+
+	<!-- 配置数据源 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 基本属性 driverClassName、url、username、password -->
+		<property name="driverClassName" value="${jdbc.driverClassName}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${druid.initialSize}"></property>
+		<property name="minIdle" value="${druid.minIdle}"></property>
+		<property name="maxActive" value="${druid.maxActive}"></property>
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${druid.maxWait}"></property>
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"></property>
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"></property>
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements" value="${druid.poolPreparedStatements}"></property><!-- 
+			如果使用mysql，则建议设置为fasle -->
+		<property name="maxOpenPreparedStatements" value="${druid.maxOpenPreparedStatements}"></property>
+		<property name="testOnBorrow" value="${druid.testOnBorrow}"></property>
+		<property name="testOnReturn" value="${druid.testOnReturn}"></property>
+		<property name="testWhileIdle" value="${druid.testWhileIdle}"></property>
+		<property name="validationQuery" value="${druid.validationQuery}"></property>
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="${druid.filters}"></property>
+	</bean>
+
+	<!-- 配置jdbcTemplate -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!--自身事务管理器，由于和流程冲突，所以注释（因为流程中已配置，在此可以不用配置） -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<!-- 通用缓存管理器 -->
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+		<property name="caches">
+			<set>
+				<!-- 默认缓存 -->
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"
+					p:name="default" />
+				<!-- 业务字典缓存 -->
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"
+					p:name="dictCache" />
+			</set>
+		</property>
+	</bean>
+
+	<!-- 缓存同步实现类 -->
+	<bean id="cacheSyncService" class="usi.sys.service.cacheSync.CacheSyncService" />
+	<!-- 通过rmi与集群节点通信，实现缓存同步 -->
+	<bean id="serviceExporter" class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<property name="service" ref="cacheSyncService" />
+		<!-- 定义服务名 -->
+		<property name="serviceName" value="cacheSync" />
+		<property name="serviceInterface" value="usi.sys.service.cacheSync.ICacheSyncService" />
+		<property name="registryPort" value="9713" />
+	</bean>
+	
+	<!-- rmi调用中连接超时设置 -->
+	<bean id="rmiClientSocketFactory" class="usi.sys.service.cacheSync.RMICustomClientSocketFactory"
+		p:timeout="2000" />
+
+</beans>

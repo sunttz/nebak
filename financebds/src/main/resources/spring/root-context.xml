@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+				http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+				http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	
+	<!-- 支持定时任务、异步方法等 -->
+	<task:annotation-driven />
+	<!-- 支持缓存 -->
+	<cache:annotation-driven />
+
+	<!-- 配置数据源 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 基本属性 driverClassName、url、username、password -->
+		<property name="driverClassName" value="${jdbc.driverClassName}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${druid.initialSize}"></property>
+		<property name="minIdle" value="${druid.minIdle}"></property>
+		<property name="maxActive" value="${druid.maxActive}"></property>
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${druid.maxWait}"></property>
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"></property>
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"></property>
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements" value="${druid.poolPreparedStatements}"></property><!-- 
+			如果使用mysql，则建议设置为fasle -->
+		<property name="maxOpenPreparedStatements" value="${druid.maxOpenPreparedStatements}"></property>
+		<property name="testOnBorrow" value="${druid.testOnBorrow}"></property>
+		<property name="testOnReturn" value="${druid.testOnReturn}"></property>
+		<property name="testWhileIdle" value="${druid.testWhileIdle}"></property>
+		<property name="validationQuery" value="${druid.validationQuery}"></property>
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="${druid.filters}"></property>
+	</bean>
+
+	<!-- 配置jdbcTemplate -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!--自身事务管理器 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<!-- 通用缓存管理器 -->
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+		<property name="caches">
+			<set>
+				<!-- 默认缓存 -->
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default" />
+				<!-- 业务字典缓存 -->
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="dictCache" />
+				<!-- 脚本缓存, -->
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="scriptCache" />
+				<!-- 接口服务缓存,usi-ic -->
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="intfServiceCache" />
+				<!-- 规则缓存 ,usi-iserve-rule-->
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="ruleCache" />
+			</set>
+		</property>
+	</bean>
+
+		<!-- 线程池,工作队列为空,当有任务需要执行而核心线程已用完则会直接创建新线程 -->
+	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="rejectedExecutionHandler">
+     		<bean class="java.util.concurrent.ThreadPoolExecutor$DiscardPolicy" />
+		</property>
+		<property name="corePoolSize" value="5" />
+		<property name="maxPoolSize" value="500" />
+		<property name="queueCapacity" value="0" />
+	</bean>
+
+</beans>

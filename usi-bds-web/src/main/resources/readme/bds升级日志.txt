@@ -1,0 +1,13 @@
+[2.0.1-SNAPSHOT]
+2015-12-11	修改comm.css,配置页面的输入字体统一成12px
+2015-12-17	jackson版本升级到2.2.2
+2015-12-17	找回修改密码功能
+2015-12-21	AuthInfo类实现接口Serializable
+2016-01-07	PrimarykeyUtil一次缓存的key的数量由100改为20
+2016-01-08	改进一处:LoginController第76行";Path=" +contextPath+ ";HTTPOnly"改为";Path=" +contextPath+ "/;HTTPOnly";
+2016-01-08	修正一处错误:usi.sys.key.util.impl4oracle包下的DefaultUniqueTableApp继承的是JdbcDaoSupport4mysql而不是JdbcDaoSupport4oracle
+2016-01-08	改进一处:DefaultUniqueTableApp中的@Transactional加个参数"propagation=Propagation.REQUIRES_NEW",使之即时提交事务
+2016-01-20	角色编码可以在页面上编辑了
+2016-01-21	代码中的roleId统一由long改成Integer
+2016-01-25  增加了scripts中mysql数据库的实现
+2016-02-15	修正一处:authinfo中的roles的roleCode一直没有查询出

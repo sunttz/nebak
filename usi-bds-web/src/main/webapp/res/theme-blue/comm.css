@@ -1,0 +1,26 @@
+.aBtn{text-decoration: none; padding:3px 5px;}
+.aBtn:hover{background:#ccc; color:#313131;}
+/*table的样式*/
+.info_table{border-collapse:collapse;border-spacing:0;}
+.info_table td{padding:0 15px;border:1px solid #dcdcdc;}
+.info_table td input{height:18px;line-height:18px;font-size: 12px;}
+.info_table textarea,.info_table select{font-size: 12px;}
+
+.inp{width:80%;}
+/*tab页签的样式*/
+.tab_title{width:80px;height:20px;background:#1464B4;text-align:center;color:#FFFFFF;line-height:20px;font-weight:bold;}
+
+td.label{width:100px;background:#FAFAFA;padding:0;}
+td.attr{width:252px;padding:0 2px;}
+.attr input{width:200px;}
+#watchStaffDetailDialog .attr{cursor:default;}
+.datagrid-cell .content{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.resetBtn{float:left;color:#666666;height:20px;width:50px;padding:0px 4px;cursor:pointer;line-height:20px;margin-left:5px;margin-top:2px;}
+.resetbtn:hover {background:#1566B7;color:#ffffff;}
+
+/*修改combobox默认样式*/
+.combo {background-color: #ffffff;border-color: #dcdcdc;}
+
+/*嵌在datagrid单元格中的按钮的样式*/
+a.datagrid-embed-btn {cursor: pointer;display: inline-block;height: 22px;margin: 0;opacity: 0.6;vertical-align: top;width: 22px;}
+a.datagrid-embed-btn:hover {opacity: 1;background-color: #ffffff;border: 1px solid #b7d2ff;border-radius: 5px;}

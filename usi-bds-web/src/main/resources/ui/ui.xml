@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+-->
+<application theme="blue" name="网元备份管理系统" copyright="2016 中国移动 版权所有">
+	<login-page>
+		<logo-url>/res/theme-blue/images/login/logo.png</logo-url>
+	</login-page>
+	<index-page>
+		<logo-url>/res/theme-blue/images/index/logo_small.png</logo-url>
+	</index-page>
+</application> 
+<!-- 
+<application theme="red" name="全业务预处理" copyright="2015 中国联通 版权所有">
+	<login-page>
+		<logo-url>/res/theme-red/images/login/logo.png</logo-url>
+	</login-page>
+	<index-page>
+		<logo-url>/res/theme-red/images/index/logo_small.png</logo-url>
+	</index-page>
+</application>
+-->

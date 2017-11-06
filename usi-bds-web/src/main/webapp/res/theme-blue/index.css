@@ -1,0 +1,101 @@
+@charset "utf-8";
+html,body{overflow:hidden;height:100%;}
+body,button,input,select,textarea{font:12px/1.5 tahoma,arial,\5b8b\4f53,sans-serif;}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{padding:0;margin:0; list-style-type:none;}
+a{outline:none;text-decoration:none;}
+.red{color:#D70000;}
+.green{color:green;}
+.clearfix:after {content:'\0020';display:block;height:0;clear:both;visibility:hidden;}
+.clearfix{zoom:1;}
+.head{background-color:#fff;border-bottom:2px solid #1566B7;height:80px;background:url(images/index/top_right_blue.jpg) no-repeat right top;}
+.h_top{height:48px;}
+.h_logo{margin-left:12px;height:48px;float:left;}
+.h_content{height:30px;line-height:20px;font-size:12px;color:#666666;position:absolute;right:20px;top:14px;z-index:4;}
+.content_item{float:left;margin-right:8px;height:100%;}
+.content_item.pwd{position:relative;}
+#pwd_panel{position:absolute;right:0;top:20px;width:350px;height:200px;border:1px solid #666666;background:#FFFFFF;display:none;}
+#pwd_panel .pwd_title{width:250px;margin:30px auto 0;}
+#pwd_panel .pwd_warn{width:250px;height:16px;margin:10px auto 0;display:none;}
+.pwd_error{margin:0 auto; width:16px; height:16px; vertical-align:middle;display:inline-block;background:url(images/index/error.png) no-repeat;}
+.pwd_right{margin:0 auto; width:16px; height:16px; vertical-align:middle;display:inline-block;background:url(images/index/right.png) no-repeat;}
+#pwd_panel .pwd_tail{position:absolute;left:0;right:0;bottom:0;height:40px;background:#FAFAFA;border-top:1px solid #D2D2D2;}
+#pwd_panel input{width:180px;height:20px;line-height:20px;border:1px solid #C4C4C4;}
+#pwd_panel .tail_btn{float:right;width:50px;height:20px;line-height:20px;text-align:center;background:#EDEDED;border:1px solid #999999;margin-top:10px;cursor:pointer;}
+#pwd_close{margin-right:52px;}
+#pwd_submit{margin-right:15px;}
+.content_item a{cursor:pointer;color:#666666;text-decoration:none;display:inline-block;height:20px;padding:0px 4px;}
+.content_item a:HOVER{background:#1566B7;color:#FFFFFF;}
+.content_item .hover{background:#1566B7;color:#FFFFFF;}
+.welname{color:#222222;font-weight:bold;font-size:14px;font-family:verdana;}
+.h_tail{height:32px;}
+.h_nvg{margin-left:12px;font-size:14px;font-family:'Microsoft Yahei',​verdana;color:#6A6A6A;}
+.h_tab{width:90px;height:32px;float:left;margin-right:-1px;cursor:pointer;line-height:32px;font-weight:bold;text-align:center;padding:0 15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;word-wrap:normal;position:relative;}
+.h_tab.extend{position:relative;padding:0 20px 0 10px;}
+.h_tab b{width:16px;height:16px;position:absolute;top:7px;right:6px;line-height:16px;color:#CCCCCC;font-size:12px;font-weight:bold;}
+.h_tab b:hover{color:#5E6164;}
+/*用于ie6下让hover伪类有效，定义第一行是为了让覆盖后的属性与原来a标签的属性不一样，从而触发hover，只有部分属性才能触发hover*/
+a:hover{border:none}
+a:hover .h_tab{background:#90c31f none repeat scroll 0 0;z-index:3;color:white;}
+.selected, a:hover .selected{background:url('images/index/3.png');font-weight:bold;z-index:4;color:#FFFFFF;}
+/* .h_tab:hover{background:#90c31f none repeat scroll 0 0;z-index:3;color:white;} */
+/* .selected, .selected:hover{background:url('images/index/3.png');font-weight:bold;z-index:4;color:#FFFFFF;} */
+
+.h_xiala{background:url('images/index/xiala1.png') 0 -8px;float:left;margin-top:3px;width:64px;height:29px;cursor:pointer;position:relative;z-index:4;outline:0 none;}
+.h_xiala:hover{background:url('images/index/xiala2.png') 0 -7px;}
+.h_xiala_panel{position:absolute;top:31px;right:0;width:180px;line-height:25px;color:#555555;background:#FFFFFF;border:1px solid #999999;padding:7px 0;border-radius:4px;box-shadow:0 0 10px rgba(0, 0, 0, 0.5);z-index:10;font-size:12px;display:none;}
+.xia_item{height:25px;padding:0 52px 0 32px;white-space:nowrap;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;word-wrap:normal;}
+.xia_item.curr{background-image:url('images/index/item_curr.png');background-repeat:no-repeat;background-position:10px 5px;}
+#close_item{background-image:url('images/index/menu_close_all.png');background-repeat:no-repeat;background-position:10px 4px;}
+a:hover .xia_item{background-color:#90c31f;color:#FFFFFF;}
+.xia_split{margin:4px 0;border-color:#C6C6C6;border-style:solid;border-width:0 0 1px;clear:both;color:#E0E0E0;font-size:0;height:0;line-height:0;overflow: hidden;}
+.main{position:absolute;left:0px;top:84px;bottom:0px;right:0px;background:#FFFFFF;}
+.tab_content{position:absolute;top:0px;left:0px;bottom:0px;right:0px;display:none;}
+.left_menu{position:absolute;left:0px;top:84px;bottom:0px;width:200px;border-right:1px solid #D8D8D8;background:#F6F6F6;padding:10px 0;overflow:auto;}
+.jiayin{z-index:-2}
+.iframe_yesleft{position:absolute;left:201px;top:0px;bottom:0px;right:0px;}
+.iframe_noleft{position:absolute;left:0px;top:0px;bottom:0px;right:0px;}
+.iframe_auto{width:100%;height:100%;position:absolute;top:0px;left:0px;right:0px;bottom:0px;}
+
+/*left layout*/
+.left{position:absolute;z-index:1;left:0;top:82px;bottom:0;width:200px;border-right:1px solid #D8D8D8;background:#FFFFFF;overflow:auto;}
+.l_menu{font-size:14px;font-family:'Microsoft Yahei',​verdana;}
+/*一级节点*/
+.menu_item_one{line-height:30px;}
+.menu_item_one a{display:block;color:#333;padding:0 20px;}
+/*二级节点*/
+.menu_item_two{line-height:30px;}
+.menu_item_two a{display:block;color:#333;padding:0 50px 0 46px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+/*一级导航类节点*/
+	/*没有展开的*/
+.hasc .onehref{font-weight:bold;color:#000000;background:#F5F7FA;border-bottom:1px solid #CCCCCC;background-image:url('images/index/base_z.png');background-repeat:no-repeat;background-position:165px -415px;}
+.hasc ul{display:none;}
+	/*展开的*/
+.hasc.expand .onehref{background-image:url('images/index/base_z.png');_background-image:url('images/index/ie6_base_z.png');background-repeat:no-repeat;background-position:165px -389px;}
+.hasc.expand ul{display:block;}
+.hasc .onehref:hover{background-color:#DCE7F0;}
+/*一级功能类节点*/
+.noc .onehref{padding:0 20px 0 36px;background-image:url('images/index/offline.png');_background-image:url('images/index/ie6_offline.png'); background-repeat:no-repeat;background-repeat:no-repeat;background-position:20px 9px;}
+.noc .onehref:hover{background-color:#EAF2EF;background-image:url('images/index/online.png');_background-image:url('images/index/ie6_online.png');color:#1462B0;}
+.noc .onehref.curr{background-color:#C9DBE9;background-image:url('images/index/online.png');_background-image:url('images/index/ie6_online.png');color:#1462B0;}
+/*二级功能类节点*/
+.twohref{background-image:url('images/index/offline.png'); _background-image:url('images/index/ie6_offline.png');background-repeat:no-repeat;background-repeat:no-repeat;background-position:30px 9px;}
+.twohref:hover{background-color:#EAF2EF;background-image:url('images/index/online.png');_background-image:url('images/index/ie6_online.png');color:#1462B0;}
+.twohref.curr{background-color:#C9DBE9;background-image:url('images/index/online.png');_background-image:url('images/index/ie6_online.png');color:#1462B0;}
+
+/*高级选择器*/
+/*一级功能类节点的兄弟导航类节点加top边框*/
+.noc + .hasc .onehref{border-top:1px solid #EEEEEE;}
+/*一级展开的导航类节点的兄弟导航类节点加top边框*/
+.expand + .hasc .onehref{border-top:1px solid #EEEEEE;}
+
+/*center layout*/
+.center{position:absolute;z-index:3;left:201px;top:82px;bottom:0;right:0;}
+.center.noLeft{left:0;}
+.noleft{left:0;}
+.center iframe{width:100%;height:100%;position:absolute;top:0px;left:0px;right:0px;bottom:0px;}
+
+/*展开收缩按钮*/
+.left .pullbar_l{position:absolute;z-index:2;width:11px;height:45px;top:50%;right:0;background-image:url('images/index/pullbar_l.png');}
+.center .pullbar_r{position:absolute;width:11px;height:45px;top:50%;left:0;background-image:url('images/index/pullbar_r.png');display:none;}
+/*首页右上角的系统名称*/
+.sysname{ float:left; height:48px; line-height:48px; font-size:16px; font-family:"微软雅黑"; font-weight:bold;color:#222222;}

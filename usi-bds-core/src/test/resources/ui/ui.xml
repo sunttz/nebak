@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application theme="dianxin" name="网元备份管理系统" copyright="2016 中国移动 版权所有">
+	<login-page>
+		<logo-url>/res/theme-dianxin/images/login/logo.png</logo-url>
+	</login-page>
+	<index-page>
+		<logo-url>/res/theme-dianxin/images/index/logo_small.png</logo-url>
+	</index-page>
+</application> 
+<!-- 
+<application theme="liantong" name="科大国创系统框架" copyright="2014 科大国创 版权所有">
+	<login-page>
+		<logo-url>/res/theme-liantong/images/login/logo.png</logo-url>
+	</login-page>
+	<index-page>
+		<logo-url>/res/theme-liantong/images/index/logo_small.png</logo-url>
+	</index-page>
+</application>
+-->
