@@ -44,7 +44,7 @@ $(document).ready(function() {
 			handler: function(){
 				var row = $("#listTable").datagrid("getSelections");
 				var ids = "";
-				if(!row){
+				if(!row || row.length == 0){
 					alert("请选择备份机器!");
 					return;
 				}else{

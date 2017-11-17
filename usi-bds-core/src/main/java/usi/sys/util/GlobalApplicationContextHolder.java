@@ -1,10 +1,10 @@
 package usi.sys.util;
 
-import java.util.Map;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 /**
  * 对全系统提供ApplicationContext及对应的getBean
