@@ -1,0 +1,25 @@
+-- Add/modify columns
+alter table NE_SERVER add BAK_TYPE char(1);
+
+-- Create table
+create table biz_bak_result
+(
+  pk_no       number(18) not null,
+  succ_num    number(18),
+  fail_num    number(18),
+  create_date date default sysdate
+)
+;
+
+
+
+-- 给管理员角色增加网元配置管理菜单
+
+
+-- Create sequence
+create sequence NE_SERVER_SEQ
+minvalue 1
+maxvalue 999999999999999999999999999
+start with 100
+increment by 1
+cache 10;

@@ -25,6 +25,8 @@ public class NeServer {
 	private String userName;
 	//密码
 	private String passWord;
+	//备份类型(0被动取1主动推)
+	private String bakType;
 	public Long getServerId() {
 		return serverId;
 	}
@@ -85,5 +87,12 @@ public class NeServer {
 	public void setPassWord(String passWord) {
 		this.passWord = passWord;
 	}
-	
+
+	public String getBakType() {
+		return bakType;
+	}
+
+	public void setBakType(String bakType) {
+		this.bakType = bakType;
+	}
 }

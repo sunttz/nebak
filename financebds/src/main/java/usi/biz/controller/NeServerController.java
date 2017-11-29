@@ -1,35 +1,29 @@
 package usi.biz.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import usi.biz.entity.AutoLogDto;
+import usi.biz.entity.NeServer;
 import usi.biz.service.NeServerService;
 import usi.biz.util.DiskInfoUtil;
 import usi.sys.dto.AuthInfo;
 import usi.sys.dto.PageObj;
 import usi.sys.util.ConfigUtil;
 import usi.sys.util.ConstantUtil;
-import usi.biz.entity.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Controller
 @RequestMapping("/netElement")
@@ -236,5 +230,52 @@ public class NeServerController {
               in.close();  
               out.flush();
           } 
-    }  
+    }
+
+	/**
+	 * 网元serve配置页面
+	 * @return
+	 */
+	@RequestMapping(value = "/neServerConfig.do", method = RequestMethod.GET)
+	public String neServerConfig(Model model){
+		return "ne_server/neServerConfig";
+	}
+
+	/**
+	 * 网元配置-保存
+	 * @param neServer
+	 * @return
+	 */
+	@RequestMapping(value = "/saveNeserver.do", method = RequestMethod.POST)
+	@ResponseBody
+	public boolean addNeserver(NeServer neServer){
+		boolean flag = false;
+		try {
+			int result = -1;
+			Long serverId = neServer.getServerId();
+			if(serverId != null){
+				result = neServerService.updateNeServer(neServer);
+			}else{
+				result = neServerService.saveNeServer(neServer);
+			}
+			if(result == 1){
+				flag = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return flag;
+	}
+
+	/**
+	 * 网元配置-删除
+	 * @param serverIds
+	 * @return
+	 */
+	@RequestMapping(value = "/deleteNeserver.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String deleteNeserver(String serverIds){
+		String failServerIds = neServerService.deleteNeServer(serverIds);
+		return failServerIds;
+	}
 }

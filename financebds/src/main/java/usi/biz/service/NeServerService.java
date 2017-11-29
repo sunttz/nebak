@@ -1,18 +1,6 @@
 package usi.biz.service;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
 import org.springframework.stereotype.Service;
-
 import usi.biz.dao.AutoLogDao;
 import usi.biz.dao.NeServerDao;
 import usi.biz.entity.AutoLog;
@@ -22,6 +10,11 @@ import usi.biz.util.ChineseToEnglishUtil;
 import usi.biz.util.FtpUtils;
 import usi.sys.dto.PageObj;
 import usi.sys.util.ConfigUtil;
+
+import javax.annotation.Resource;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class NeServerService {
@@ -447,4 +440,40 @@ public class NeServerService {
         }
         return size;
     }
+
+	/**
+	 * 新增网元
+	 * @param neServer
+	 */
+	public int saveNeServer(NeServer neServer){
+		return neServerDao.saveNeServer(neServer);
+	}
+
+	/**
+	 * 修改网元
+	 * @param neServer
+	 * @return
+	 */
+	public int updateNeServer(NeServer neServer){
+		return neServerDao.updateNeServer(neServer);
+	}
+
+	/**
+	 * 删除网元
+	 * @param serverIds
+	 * @return 失败列表
+	 */
+	public String deleteNeServer(String serverIds){
+		StringBuffer failServerIds = new StringBuffer();
+		String[] ids = serverIds.split(",");
+		for(String serverId : ids){
+			try {
+				neServerDao.deleteNeServer(Long.parseLong(serverId));
+			} catch (Exception e) {
+				e.printStackTrace();
+				failServerIds.append(serverId+",");
+			}
+		}
+		return failServerIds.toString();
+	}
 }
