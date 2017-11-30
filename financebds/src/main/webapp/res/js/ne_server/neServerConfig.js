@@ -21,9 +21,15 @@ $(document).ready(function() {
         editable:false,
         multiple:false,
         cascadeCheck:false,
-        onLoadSuccess: function () {
-        }
+        onLoadSuccess: function () { //加载完成后,设置选中第一项
+            var options = $("#orgId").combobox("getData");
+            if(options[0].orgId==-1){
+                options.shift();
+            }
+            $("#orgId").combobox('loadData',options);
+        },
     });
+
 	
 	//列表初始化
 	$('#listTable').datagrid({

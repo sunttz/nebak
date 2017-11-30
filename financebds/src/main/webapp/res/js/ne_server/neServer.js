@@ -24,6 +24,7 @@ $(document).ready(function() {
 		striped:true,
 		pagination:true,
 		singleSelect:false,
+        pageSize : 20,
 		queryParams: {
 			orgId:$('#org_id').combobox('getValue'),
 			deviceType:$('#device_type').combobox('getValue')
