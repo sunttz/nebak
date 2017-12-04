@@ -1,19 +1,6 @@
 $(document).ready(function() {
-	//地区初始化
-	$("#org_id").combobox({
-		url:'getAllOrg.do',
-		method:'post',
-		valueField:'orgId',
-		textField:'orgName',
-		editable:false,
-		multiple:false,
-		cascadeCheck:false, 
-		onLoadSuccess: function () { //加载完成后,设置选中第一项
-			var option = $("#org_id").combobox("getData")[0].orgId;
-			$("#org_id").combobox("setValue",option);
-		},
-	});
-    $("#orgId").combobox({
+    //地区初始化
+    $("#org_id").combobox({
         url:'getAllOrg.do',
         method:'post',
         valueField:'orgId',
@@ -22,15 +9,20 @@ $(document).ready(function() {
         multiple:false,
         cascadeCheck:false,
         onLoadSuccess: function () { //加载完成后,设置选中第一项
-            var options = $("#orgId").combobox("getData");
+            var option = $("#org_id").combobox("getData")[0].orgId;
+            $("#org_id").combobox("setValue",option);
+            // 网元新增的所属地区初始化
+            var options = $("#org_id").combobox("getData");
             if(options[0].orgId==-1){
                 options.shift();
             }
-            $("#orgId").combobox('loadData',options);
+            $("#orgId").combobox({
+                data : options,
+                valueField: 'orgId',
+                textField: 'orgName'});
         },
     });
 
-	
 	//列表初始化
 	$('#listTable').datagrid({
 		url:'getPageAllNE.do',
@@ -134,6 +126,23 @@ $(document).ready(function() {
             }
         }]
 	});
+
+    // $("#orgId").combobox({
+    //     url:'getAllOrg.do',
+    //     method:'post',
+    //     valueField:'orgId',
+    //     textField:'orgName',
+    //     editable:false,
+    //     multiple:false,
+    //     cascadeCheck:false,
+    //     onLoadSuccess: function () { //加载完成后,设置选中第一项
+    //         var options = $("#orgId").combobox("getData");
+    //         if(options[0].orgId==-1){
+    //             options.shift();
+    //         }
+    //         $("#orgId").combobox('loadData',options);
+    //     },
+    // });
 	
 	//点击搜索按钮
 	$('#job_log_btn').click(function(){
