@@ -13,11 +13,12 @@ $(document).ready(function() {
             $("#org_id").combobox("setValue",option);
             // 网元新增的所属地区初始化
             var options = $("#org_id").combobox("getData");
-            if(options[0].orgId==-1){
-                options.shift();
+            var newOptions=JSON.parse(JSON.stringify(options))
+            if(newOptions[0].orgId==-1){
+                newOptions.shift();
             }
             $("#orgId").combobox({
-                data : options,
+                data : newOptions,
                 valueField: 'orgId',
                 textField: 'orgName'});
         },
@@ -169,6 +170,16 @@ $(document).ready(function() {
         }
     });
 
+    // 主动推类型无需ftp配置
+    $("input:radio[name=bakType]").change(function () {
+        var bakType = $('input:radio[name="bakType"]:checked').val();
+        if(bakType == "1"){
+            $("#deviceAddrTr,#userNameTr,#passWordTr").hide();
+        }else{
+            $("#deviceAddrTr,#userNameTr,#passWordTr").show();
+        }
+    });
+
 });
 
 //采用jquery easyui loading css效果 
@@ -276,18 +287,6 @@ function saveNeServer() {
         $('#remarks_box .validate_box').hide();
         $('#remarks_box .validate_msg').html('');
     }
-    if(deviceAddr.length == 0) {
-        $('#deviceAddr_box .validate_box').show();
-        $('#deviceAddr_box .validate_msg').html('必选字段');
-        flag = false;
-    } else if (!/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.test(deviceAddr)) {
-        $('#deviceAddr_box .validate_box').show();
-        $('#deviceAddr_box .validate_msg').html('格式不正确')
-        flag = false;
-    } else {
-        $('#deviceAddr_box .validate_box').hide();
-        $('#deviceAddr_box .validate_msg').html('');
-    }
     if(bakPath.length == 0) {
         $('#bakPath_box .validate_box').show();
         $('#bakPath_box .validate_msg').html('必选字段');
@@ -296,21 +295,36 @@ function saveNeServer() {
         $('#bakPath_box .validate_box').hide();
         $('#bakPath_box .validate_msg').html('');
     }
-    if(userName.length == 0) {
-        $('#userName_box .validate_box').show();
-        $('#userName_box .validate_msg').html('必选字段');
-        flag = false;
-    } else {
-        $('#userName_box .validate_box').hide();
-        $('#userName_box .validate_msg').html('');
-    }
-    if(passWord.length == 0) {
-        $('#passWord_box .validate_box').show();
-        $('#passWord_box .validate_msg').html('必选字段');
-        flag = false;
-    } else {
-        $('#passWord_box .validate_box').hide();
-        $('#passWord_box .validate_msg').html('');
+    // 被动取类型校验ftp配置
+    if(bakType == "0"){
+        if(deviceAddr.length == 0) {
+            $('#deviceAddr_box .validate_box').show();
+            $('#deviceAddr_box .validate_msg').html('必选字段');
+            flag = false;
+        } else if (!/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.test(deviceAddr)) {
+            $('#deviceAddr_box .validate_box').show();
+            $('#deviceAddr_box .validate_msg').html('格式不正确')
+            flag = false;
+        } else {
+            $('#deviceAddr_box .validate_box').hide();
+            $('#deviceAddr_box .validate_msg').html('');
+        }
+        if(userName.length == 0) {
+            $('#userName_box .validate_box').show();
+            $('#userName_box .validate_msg').html('必选字段');
+            flag = false;
+        } else {
+            $('#userName_box .validate_box').hide();
+            $('#userName_box .validate_msg').html('');
+        }
+        if(passWord.length == 0) {
+            $('#passWord_box .validate_box').show();
+            $('#passWord_box .validate_msg').html('必选字段');
+            flag = false;
+        } else {
+            $('#passWord_box .validate_box').hide();
+            $('#passWord_box .validate_msg').html('');
+        }
     }
     if(flag == false){
         return;
@@ -344,8 +358,14 @@ function saveNeServer() {
 // 修改网元
 function updateNeServer(index) {
     var row = $("#listTable").datagrid('getData').rows[index];
-    console.info(row);
     if(row != undefined && row != null) {
+        // 主动推类型无需ftp配置
+        var bakType = row.bakType;
+        if(bakType == "1"){
+            $("#deviceAddrTr,#userNameTr,#passWordTr").hide();
+        }else{
+            $("#deviceAddrTr,#userNameTr,#passWordTr").show();
+        }
         $('#neServerForm').form('load', row);
         $('#neServerDialog').dialog({
             title:'修改网元信息',

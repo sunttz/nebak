@@ -50,7 +50,7 @@
 
 	<div style="display:none;">
 		<div id="neServerDialog" style="padding:5px;">
-			<form id="neServerForm" method="post">
+			<form id="neServerForm" method="post" style="height: 270px;">
 				<input name="serverId" id="serverId" type="text" style="display: none;" />
 				<table style="width:100%;" class="info_table">
 					<tr style="height:30px;white-space: nowrap;">
@@ -102,15 +102,6 @@
 						</td>
 					</tr>
 					<tr style="height:30px;white-space: nowrap;">
-						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>设备地址</td>
-						<td id="deviceAddr_box">
-							<input id="deviceAddr" name="deviceAddr" style="width:420px;" class="input" size="40" />
-							<span class="validate_box">
-								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
-							</span>
-						</td>
-					</tr>
-					<tr style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>备份路径</td>
 						<td id="bakPath_box">
 							<input id="bakPath" name="bakPath" style="width:420px;" class="input" size="40"/>
@@ -119,7 +110,16 @@
 							</span>
 						</td>
 					</tr>
-					<tr style="height:30px;white-space: nowrap;">
+					<tr id="deviceAddrTr" style="height:30px;white-space: nowrap;">
+						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>设备地址</td>
+						<td id="deviceAddr_box">
+							<input id="deviceAddr" name="deviceAddr" style="width:420px;" class="input" size="40" />
+							<span class="validate_box">
+								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
+							</span>
+						</td>
+					</tr>
+					<tr id="userNameTr" style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>用户名</td>
 						<td id="userName_box">
 							<input id="userName" name="userName" style="width:420px;" class="input" size="30" />
@@ -128,7 +128,7 @@
 							</span>
 						</td>
 					</tr>
-					<tr style="height:30px;white-space: nowrap;">
+					<tr id="passWordTr" style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>密码</td>
 						<td id="passWord_box">
 							<input id="passWord" name="passWord"  style="width:420px;" class="input" size="30" />

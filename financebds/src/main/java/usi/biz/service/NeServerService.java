@@ -24,7 +24,13 @@ public class NeServerService {
 	private AutoLogDao autoLogDao;
 	
 	private static String rootName=ConfigUtil.getValue("download.file.path");
-	
+
+	// 备份ftp服务器配置
+	private static String ftpflag=ConfigUtil.getValue("bak.ftp.flag");
+	private static String ftpIp=ConfigUtil.getValue("bak.ftp.ip");
+	private static String ftpUsername=ConfigUtil.getValue("bak.ftp.username");
+	private static String ftpPassword=ConfigUtil.getValue("bak.ftp.password");
+
 	public List<NeServer> getAllOrg(){
 		return neServerDao.getAllOrg();
 	}
@@ -89,29 +95,83 @@ public class NeServerService {
 		for(int i=0;i<serverIds.length;i++){
 			List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 			NeServer neserver=list.get(0);
-			downloadPath=checkBakAddr(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
-			dir=neserver.getBakPath();
-			hostname=neserver.getDeviceAddr();
-			username=neserver.getUserName();
-			password=neserver.getPassWord();
-			System.out.println("==============downloadPath(本机路径):"+downloadPath);
-			System.out.println("==============dir(ftp服务器路径):"+dir);
-			System.out.println("==============hostname(主机名):"+hostname);
-			System.out.println("==============port(端口):"+port);
-			System.out.println("==============username(用户名):"+username);
-			System.out.println("==============password(密码):"+password);
-			try{
-				Boolean flag=FtpUtils.fileDownload(downloadPath,dir,fileName,hostname,port, username,password,activeTime);
-				System.out.println("==============flag(返回标志位):"+flag);
-				if(!flag){
+			String bakType = neserver.getBakType(); // 备份类型
+			// 被动取(去指定ftp主机下载)
+			if("0".equals(bakType)){
+				downloadPath=checkBakAddr(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
+				dir=neserver.getBakPath();
+				hostname=neserver.getDeviceAddr();
+				username=neserver.getUserName();
+				password=neserver.getPassWord();
+				System.out.println("==============downloadPath(本机路径):"+downloadPath);
+				System.out.println("==============dir(ftp服务器路径):"+dir);
+				System.out.println("==============hostname(主机名):"+hostname);
+				System.out.println("==============port(端口):"+port);
+				System.out.println("==============username(用户名):"+username);
+				System.out.println("==============password(密码):"+password);
+				try{
+					Boolean flag=FtpUtils.fileDownload(downloadPath,dir,fileName,hostname,port, username,password,activeTime);
+					System.out.println("==============flag(返回标志位):"+flag);
+					if(!flag){
+						if(result.equals("")){
+							result=serverIds[i];
+						}else{
+							result+=","+serverIds[i];
+						}
+					}
+				}catch(Exception e){
+					e.printStackTrace();
 					if(result.equals("")){
 						result=serverIds[i];
 					}else{
 						result+=","+serverIds[i];
 					}
 				}
-			}catch(Exception e){
-				e.printStackTrace();
+			}
+			// 主动推(检查指定路径是否有文件)
+			else if("1".equals(bakType)){
+				String bakDir = getBakDir(neserver.getBakPath(), neserver.getOrgName(), neserver.getDeviceType(), neserver.getDeviceName());
+				// 推送到ftp
+				if("true".equals(ftpflag)){
+					try{
+						boolean isExits = FtpUtils.dirExits(bakDir, ftpIp, port, ftpUsername, ftpPassword, activeTime);
+						if(!isExits){
+							if(result.equals("")){
+								result=serverIds[i];
+							}else{
+								result+=","+serverIds[i];
+							}
+						}
+					}catch(Exception e){
+						e.printStackTrace();
+						if(result.equals("")){
+							result=serverIds[i];
+						}else{
+							result+=","+serverIds[i];
+						}
+					}
+				}
+				// 推送到本地
+				else{
+					try {
+						File file = new File(bakDir);
+						if(!file.exists() || file.listFiles().length == 0){
+							if(result.equals("")){
+								result=serverIds[i];
+							}else{
+								result+=","+serverIds[i];
+							}
+                        }
+					} catch (Exception e) {
+						e.printStackTrace();
+						if(result.equals("")){
+							result=serverIds[i];
+						}else{
+							result+=","+serverIds[i];
+						}
+					}
+				}
+			}else{
 				if(result.equals("")){
 					result=serverIds[i];
 				}else{
@@ -232,6 +292,26 @@ public class NeServerService {
 		}
 		return secondFolderName;
 	}
+
+	/**
+	 * 返回主动推送备份文件夹路径
+	 * @param rootName
+	 * @param orgName
+	 * @param deviceType
+	 * @param deviceName
+	 * @return
+	 */
+	public String getBakDir(String rootName, String orgName,String deviceType,String deviceName){
+		//获取地市首字母
+		String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);
+		//获取当前年月日
+		String date=getDate();
+		String firstFolderName=rootName+File.separator+englishOrgName+"_"+deviceType+"_"+date;
+		String secondFolderName=firstFolderName+File.separator+englishOrgName+"_"+deviceType+"_"+deviceName+"_"+date;
+		System.out.println("===============fileSecond:"+secondFolderName);
+		return secondFolderName;
+	}
+
 	/**
 	 * 获取当前年月日
 	 * @return

@@ -1,13 +1,12 @@
 package usi.biz.util;
-import java.io.File;  
-import java.io.FileInputStream;  
-import java.io.FileOutputStream;  
-import java.io.IOException;  
-  
-import org.apache.commons.io.IOUtils;  
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPClientConfig;
-import org.apache.commons.net.ftp.FTPFile; 
+import org.apache.commons.net.ftp.FTPFile;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 /** 
  *  
  *【功能描述：ftp 工具类】 
@@ -291,6 +290,50 @@ public class FtpUtils {
         }  
         return flag;  
           
-    }  
+    }
+
+    /**
+     *【功能描述：检查文件夹是否存在】
+     *【功能详细描述：检查文件夹是否存在，文件夹内是否有内容】
+     * @param dir ftp上路径
+     * @param hostname
+     * @param port
+     * @param username
+     * @param password
+     * @param activeTime
+     * @return
+     */
+    public static boolean dirExits(String dir,String hostname, int port, String username, String password,int activeTime) {
+        FTPClient ftpClient = new FTPClient();
+        Boolean flag = true;
+        try {
+            ftpClient = getFTPClient(hostname, port, username, password,activeTime);
+            ftpClient.setBufferSize(1024);
+            ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            // 切换到指定的目录
+            final boolean changeFlag = ftpClient.changeWorkingDirectory(dir + File.separator);
+            if(!changeFlag){
+                flag = false;
+            }else{
+                // 获得指定目录下的文件夹和文件信息
+                FTPFile[] ftpFiles = ftpClient.listFiles();
+                if(ftpFiles.length == 0){
+                    flag = false;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            flag=false;
+            throw new RuntimeException("FTP检查文件失败", e);
+        } finally {
+            try {
+                ftpClient.disconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("关闭FTP连接失败", e);
+            }
+            return flag;
+        }
+    }
   
 }  

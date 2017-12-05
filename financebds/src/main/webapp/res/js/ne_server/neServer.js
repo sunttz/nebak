@@ -37,6 +37,16 @@ $(document).ready(function() {
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
 				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:100},
 				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:100},
+            	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:60,
+                	formatter: function(value, row, index) {
+						var bakType = value;
+						if(value=='0'){
+							bakType = "被动取";
+						}else if(value=='1'){
+							bakType = "主动推";
+						}
+						return bakType;
+                }},
 				{field:'remarks',title:'备注',halign:'center',align:'center',width:100}
 		]],
 		toolbar: [{
@@ -58,7 +68,6 @@ $(document).ready(function() {
 					}
 				}
 				$.ajax({
-					
 					async : false,
 					cache : false,
 					type : 'POST',
