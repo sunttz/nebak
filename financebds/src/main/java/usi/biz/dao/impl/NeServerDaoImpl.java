@@ -90,7 +90,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 	@Override
 	public List<NeServer> getAllNE() {
 		// TODO Auto-generated method stub
-		String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word from ne_server t"
+		String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type from ne_server t"
 				+" WHERE 1=1";
 		sql+=" order by t.org_id asc";
 		return this.getJdbcTemplate().query(sql,  new RowMapper<NeServer>(){
@@ -107,6 +107,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setBakPath(rs.getString(8));
 				record.setUserName(rs.getString(9));
 				record.setPassWord(rs.getString(10));
+				record.setBakType(rs.getString(11));
 				return record;
 			}});
 	}

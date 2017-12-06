@@ -44,8 +44,9 @@ public class FtpUtils {
      */  
     public static FTPClient getFTPClient(String hostname, int port, String username, String password,int activeTime) throws IOException{  
         FTPClient ftpClient = new FTPClient(); 
-        ftpClient.connect(hostname, port);  
-        boolean flag = ftpClient.login(username, password);  
+        ftpClient.setConnectTimeout(5000);
+        ftpClient.connect(hostname, port);
+        boolean flag = ftpClient.login(username, password);
         System.out.println("=================flag:"+flag);
         if(flag){  
             ftpClient.setControlKeepAliveTimeout(activeTime);  
