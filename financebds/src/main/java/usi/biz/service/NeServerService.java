@@ -2,9 +2,11 @@ package usi.biz.service;
 
 import org.springframework.stereotype.Service;
 import usi.biz.dao.AutoLogDao;
+import usi.biz.dao.BakResultDao;
 import usi.biz.dao.NeServerDao;
 import usi.biz.entity.AutoLog;
 import usi.biz.entity.AutoLogDto;
+import usi.biz.entity.BakResult;
 import usi.biz.entity.NeServer;
 import usi.biz.util.ChineseToEnglishUtil;
 import usi.biz.util.FtpUtils;
@@ -22,6 +24,8 @@ public class NeServerService {
 	private NeServerDao neServerDao;
 	@Resource 
 	private AutoLogDao autoLogDao;
+	@Resource
+	private BakResultDao bakResultDao;
 	
 	private static String rootName=ConfigUtil.getValue("download.file.path");
 
@@ -208,16 +212,19 @@ public class NeServerService {
 		// 备份结果（1成功0失败）
 		int bakFlag;
 		// 备份成功数
-		int succNum = 0;
+		long succNum = 0l;
 		// 备份失败数
-		int failNum = 0;
+		long failNum = 0l;
 
+		//先删除日志，再进行备份
+		bakResultDao.deleteBakResultByTime();
 		//第一步获取单个网元信息
 		String[] serverIds=ids.split(",");
 		for(int i=0;i<serverIds.length;i++){
 			bakFlag = 1;
 			List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 			NeServer neserver=list.get(0);
+			System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份开始=======");
 			String bakType = neserver.getBakType(); // 备份类型
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
@@ -234,7 +241,7 @@ public class NeServerService {
 				System.out.println("==============password(密码):"+password);
 				try{
 					Boolean flag=FtpUtils.fileDownload(downloadPath,dir,fileName,hostname,port, username,password,activeTime);
-					System.out.println("==============flag(返回标志位):"+flag);
+					System.out.println("==============ftp下载flag(返回标志位):"+flag);
 					if(!flag){
 						if(result.equals("")){
 							result=serverIds[i];
@@ -311,7 +318,11 @@ public class NeServerService {
 			this.addAutoLog(Long.parseLong(serverIds[i]),bakFlag);
 			succNum += bakFlag;
 			failNum += bakFlag==0?1:0;
+			System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份结束=======");
 		}
+		// 保存备份结果
+		BakResult bakResult = new BakResult(succNum,failNum);
+		bakResultDao.saveBakResult(bakResult);
 		System.out.println("==============result(错误结果):"+result);
 		System.out.println("==============备份成功数:"+succNum);
 		System.out.println("==============备份失败数:"+failNum);
@@ -377,7 +388,7 @@ public class NeServerService {
 		String date=getDate();
 		String firstFolderName=rootName+File.separator+englishOrgName+"_"+deviceType+"_"+date;
 		String secondFolderName=firstFolderName+File.separator+englishOrgName+"_"+deviceType+"_"+deviceName+"_"+date;
-		System.out.println("===============fileSecond:"+secondFolderName);
+		System.out.println("===============备份文件夹路径:"+secondFolderName);
 		return secondFolderName;
 	}
 

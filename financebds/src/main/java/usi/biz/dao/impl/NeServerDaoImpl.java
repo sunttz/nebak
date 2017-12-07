@@ -127,6 +127,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				     "a.pass_word,"+
 				     "b.log_id,"+
 				     "b.bak_flag,"+
+					 "a.bak_type,"+
 				     "to_char(b.create_date, 'yyyy-mm-dd') as create_date"+
 				     " from ne_server a, biz_auto_log b"+
 				     " where a.server_id = b.server_id";
@@ -150,7 +151,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setPassWord(rs.getString(10));
 				record.setLogId(rs.getLong(11));
 				record.setBakFlag(rs.getInt(12));
-				record.setCreateDate(rs.getString(13));
+				record.setBakType(rs.getString(13));
+				record.setCreateDate(rs.getString(14));
 				return record;
 			}});
 	}

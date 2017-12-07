@@ -36,7 +36,13 @@ $(document).ready(function() {
 				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:100},
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
 				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:100},
-				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:100},
+				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:100,
+                    formatter: function(value, row, index) {
+                        if(value == null || value == ""){
+                            value = "-";
+                        }
+                        return value;
+                    }},
             	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:60,
                 	formatter: function(value, row, index) {
 						var bakType = value;

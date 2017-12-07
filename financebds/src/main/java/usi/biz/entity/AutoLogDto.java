@@ -1,7 +1,5 @@
 package usi.biz.entity;
 
-import java.util.Date;
-
 public class AutoLogDto {
 	//ID
 	private Long serverId;
@@ -19,6 +17,8 @@ public class AutoLogDto {
 	private String deviceAddr;
 	//备份路径
 	private String bakPath;
+	//备份类型
+	private String bakType;
 	//用户名
 	private String userName;
 	//密码
@@ -107,5 +107,12 @@ public class AutoLogDto {
 	}
 	public void setCreateDate(String createDate) {
 		this.createDate = createDate;
+	}
+	public String getBakType() {
+		return bakType;
+	}
+
+	public void setBakType(String bakType) {
+		this.bakType = bakType;
 	}
 }

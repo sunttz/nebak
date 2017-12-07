@@ -47,7 +47,7 @@ public class FtpUtils {
         ftpClient.setConnectTimeout(5000);
         ftpClient.connect(hostname, port);
         boolean flag = ftpClient.login(username, password);
-        System.out.println("=================flag:"+flag);
+        System.out.println("=================获取FTP连接flag:"+flag);
         if(flag){  
             ftpClient.setControlKeepAliveTimeout(activeTime);  
             return ftpClient;  
@@ -149,13 +149,13 @@ public class FtpUtils {
         } catch (IOException e) {  
             e.printStackTrace();  
             flag=false;
-            throw new RuntimeException("FTP下载失败  ", e);  
+            throw new RuntimeException("FTP下载失败", e);
         } finally {  
             try {  
                 ftpClient.disconnect();  
             } catch (IOException e) {  
                 e.printStackTrace();  
-                throw new RuntimeException("关闭FTP连接失败  ", e);  
+                throw new RuntimeException("关闭FTP连接失败", e);
             }  
             return flag;  
         }  
@@ -176,14 +176,19 @@ public class FtpUtils {
         // 列出这个地址对应到的是文件夹还是文件  
     	System.out.println("==============dir(目标路径):"+dir);
     	System.out.println("==============downloadPath(结果路径):"+downloadPath);
-    	//由于apache不支持中文语言环境，通过定制类解析中文日期类型  
+    	//由于apache不支持中文语言环境，通过定制类解析中文日期类型
+        boolean changeResult = false; // 解决备份路径配置为不存在地址会循环创建文件bug
     	if(dir.contains(":")){
     		String[] dirArray=dir.split(":");
-    		ftpClient.changeWorkingDirectory(dirArray[0]+":"); 
-    		ftpClient.changeWorkingDirectory(dirArray[1]);  
+    		ftpClient.changeWorkingDirectory(dirArray[0]+":");
+            changeResult = ftpClient.changeWorkingDirectory(dirArray[1]);
     	}else{
-    		ftpClient.changeWorkingDirectory(dir);  
+            changeResult = ftpClient.changeWorkingDirectory(dir);
     	}
+    	if(!changeResult){
+            System.out.println("=============FTP路径切换失败");
+            throw new RuntimeException("FTP路径切换失败");
+        }
         //ftpClient.enterLocalPassiveMode();
         //ftpClient.configure(new FTPClientConfig("usi.biz.util.UnixFTPEntryParser"));
         FTPFile[] files = ftpClient.listFiles(); 
@@ -204,7 +209,7 @@ public class FtpUtils {
                 System.out.println("==============localPath(本地路径):"+localPath);
                 System.out.println("==============path(目标文件):"+path);
                 Boolean flag=ftpClient.retrieveFile(path, fos);  
-                System.out.println("==============flag(返回结果):"+flag);
+                System.out.println("==============flag(返回下载结果):"+flag);
                 //Boolean flag=ftpClient.retrieveFile(new String(path.getBytes("GBK"),"ISO-8859-1"), fos);   
                 IOUtils.closeQuietly(fos);  
             }else if(f.isDirectory()){  

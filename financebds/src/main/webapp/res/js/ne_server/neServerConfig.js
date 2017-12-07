@@ -46,7 +46,13 @@ $(document).ready(function() {
 				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:100},
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
 				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:100},
-				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:100},
+				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:100,
+                    formatter: function(value, row, index) {
+                        if(value == null || value == ""){
+                            value = "-";
+                        }
+                        return value;
+                    }},
             	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:60,
                     formatter: function(value, row, index) {
             			var bakType = value;
@@ -174,6 +180,9 @@ $(document).ready(function() {
     $("input:radio[name=bakType]").change(function () {
         var bakType = $('input:radio[name="bakType"]:checked').val();
         if(bakType == "1"){
+            $("#deviceAddr").val("");
+            $("#userName").val("");
+            $("#passWord").val("");
             $("#deviceAddrTr,#userNameTr,#passWordTr").hide();
         }else{
             $("#deviceAddrTr,#userNameTr,#passWordTr").show();

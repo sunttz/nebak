@@ -18,8 +18,8 @@ public class TimerController {
 	/**
 	 * 定时启动。每天凌晨一点执行一次
      */
-    //@Scheduled(fixedDelay=1000*60*60*12)
-	@Scheduled(cron="0 11 17 * * ?")	// 0 0 1 * * ?
+    @Scheduled(fixedDelay=1000*60*60*12)
+	//@Scheduled(cron="0 0 1 * * ?")
     public void show() {
     	//先删除日志，再进行备份
     	neServerService.deleteAutoLogByTime();

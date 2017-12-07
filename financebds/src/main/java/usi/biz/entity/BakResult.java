@@ -8,6 +8,14 @@ public class BakResult {
     private Long failNum; // 失败数
     private Date createDate; // 生成日期
 
+    public BakResult() {
+    }
+
+    public BakResult(Long succNum, Long failNum) {
+        this.succNum = succNum;
+        this.failNum = failNum;
+    }
+
     public Long getPkNo() {
         return pkNo;
     }
