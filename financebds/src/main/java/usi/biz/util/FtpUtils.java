@@ -146,11 +146,11 @@ public class FtpUtils {
             }else{
             	iterateDown(ftpClient,dir,downloadPath+File.separator+fileName);  
             }
-        } catch (IOException e) {  
+        } catch (Exception e) {
             e.printStackTrace();  
             flag=false;
             throw new RuntimeException("FTP下载失败", e);
-        } finally {  
+        } finally {
             try {  
                 ftpClient.disconnect();  
             } catch (IOException e) {  
@@ -327,7 +327,7 @@ public class FtpUtils {
                     flag = false;
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             flag=false;
             throw new RuntimeException("FTP检查文件失败", e);

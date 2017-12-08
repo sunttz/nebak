@@ -1,5 +1,6 @@
 -- Add/modify columns
 alter table NE_SERVER add BAK_TYPE char(1);
+update NE_SERVER set BAK_TYPE = '0';
 
 -- Create table
 create table biz_bak_result
