@@ -67,8 +67,8 @@ public class NeServerService {
 	 * 查询所有网元信息（不分页）
 	 * @return
 	 */
-	public List<AutoLogDto> getAutoResult(String dateTime){
-		return neServerDao.getAutoResult(dateTime);
+	public List<AutoLogDto> getAutoResult(String dateTime,PageObj pageObj){
+		return neServerDao.getAutoResult(dateTime,pageObj);
 	}
 	
 	/**
@@ -635,5 +635,9 @@ public class NeServerService {
 			}
 		}
 		return failServerIds.toString();
+	}
+
+	public List<AutoLogDto> getFailResult(String dateTime,PageObj pageObj){
+		return neServerDao.getFailResult(dateTime,pageObj);
 	}
 }

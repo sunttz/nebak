@@ -20,6 +20,9 @@ import java.util.List;
 public class BakResultDaoImpl extends JdbcDaoSupport4oracle implements BakResultDao{
     @Override
     public BakResult queryByTime(String createDate) {
+        if(StringUtils.isEmpty(createDate)){
+            createDate = this.getCurDay();
+        }
         BakResult bakResult = null;
         String sql = "select t.pk_no,t.succ_num,t.fail_num,t.create_date from biz_bak_result t where to_char(t.create_date,'yyyymmdd') = '"+createDate+"'";
         List<BakResult> results = this.getJdbcTemplate().query(sql, new RowMapper<BakResult>() {
@@ -48,6 +51,7 @@ public class BakResultDaoImpl extends JdbcDaoSupport4oracle implements BakResult
         if(StringUtils.isNotEmpty(endDate)){
             sql += " and t.create_date < to_date('"+endDate+" 23:59:59','yyyy-mm-dd hh24:mi:ss')";
         }
+        sql += " order by t.create_date";
         return this.getJdbcTemplate().query(sql, new RowMapper<BakResult>() {
             @Override
             public BakResult mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -75,6 +79,12 @@ public class BakResultDaoImpl extends JdbcDaoSupport4oracle implements BakResult
 
     @Override
     public int deleteBakResultByTime() {
+        String createDate = this.getCurDay();
+        String sql = " delete from biz_bak_result t where to_char(t.create_date,'yyyymmdd')= '"+createDate+"'";
+        return this.getJdbcTemplate().update(sql);
+    }
+
+    private String getCurDay(){
         Calendar now = Calendar.getInstance();
         String year=String.valueOf(now.get(Calendar.YEAR));
         String month= String.valueOf(now.get(Calendar.MONTH) + 1);
@@ -82,7 +92,6 @@ public class BakResultDaoImpl extends JdbcDaoSupport4oracle implements BakResult
         month=month.length()<2?'0'+month:month;
         day=day.length()<2?'0'+day:day;
         String createDate=year+month+day;
-        String sql = " delete from biz_bak_result t where to_char(t.create_date,'yyyymmdd')= '"+createDate+"'";
-        return this.getJdbcTemplate().update(sql);
+        return createDate;
     }
 }

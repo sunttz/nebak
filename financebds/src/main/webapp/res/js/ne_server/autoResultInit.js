@@ -6,6 +6,7 @@ $(document).ready(function() {
 		fit:true,
 		fitColumns:true,
 		rownumbers:true,
+        pageSize : 20,
 		striped:true,
 		pagination:true,
 		singleSelect:false,

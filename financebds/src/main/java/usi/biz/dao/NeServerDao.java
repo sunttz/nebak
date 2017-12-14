@@ -10,7 +10,7 @@ public interface NeServerDao {
 	public List<NeServer> getPageAllNE(PageObj pageObj,Long orgId,String deviceType);
 	public List<NeServer> getAllNE();
 	public List<NeServer> getNeServerById(Long serverId);
-	public List<AutoLogDto> getAutoResult(String dateTime);
+	public List<AutoLogDto> getAutoResult(String dateTime,PageObj pageObj);
 
 	/**
 	 * 新增网元
@@ -30,5 +30,13 @@ public interface NeServerDao {
 	 * @param serverId
 	 */
 	int deleteNeServer(Long serverId);
+
+	/**
+	 * 获得失败列表
+	 * @param dateTime
+	 * @param pageObj
+	 * @return
+	 */
+	List<AutoLogDto> getFailResult(String dateTime,PageObj pageObj);
 
 }

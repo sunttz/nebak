@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    $('#date_time').val(getDateStr(0));
 	//地区初始化
 	$("#org_id").combobox({
 		url:'getAllOrg.do',
@@ -127,4 +128,14 @@ function editTask(filePath,orgName){
 		dateTime:'',
 		filePath:filePath.replace("\\","/")
 	});
+}
+
+//获取addDayCount天后的日期
+function getDateStr(addDayCount){
+    var dd = new Date();
+    dd.setDate(dd.getDate()+addDayCount);
+    var y = dd.getFullYear();
+    var m = (dd.getMonth()+1)<10?"0"+(dd.getMonth()+1):(dd.getMonth()+1);//获取当前月份的日期，不足10补0
+    var d = dd.getDate()<10?"0"+dd.getDate():dd.getDate(); //获取当前几号，不足10补0
+    return ""+y+m+d;
 }

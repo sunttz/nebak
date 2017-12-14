@@ -7,15 +7,16 @@
 	<head>
 		<%@ include file="/WEB-INF/views/common/taglibs.jsp"%>
 		<script type="text/javascript" src="${ctx }/res/My97DatePicker/WdatePicker.js"></script>
-		<script type="text/javascript" src="${ctx }/res/js/ne_server/autoResultInit.js"></script>
+		<script type="text/javascript" src="${ctx }/res/js/ne_server/autoResultStatistics.js"></script>
+		<script type="text/javascript" src="${ctx}/res/javascript/echarts.min.js"></script>
 		<script>
 			var ctx='${ctx}';
 		</script>
 	</head>	
 	
 	<body class="easyui-layout">
-		<div data-options="region:'north', border:false" style="height:130px;padding: 1px 1px 1px 0px;">
-			<div id="searchPanel" class="easyui-panel" data-options="fit:true,title:'备份管理列表'" style="background:#F4F4F4;">
+		<div data-options="region:'north', border:false" style="height:100px;padding: 1px 1px 1px 0px;">
+			<div id="searchPanel" class="easyui-panel" data-options="fit:true,title:'自动备份统计'" style="background:#F4F4F4;">
 				<table style="height:100%;">
 					<tr>
 						<td align="right" style="width: 120px;">输入日期：</td>
@@ -34,8 +35,19 @@
 			</div>
 	    </div>
 	    <div data-options="region:'center',border:false" style="padding:3px;">
-			<table id="listTable"></table>
+			<div>
+				<div style="width: 39%;height: 300px;float:left;border:1px solid #f4f4f4;">
+					<div id="pie" style="height:300px;width: 100%"></div>
+				</div>
+				<div style="width: 60%;height: 300px;float:left;">
+					<table id="listTable"></table>
+				</div>
+			</div>
+			<div style="clear: both;"></div>
+			<div style="height: 305px;margin-top:3px;border:1px solid #f4f4f4">
+				<div id="line" style="height:305px;width: 100%"></div>
+			</div>
 		</div>
 	</body>
-	
+
 </html>	

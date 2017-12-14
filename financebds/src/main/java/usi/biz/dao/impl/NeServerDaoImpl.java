@@ -113,7 +113,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 	}
 
 	@Override
-	public List<AutoLogDto> getAutoResult(String dateTime) {
+	public List<AutoLogDto> getAutoResult(String dateTime,PageObj pageObj) {
 		// TODO Auto-generated method stub
 		String sql = "select a.server_id,"+
 				     "a.org_id,"+
@@ -135,7 +135,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 			sql+=" and to_char(b.create_date, 'yyyymmdd') ='"+ dateTime +"'";
 		}
 		sql+=" order by a.org_id";
-		return this.getJdbcTemplate().query(sql,  new RowMapper<AutoLogDto>(){
+		return this.queryByPage(sql,  new RowMapper<AutoLogDto>(){
 			@Override
 			public AutoLogDto mapRow(ResultSet rs, int rowNum) throws SQLException {
 				AutoLogDto record = new AutoLogDto();
@@ -154,7 +154,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setBakType(rs.getString(13));
 				record.setCreateDate(rs.getString(14));
 				return record;
-			}});
+			}},pageObj);
 	}
 
 	@Override
@@ -209,5 +209,49 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				ps.setLong(1,serverId);
 			}
 		});
+	}
+
+	@Override
+	public List<AutoLogDto> getFailResult(String dateTime, PageObj pageObj) {
+		String sql = "select a.server_id,"+
+				"a.org_id,"+
+				"a.org_name,"+
+				"a.device_name,"+
+				"a.device_type,"+
+				"a.remarks,"+
+				"a.device_addr,"+
+				"a.bak_path,"+
+				"a.user_name,"+
+				"a.pass_word,"+
+				"b.log_id,"+
+				"b.bak_flag,"+
+				"a.bak_type,"+
+				"to_char(b.create_date, 'yyyy-mm-dd') as create_date"+
+				" from ne_server a, biz_auto_log b"+
+				" where a.server_id = b.server_id and b.bak_flag = 0";
+		if(!dateTime.equals("")){
+			sql+=" and to_char(b.create_date, 'yyyymmdd') ='"+ dateTime +"'";
+		}
+		sql+=" order by a.org_id";
+		return this.queryByPage(sql,  new RowMapper<AutoLogDto>(){
+			@Override
+			public AutoLogDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+				AutoLogDto record = new AutoLogDto();
+				record.setServerId(rs.getLong(1));
+				record.setOrgId(rs.getLong(2));
+				record.setOrgName(rs.getString(3));
+				record.setDeviceName(rs.getString(4));
+				record.setDeviceType(rs.getString(5));
+				record.setRemarks(rs.getString(6));
+				record.setDeviceAddr(rs.getString(7));
+				record.setBakPath(rs.getString(8));
+				record.setUserName(rs.getString(9));
+				record.setPassWord(rs.getString(10));
+				record.setLogId(rs.getLong(11));
+				record.setBakFlag(rs.getInt(12));
+				record.setBakType(rs.getString(13));
+				record.setCreateDate(rs.getString(14));
+				return record;
+			}},pageObj);
 	}
 }

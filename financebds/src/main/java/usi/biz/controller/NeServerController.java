@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import usi.biz.entity.AutoLogDto;
+import usi.biz.entity.BakResult;
 import usi.biz.entity.NeServer;
+import usi.biz.service.BakResultService;
 import usi.biz.service.NeServerService;
 import usi.biz.util.DiskInfoUtil;
 import usi.sys.dto.AuthInfo;
@@ -18,10 +20,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -31,6 +30,9 @@ public class NeServerController {
 	
 	@Resource
 	private NeServerService neServerService;
+
+	@Resource
+	BakResultService bakResultService;
 	
 	private static String rootName=ConfigUtil.getValue("download.file.path");
 	
@@ -135,18 +137,22 @@ public class NeServerController {
 	 */
 	@RequestMapping(value = "/getAutoResult.do", method = RequestMethod.POST)
 	@ResponseBody
-	public  List<AutoLogDto> getAutoResult(HttpSession session,String dateTime) throws Exception{
-		    if(dateTime==null ||dateTime.equals("")){
-		    	Calendar now = Calendar.getInstance();  
-				String year=String.valueOf(now.get(Calendar.YEAR));
-				String month= String.valueOf(now.get(Calendar.MONTH) + 1);
-				String day=String.valueOf(now.get(Calendar.DAY_OF_MONTH));
-				month=month.length()<2?'0'+month:month;
-				day=day.length()<2?'0'+day:day;
-				dateTime=year+month+day;
-				
-		    }
-			return neServerService.getAutoResult(dateTime);
+	public  Map<String,Object> getAutoResult(PageObj pageObj,HttpSession session,String dateTime) throws Exception{
+		Map<String,Object> map = new HashMap<String, Object>();
+		if(dateTime==null ||dateTime.equals("")){
+			Calendar now = Calendar.getInstance();
+			String year=String.valueOf(now.get(Calendar.YEAR));
+			String month= String.valueOf(now.get(Calendar.MONTH) + 1);
+			String day=String.valueOf(now.get(Calendar.DAY_OF_MONTH));
+			month=month.length()<2?'0'+month:month;
+			day=day.length()<2?'0'+day:day;
+			dateTime=year+month+day;
+
+		}
+		List<AutoLogDto> autoResult = neServerService.getAutoResult(dateTime, pageObj);
+		map.put("total", pageObj.getTotal());
+		map.put("rows", autoResult);
+		return map;
 	}
 	
 	/**
@@ -278,4 +284,78 @@ public class NeServerController {
 		String failServerIds = neServerService.deleteNeServer(serverIds);
 		return failServerIds;
 	}
+
+	/**
+	 * 自动结果统计
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/autoResultStatistics.do", method = RequestMethod.GET)
+	public String autoResultStatistics(Model model){
+		return "ne_server/autoResultStatistics";
+	}
+
+	/**
+	 * 备份失败列表
+	 * @param pageObj
+	 * @param session
+	 * @param dateTime
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/getFailResult.do", method = RequestMethod.POST)
+	@ResponseBody
+	public  Map<String,Object> getFailResult(PageObj pageObj,HttpSession session,String dateTime) throws Exception{
+		Map<String,Object> map = new HashMap<String, Object>();
+		if(dateTime==null ||dateTime.equals("")){
+			Calendar now = Calendar.getInstance();
+			String year=String.valueOf(now.get(Calendar.YEAR));
+			String month= String.valueOf(now.get(Calendar.MONTH) + 1);
+			String day=String.valueOf(now.get(Calendar.DAY_OF_MONTH));
+			month=month.length()<2?'0'+month:month;
+			day=day.length()<2?'0'+day:day;
+			dateTime=year+month+day;
+
+		}
+		List<AutoLogDto> failResult = neServerService.getFailResult(dateTime, pageObj);
+		map.put("total", pageObj.getTotal());
+		map.put("rows", failResult);
+		return map;
+	}
+
+	/**
+	 * 查询指定天备份结果
+	 * @param createDate
+	 * @return
+	 */
+	@RequestMapping(value = "/getBakResultByDay.do", method = RequestMethod.POST)
+	@ResponseBody
+	public BakResult getBakResultByDay(String createDate){
+		BakResult bakResult = null;
+		try {
+			bakResult = bakResultService.queryByTime(createDate);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return bakResult;
+	}
+
+	/**
+	 * 查询指定时间段备份结果
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	@RequestMapping(value = "/getBakResultByTime.do", method = RequestMethod.POST)
+	@ResponseBody
+	public List<BakResult> getBakResultByTime(String startDate, String endDate){
+		List<BakResult> bakResults = null;
+		try {
+			bakResults = bakResultService.queryBakResult(startDate, endDate);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return bakResults;
+	}
+
 }
