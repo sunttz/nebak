@@ -105,8 +105,8 @@ $(document).ready(function() {
 			}
 		}]
 	});
-	
-	
+
+
 	//点击搜索按钮
 	$('#job_log_btn').click(function(){
 		$('#listTable').datagrid('load', {

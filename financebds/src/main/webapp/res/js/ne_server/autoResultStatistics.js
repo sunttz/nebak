@@ -245,11 +245,7 @@ function ajax_bakResultByTime() {
         },
         error : function () {
             option = {
-                xAxis : [
-                    {
-                        data : []
-                    }
-                ],
+                xAxis : [{data : []}],
                 series : []
             };
             lineChart.hideLoading();
@@ -299,11 +295,7 @@ function ajax_bakResultByTime() {
                 };
             }else{
                 option = {
-                    xAxis : [
-                        {
-                            data : []
-                        }
-                    ],
+                    xAxis : [{data : []}],
                     series : []
                 };
             }
