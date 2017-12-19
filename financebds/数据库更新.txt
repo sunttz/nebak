@@ -37,3 +37,9 @@ cache 10;
 
 -- 添加自动备份统计菜单
 /netElement/autoResultStatistics.do
+
+-- 保存时长
+-- Add/modify columns
+alter table NE_SERVER add save_day number(18);
+
+update NE_SERVER set save_day = 7;

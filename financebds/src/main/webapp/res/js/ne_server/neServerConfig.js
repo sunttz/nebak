@@ -63,6 +63,7 @@ $(document).ready(function() {
 						}
                         return bakType;
                     }},
+                {field:'saveDay',title:'保存天数',halign:'center',align:'center',width:40},
 				{field:'remarks',title:'备注',halign:'center',align:'center',width:100},
 				{field:'operate',title:'操作',halign:'center',align:'center',width:70,
 					formatter: function(value, row, index) {
@@ -249,6 +250,7 @@ function saveNeServer() {
     var deviceName = $("#deviceName").val(); // 设备名称
     var deviceType=$('input:radio[name="deviceType"]:checked').val(); // 网元类型
     var bakType = $('input:radio[name="bakType"]:checked').val(); // 备份类型
+    var saveDay = $("#saveDay").val();// 保存天数
     var remarks = $("#remarks").val(); // 备注
     var deviceAddr = $("#deviceAddr").val(); // 设备地址
     var bakPath = $("#bakPath").val(); // 备份路径
@@ -287,6 +289,20 @@ function saveNeServer() {
     } else {
         $('#bakType_box .validate_box').hide();
         $('#bakType_box .validate_msg').html('');
+    }
+    if(saveDay.length == 0) {
+        $('#saveDay_box .validate_box').show();
+        $('#saveDay_box .validate_msg').html('必选字段');
+        flag = false;
+    }
+    // 保存天数为正整数
+    else if (!/^([1-9][0-9]*){1,3}$/.test(saveDay)){
+        $('#saveDay_box .validate_box').show();
+        $('#saveDay_box .validate_msg').html('必须为正整数');
+        flag = false;
+    } else {
+        $('#saveDay_box .validate_box').hide();
+        $('#saveDay_box .validate_msg').html('');
     }
     if(remarks.length == 0) {
         $('#remarks_box .validate_box').show();
@@ -346,7 +362,7 @@ function saveNeServer() {
         dataType : 'json',
         url : 'saveNeserver.do',
         data : {
-            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,bakType:bakType,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord
+            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,bakType:bakType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord
         },
         beforeSend:ajaxLoading,//发送请求前打开进度条
         success : function(data) { // 请求成功后处理函数。

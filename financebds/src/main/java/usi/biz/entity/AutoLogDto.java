@@ -29,6 +29,8 @@ public class AutoLogDto {
 	private int bakFlag;
 	//创建时间
 	private String createDate;
+	// 保存天数
+	private Long saveDay;
 	
 	public Long getServerId() {
 		return serverId;
@@ -114,5 +116,13 @@ public class AutoLogDto {
 
 	public void setBakType(String bakType) {
 		this.bakType = bakType;
+	}
+
+	public Long getSaveDay() {
+		return saveDay;
+	}
+
+	public void setSaveDay(Long saveDay) {
+		this.saveDay = saveDay;
 	}
 }

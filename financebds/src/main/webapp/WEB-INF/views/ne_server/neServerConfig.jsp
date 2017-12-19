@@ -93,6 +93,15 @@
 						</td>
 					</tr>
 					<tr style="height:30px;white-space: nowrap;">
+						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>保存天数</td>
+						<td id="saveDay_box">
+							<input id="saveDay" name="saveDay" style="width:420px;" class="input" size="30" value="7"/>
+							<span class="validate_box">
+								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
+							</span>
+						</td>
+					</tr>
+					<tr style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>备注</td>
 						<td id="remarks_box">
 							<input id="remarks" name="remarks"  style="width:420px;" class="input" size="30" />

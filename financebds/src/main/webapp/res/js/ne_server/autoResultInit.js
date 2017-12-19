@@ -37,6 +37,7 @@ $(document).ready(function() {
 						}
 						return bakType;
                 }},
+            	{field:'saveDay',title:'保存天数',halign:'center',align:'center',width:40},
 				{field:'remarks',title:'备注',halign:'center',align:'center',width:100},
 				{field:'bakFlag',title:'操作结果',halign:'center',align:'center',width:100,
 					formatter: function(value,row,index){

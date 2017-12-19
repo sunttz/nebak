@@ -53,6 +53,7 @@ $(document).ready(function() {
 						}
 						return bakType;
                 }},
+            	{field:'saveDay',title:'保存天数',halign:'center',align:'center',width:40},
 				{field:'remarks',title:'备注',halign:'center',align:'center',width:100}
 		]],
 		toolbar: [{

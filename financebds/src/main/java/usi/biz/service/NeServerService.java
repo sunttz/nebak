@@ -225,6 +225,11 @@ public class NeServerService {
 			List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 			NeServer neserver=list.get(0);
 			System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份开始=======");
+			// TODO 删除超过保存天数备份文件
+			// 1.遍历所有一级文件夹，取出地域和网元类型匹配且日期在当前设备备份天数之前的放到list集合中
+			// 2.遍历list集合文件夹，判断当天该网元备份文件夹是否存在，存在则删除
+			// 3.最后遍历所有一级文件夹，对于空文件，删除
+			
 			String bakType = neserver.getBakType(); // 备份类型
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
@@ -600,6 +605,24 @@ public class NeServerService {
         }
         return size;
     }
+
+	/**
+	 * 递归删除文件及文件夹
+	 * @param file
+	 */
+	public void delteFile(File file) {
+		File[] filearray = file.listFiles();
+		if (filearray != null) {
+			for (File f : filearray) {
+				if (f.isDirectory()) {
+					delteFile(f);
+				} else {
+					f.delete();
+				}
+			}
+			file.delete();
+		}
+	}
 
 	/**
 	 * 新增网元

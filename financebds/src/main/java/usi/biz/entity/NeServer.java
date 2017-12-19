@@ -27,6 +27,9 @@ public class NeServer {
 	private String passWord;
 	//备份类型(0被动取1主动推)
 	private String bakType;
+	// 保存天数
+	private Long saveDay;
+
 	public Long getServerId() {
 		return serverId;
 	}
@@ -94,5 +97,13 @@ public class NeServer {
 
 	public void setBakType(String bakType) {
 		this.bakType = bakType;
+	}
+
+	public Long getSaveDay() {
+		return saveDay;
+	}
+
+	public void setSaveDay(Long saveDay) {
+		this.saveDay = saveDay;
 	}
 }

@@ -147,7 +147,6 @@ public class NeServerController {
 			month=month.length()<2?'0'+month:month;
 			day=day.length()<2?'0'+day:day;
 			dateTime=year+month+day;
-
 		}
 		List<AutoLogDto> autoResult = neServerService.getAutoResult(dateTime, pageObj);
 		map.put("total", pageObj.getTotal());
