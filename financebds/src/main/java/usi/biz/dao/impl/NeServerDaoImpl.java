@@ -67,7 +67,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 
 	@Override
 	public List<NeServer> getNeServerById(Long serverId) {
-		String sql="select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type from ne_server t"
+		String sql="select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day from ne_server t"
 				+" WHERE t.server_id="+serverId;
 		return this.getJdbcTemplate().query(sql, new RowMapper<NeServer>(){
 			@Override
@@ -84,6 +84,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setUserName(rs.getString(9));
 				record.setPassWord(rs.getString(10));
 				record.setBakType(rs.getString(11));
+				record.setSaveDay(rs.getLong(12));
 				return record;
 			}});
 	}

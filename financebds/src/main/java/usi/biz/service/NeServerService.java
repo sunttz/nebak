@@ -1,5 +1,8 @@
 package usi.biz.service;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.stereotype.Service;
 import usi.biz.dao.AutoLogDao;
 import usi.biz.dao.BakResultDao;
@@ -28,6 +31,7 @@ public class NeServerService {
 	private BakResultDao bakResultDao;
 	
 	private static String rootName=ConfigUtil.getValue("download.file.path");
+	private SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd");
 
 	// 备份ftp服务器配置
 	private static String ftpflag=ConfigUtil.getValue("bak.ftp.flag");
@@ -218,6 +222,8 @@ public class NeServerService {
 
 		//先删除日志，再进行备份
 		bakResultDao.deleteBakResultByTime();
+		// 删除备份路径下空文件夹
+		deleteEmptyFile();
 		//第一步获取单个网元信息
 		String[] serverIds=ids.split(",");
 		for(int i=0;i<serverIds.length;i++){
@@ -225,14 +231,15 @@ public class NeServerService {
 			List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 			NeServer neserver=list.get(0);
 			System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份开始=======");
-			// TODO 删除超过保存天数备份文件
-			// 1.遍历所有一级文件夹，取出地域和网元类型匹配且日期在当前设备备份天数之前的放到list集合中
-			// 2.遍历list集合文件夹，判断当天该网元备份文件夹是否存在，存在则删除
-			// 3.最后遍历所有一级文件夹，对于空文件，删除
-			
 			String bakType = neserver.getBakType(); // 备份类型
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
+				try {
+					// 删除本地过期文件
+					deleteLocalExpireFile("",neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				downloadPath=checkBakAddr(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
 				dir=neserver.getBakPath();
 				hostname=neserver.getDeviceAddr();
@@ -271,6 +278,8 @@ public class NeServerService {
 				// 推送到ftp
 				if("true".equals(ftpflag)){
 					try{
+						// 删除ftp过期文件
+						deleteFtpExpireFile(neserver.getBakPath(),neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay());
 						boolean isExits = FtpUtils.dirExits(bakDir, ftpIp, port, ftpUsername, ftpPassword, activeTime);
 						if(!isExits){
 							if(result.equals("")){
@@ -293,6 +302,9 @@ public class NeServerService {
 				// 推送到本地
 				else{
 					try {
+						// 删除本地过期文件
+						deleteLocalExpireFile(neserver.getBakPath(),neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay());
+						// 开始检查备份
 						File file = new File(bakDir);
 						if(!file.exists() || file.listFiles().length == 0){
 							if(result.equals("")){
@@ -333,7 +345,142 @@ public class NeServerService {
 		System.out.println("==============备份失败数:"+failNum);
 		return result;
 	}
-	
+
+	/**
+	 * 遍历所有一级文件夹，对于空文件，删除
+	 */
+	private void deleteEmptyFile(){
+		File rootFile = new File(rootName);
+		File[] files = rootFile.listFiles();
+		for (File f : files) {
+			if(f.isDirectory() && f.listFiles().length == 0){
+				f.delete();
+			}
+		}
+	}
+
+	/**
+	 * 删除本地超过保存天数的备份文件
+	 * @param bakPath 备份路径
+	 * @param orgName
+	 * @param deviceType
+	 * @param deviceName
+	 * @param saveDay
+	 */
+	private void deleteLocalExpireFile(String bakPath,String orgName,String deviceType,String deviceName, long saveDay) throws Exception {
+		String rootName = ""; // 被动取的根目录为rootName,主动推送的为配置项
+		if(StringUtils.isNotEmpty(bakPath)){
+			rootName = bakPath;
+		}else{
+			rootName = this.rootName;
+		}
+		// 1.遍历所有一级文件夹，取出地域和网元类型匹配且日期在当前设备备份天数之前的文件夹名放到expireFolder集合中
+		List<String> expireFolders = new ArrayList<>();
+		String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);//获取地市首字母
+		String matchStr = englishOrgName + "_" + deviceType; // 匹配字符
+		Date expireDate = getExpireDate(saveDay); // 过期日期
+		File rootFile = new File(rootName);
+		File[] files = rootFile.listFiles();
+		for(File f : files){
+			if(f.isDirectory()){
+				String fileName = f.getName();
+				if(fileName.indexOf(matchStr) > -1){
+					String[] splitName = fileName.split("_");
+					if(splitName.length == 3){
+						String fileDateStr = splitName[2];
+						Date fileDate = sdf.parse(fileDateStr);
+						if(fileDate.getTime() < expireDate.getTime()){
+							expireFolders.add(fileName);
+						}
+					}
+				}
+			}
+		}
+		// 2.遍历expireFolder集合文件夹，判断当天该网元备份文件夹是否存在，存在则删除
+		String matchStr2 = matchStr + "_" + deviceName;
+		for (String folder : expireFolders) {
+			File file = new File(rootName + File.separator + folder);
+			File[] listFiles = file.listFiles();
+			for (File f : listFiles) {
+				String secondFileName = f.getName();
+				if(secondFileName.indexOf(matchStr2) > -1){
+					deleteFile(f);
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * 删除ftp超过保存天数的备份文件
+	 * @param bakPath 备份路径
+	 * @param orgName
+	 * @param deviceType
+	 * @param deviceName
+	 * @param saveDay
+	 * @throws Exception
+	 */
+	public void deleteFtpExpireFile(String bakPath,String orgName,String deviceType,String deviceName, long saveDay) throws Exception {
+		FtpUtils.deleteEmptyFile(bakPath,ftpIp,21,ftpUsername,ftpPassword,3000); // 删除空文件
+		List<String> expireFolders = new ArrayList<>();
+		String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);//获取地市首字母
+		String matchStr = englishOrgName + "_" + deviceType; // 匹配字符
+		Date expireDate = getExpireDate(saveDay); // 过期日期
+		FTPClient ftpClient = new FTPClient();
+		ftpClient = FtpUtils.getFTPClient(ftpIp, 21, ftpUsername, ftpPassword,3000);
+		ftpClient.setBufferSize(1024);
+		ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+		final boolean changeFlag = ftpClient.changeWorkingDirectory(bakPath + File.separator);
+		if(changeFlag){
+			// 1.遍历所有一级文件夹，取出地域和网元类型匹配且日期在当前设备备份天数之前的文件夹名放到expireFolder集合中
+			FTPFile[] ftpFiles = ftpClient.listFiles();
+			for (FTPFile ftpFile : ftpFiles) {
+				if(ftpFile.isDirectory()){
+					String fileName = ftpFile.getName();
+					if(fileName.indexOf(matchStr) > -1){
+						String[] splitName = fileName.split("_");
+						if(splitName.length == 3){
+							String fileDateStr = splitName[2];
+							Date fileDate = sdf.parse(fileDateStr);
+							if(fileDate.getTime() < expireDate.getTime()){
+								expireFolders.add(fileName);
+							}
+						}
+					}
+				}
+			}
+			// 2.遍历expireFolder集合文件夹，判断当天该网元备份文件夹是否存在，存在则删除
+			String matchStr2 = matchStr + "_" + deviceName;
+			for (String folder : expireFolders) {
+				boolean changeFlag2 = ftpClient.changeWorkingDirectory(bakPath + File.separator + folder);
+				if(changeFlag2){
+					FTPFile[] ftpFiles2 = ftpClient.listFiles();
+					for (FTPFile f : ftpFiles2) {
+						String secondFileName = f.getName();
+						if(secondFileName.indexOf(matchStr2) > -1){
+							String filePath = bakPath + File.separator + folder + File.separator + secondFileName + File.separator;
+							boolean deleteFlag = FtpUtils.iterateDelete(ftpClient, filePath);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * 获取过期日期
+	 * @param day
+	 * @return
+	 */
+	private Date getExpireDate(long day) {
+		Date date = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.DAY_OF_MONTH, -(int) day);
+		date = calendar.getTime();
+		return date;
+	}
 	
 	/**
 	 * 通过id保存自动备份日志
@@ -610,12 +757,12 @@ public class NeServerService {
 	 * 递归删除文件及文件夹
 	 * @param file
 	 */
-	public void delteFile(File file) {
+	public void deleteFile(File file) {
 		File[] filearray = file.listFiles();
 		if (filearray != null) {
 			for (File f : filearray) {
 				if (f.isDirectory()) {
-					delteFile(f);
+					deleteFile(f);
 				} else {
 					f.delete();
 				}

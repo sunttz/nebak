@@ -97,7 +97,7 @@ $(document).ready(function() {
 					}
 					$('#listTable').datagrid('load', {
 						orgName:'',
-						dateTime:'',
+						dateTime:$('#date_time').val(),
 						filePath:path
 					});
 					tmpfilePath=path;

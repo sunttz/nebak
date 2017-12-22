@@ -1,4 +1,5 @@
 package usi.biz.util;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -7,7 +8,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-/** 
+
+/**
  *  
  *【功能描述：ftp 工具类】 
  *【功能详细描述：逐条详细描述功能】  
@@ -23,14 +25,22 @@ public class FtpUtils {
     public static void main(String[] args) {  
     	 String hostname = "127.0.0.1";
          int port = 21;
-         String username = "business";
-         String password = "business";
+         String username = "stt";
+         String password = "123";
          int activeTime=3000;
 //        boolean flag = fileUpload("E:/tt/data","/admin/");  
-         boolean flag =  fileDownload("E:/tt/te/128","/admin/748/","748",hostname, port, username, password,activeTime);  
+         //boolean flag =  fileDownload("E:/tt/te/128","/admin/748/","748",hostname, port, username, password,activeTime);
 //       System.out.println(flag);  
 //        boolean flag = deleteDir("/admin/3128/");  
-//        boolean flag = deleteFile("/admin/2616/input/a0012.xml");  
+//        boolean flag = deleteFile("/admin/2616/input/a0012.xml");
+        boolean flag = false;
+        try {
+            //flag = iterateDelete(getFTPClient(hostname,port,username,password,activeTime), "/home/ftp/test/a.txt");
+            flag = deleteFile("/home/ftp/test/a.txt",hostname,port,username,password,activeTime);
+            //deleteDir("/home/ftp/a/HF_SERVER_20171218/HF_SERVER_HEFEI22_20171218",hostname,port,username,password,activeTime);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println(flag);  
     }  
   
@@ -262,8 +272,8 @@ public class FtpUtils {
             String path = ftpPath+File.separator+f.getName();  
             if(f.isFile()){  
                 // 是文件就删除文件  
-                ftpClient.deleteFile(path);  
-            }else if(f.isDirectory()){  
+                final boolean b = ftpClient.deleteFile(path);
+            }else if(f.isDirectory()){
                iterateDelete(ftpClient,path);  
             }  
         }  
@@ -331,6 +341,56 @@ public class FtpUtils {
             e.printStackTrace();
             flag=false;
             throw new RuntimeException("FTP检查文件失败", e);
+        } finally {
+            try {
+                ftpClient.disconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("关闭FTP连接失败", e);
+            }
+            return flag;
+        }
+    }
+
+    /**
+     * 删除指定路径下的空文件
+     * @param dir
+     * @param hostname
+     * @param port
+     * @param username
+     * @param password
+     * @param activeTime
+     * @return
+     */
+    public static boolean deleteEmptyFile(String dir,String hostname, int port, String username, String password,int activeTime) {
+        FTPClient ftpClient = new FTPClient();
+        Boolean flag = true;
+        try {
+            ftpClient = getFTPClient(hostname, port, username, password,activeTime);
+            ftpClient.setBufferSize(1024);
+            ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            // 切换到指定的目录
+            final boolean changeFlag = ftpClient.changeWorkingDirectory(dir + File.separator);
+            if(!changeFlag){
+                flag = false;
+            }else{
+                // 获得指定目录下的文件夹和文件信息
+                FTPFile[] ftpFiles = ftpClient.listFiles();
+                for (FTPFile ftpFile : ftpFiles) {
+                    if(ftpFile.isDirectory()){
+                        String filePath = dir + File.separator + ftpFile.getName() + File.separator;
+                        if(ftpClient.listFiles(filePath).length == 0){
+                            //ftpClient.deleteFile(filePath);
+                            //ftpClient.removeDirectory(filePath);
+                            FtpUtils.iterateDelete(ftpClient, filePath);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            flag=false;
+            throw new RuntimeException("FTP删除文件失败", e);
         } finally {
             try {
                 ftpClient.disconnect();
