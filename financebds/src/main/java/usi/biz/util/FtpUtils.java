@@ -272,7 +272,7 @@ public class FtpUtils {
             String path = ftpPath+File.separator+f.getName();  
             if(f.isFile()){  
                 // 是文件就删除文件  
-                final boolean b = ftpClient.deleteFile(path);
+                ftpClient.deleteFile(path);
             }else if(f.isDirectory()){
                iterateDelete(ftpClient,path);  
             }  
@@ -376,13 +376,13 @@ public class FtpUtils {
             }else{
                 // 获得指定目录下的文件夹和文件信息
                 FTPFile[] ftpFiles = ftpClient.listFiles();
-                for (FTPFile ftpFile : ftpFiles) {
-                    if(ftpFile.isDirectory()){
-                        String filePath = dir + File.separator + ftpFile.getName() + File.separator;
-                        if(ftpClient.listFiles(filePath).length == 0){
-                            //ftpClient.deleteFile(filePath);
-                            //ftpClient.removeDirectory(filePath);
-                            FtpUtils.iterateDelete(ftpClient, filePath);
+                if(ftpFiles != null){
+                    for (FTPFile ftpFile : ftpFiles) {
+                        if(ftpFile.isDirectory()){
+                            String filePath = dir + File.separator + ftpFile.getName() + File.separator;
+                            if(ftpClient.listFiles(filePath).length == 0){
+                                FtpUtils.iterateDelete(ftpClient, filePath);
+                            }
                         }
                     }
                 }

@@ -235,7 +235,7 @@ public class NeServerService {
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
 				try {
-					// 删除本地过期文件
+					// 删除该网元本地过期文件
 					deleteLocalExpireFile("",neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay());
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -352,9 +352,11 @@ public class NeServerService {
 	private void deleteEmptyFile(){
 		File rootFile = new File(rootName);
 		File[] files = rootFile.listFiles();
-		for (File f : files) {
-			if(f.isDirectory() && f.listFiles().length == 0){
-				f.delete();
+		if(files != null){
+			for (File f : files) {
+				if(f.isDirectory() && f.listFiles().length == 0){
+					f.delete();
+				}
 			}
 		}
 	}
