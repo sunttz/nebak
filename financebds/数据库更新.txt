@@ -1,22 +1,21 @@
+-- 备份类型
 -- Add/modify columns
 alter table NE_SERVER add BAK_TYPE char(1);
 update NE_SERVER set BAK_TYPE = '0';
 
--- Create table
+-- 保存时长
+-- Add/modify columns
+alter table NE_SERVER add save_day number(18);
+update NE_SERVER set save_day = 7;
+
+-- 备份结果表
 create table biz_bak_result
 (
   pk_no       number(18) not null,
   succ_num    number(18),
   fail_num    number(18),
   create_date date default sysdate
-)
-;
-
-
-
--- 给管理员角色增加网元配置管理菜单
-/netElement/neServerConfig.do
-
+);
 
 -- Create sequence
 create sequence NE_SERVER_SEQ
@@ -34,12 +33,9 @@ start with 1
 increment by 1
 cache 10;
 
+-- 给管理员角色增加网元配置管理菜单
+/netElement/neServerConfig.do
 
 -- 添加自动备份统计菜单
 /netElement/autoResultStatistics.do
 
--- 保存时长
--- Add/modify columns
-alter table NE_SERVER add save_day number(18);
-
-update NE_SERVER set save_day = 7;

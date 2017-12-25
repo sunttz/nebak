@@ -381,16 +381,18 @@ public class NeServerService {
 		Date expireDate = getExpireDate(saveDay); // 过期日期
 		File rootFile = new File(rootName);
 		File[] files = rootFile.listFiles();
-		for(File f : files){
-			if(f.isDirectory()){
-				String fileName = f.getName();
-				if(fileName.indexOf(matchStr) > -1){
-					String[] splitName = fileName.split("_");
-					if(splitName.length == 3){
-						String fileDateStr = splitName[2];
-						Date fileDate = sdf.parse(fileDateStr);
-						if(fileDate.getTime() < expireDate.getTime()){
-							expireFolders.add(fileName);
+		if(files != null){
+			for(File f : files){
+				if(f.isDirectory()){
+					String fileName = f.getName();
+					if(fileName.indexOf(matchStr) > -1){
+						String[] splitName = fileName.split("_");
+						if(splitName.length == 3){
+							String fileDateStr = splitName[2];
+							Date fileDate = sdf.parse(fileDateStr);
+							if(fileDate.getTime() < expireDate.getTime()){
+								expireFolders.add(fileName);
+							}
 						}
 					}
 				}
@@ -405,6 +407,7 @@ public class NeServerService {
 				String secondFileName = f.getName();
 				if(secondFileName.indexOf(matchStr2) > -1){
 					deleteFile(f);
+					System.out.printf("删除本地备份过期文件夹%s%n", secondFileName);
 					break;
 				}
 			}
@@ -460,6 +463,7 @@ public class NeServerService {
 						if(secondFileName.indexOf(matchStr2) > -1){
 							String filePath = bakPath + File.separator + folder + File.separator + secondFileName + File.separator;
 							boolean deleteFlag = FtpUtils.iterateDelete(ftpClient, filePath);
+							System.out.printf(String.format("删除FTP备份过期文件夹%s,结果%s%n", secondFileName, deleteFlag));
 							break;
 						}
 					}
