@@ -615,9 +615,9 @@ public class NeServerService {
 							 map.put("fileDate", ctime);
 							 //设置文件夹大小
 							 if(isDirectory){
-								 map.put("fileSize", this.getFileSize(thisFile));
+								 map.put("fileSize", FtpUtils.getFormatSize(this.getFileSize(thisFile)));
 							 }else{
-								 map.put("fileSize",thisFile.length());
+								 map.put("fileSize", FtpUtils.getFormatSize(thisFile.length()));
 							 }
 							 //设置文件路径
 							 map.put("filePath",filePath+"/"+fileName);
@@ -646,9 +646,9 @@ public class NeServerService {
 							 map.put("fileDate", ctime);
 							 //设置文件夹大小
 							 if(isDirectory){
-								 map.put("fileSize", this.getFileSize(thisFile));
+								 map.put("fileSize", FtpUtils.getFormatSize(this.getFileSize(thisFile)));
 							 }else{
-								 map.put("fileSize",thisFile.length());
+								 map.put("fileSize",FtpUtils.getFormatSize(thisFile.length()));
 							 }
 							 //设置文件路径
 							 map.put("filePath",filePath+"/"+fileName);
@@ -676,9 +676,9 @@ public class NeServerService {
 							 map.put("fileDate", ctime);
 							 //设置文件夹大小
 							 if(isDirectory){
-								 map.put("fileSize", this.getFileSize(thisFile));
+								 map.put("fileSize", FtpUtils.getFormatSize(this.getFileSize(thisFile)));
 							 }else{
-								 map.put("fileSize",thisFile.length());
+								 map.put("fileSize",FtpUtils.getFormatSize(thisFile.length()));
 							 }
 							 //设置文件路径
 							 map.put("filePath",filePath+"/"+fileName);
@@ -706,9 +706,9 @@ public class NeServerService {
 						 map.put("fileDate", ctime);
 						 //设置文件夹大小
 						 if(isDirectory){
-							 map.put("fileSize", this.getFileSize(thisFile));
+							 map.put("fileSize", FtpUtils.getFormatSize(this.getFileSize(thisFile)));
 						 }else{
-							 map.put("fileSize",thisFile.length());
+							 map.put("fileSize",FtpUtils.getFormatSize(thisFile.length()));
 						 }
 						 //设置文件路径
 						 map.put("filePath",filePath+"/"+fileName);
