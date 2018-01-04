@@ -8,6 +8,11 @@ update NE_SERVER set BAK_TYPE = '0';
 alter table NE_SERVER add save_day number(18);
 update NE_SERVER set save_day = 7;
 
+-- 用户数据、系统数据备份路径
+-- Add/modify columns
+alter table NE_SERVER add bak_userdata varchar2(2000);
+alter table NE_SERVER add bak_system varchar2(2000);
+
 -- 备份结果表
 create table biz_bak_result
 (

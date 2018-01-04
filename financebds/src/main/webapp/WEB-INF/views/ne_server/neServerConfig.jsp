@@ -32,8 +32,22 @@
 						<td align="left"  style="width: 230px;">
 							<select id="device_type" class="easyui-combobox" name="device_type" style="width:150px;">
 							    <option value="-1" selected>全部</option>
-							    <option value="SERVER">SERVER</option>
+							    <option value="MSC SERVER">MSC SERVER</option>
 							    <option value="MGW">MGW</option>
+								<option value="HSS">HSS</option>
+								<option value="汇接局">汇接局</option>
+								<option value="STP">STP</option>
+								<option value="DRA">DRA</option>
+								<option value="MME">MME</option>
+								<option value="SAE-GW">SAE-GW</option>
+								<option value="PCRF">PCRF</option>
+								<option value="DNS">DNS</option>
+								<option value="VoLTE SBC">VoLTE SBC</option>
+								<option value="CSCF">CSCF</option>
+								<option value="VoLTE AS">VoLTE AS</option>
+								<option value="ENS">ENS</option>
+								<option value="固网CSCF">固网CSCF</option>
+								<option value="固网HSS">固网HSS</option>
 							</select>
 						</td>
 						<td style="padding-left: 20px;">
@@ -50,7 +64,7 @@
 
 	<div style="display:none;">
 		<div id="neServerDialog" style="padding:5px;">
-			<form id="neServerForm" method="post" style="height: 300px;">
+			<form id="neServerForm" method="post" style="height: 330px;">
 				<input name="serverId" id="serverId" type="text" style="display: none;" />
 				<table style="width:100%;" class="info_table">
 					<tr style="height:30px;white-space: nowrap;">
@@ -74,10 +88,25 @@
 					<tr style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>网元类型</td>
 						<td id="deviceType_box">
-							<input id="deviceType1" name="deviceType" type="radio" value="SERVER" style="margin-left:20px;" checked="checked" />
-							<label for="deviceType1">SERVER</label>
-							<input id="deviceType2" name="deviceType" type="radio" value="MGW" style="margin-left:20px;" />
-							<label for="deviceType2">MGW</label>
+							<select id="deviceType" class="easyui-combobox" name="deviceType" style="width:425px;">
+								<option value=""></option>
+								<option value="MSC SERVER">MSC SERVER</option>
+								<option value="MGW">MGW</option>
+								<option value="HSS">HSS</option>
+								<option value="汇接局">汇接局</option>
+								<option value="STP">STP</option>
+								<option value="DRA">DRA</option>
+								<option value="MME">MME</option>
+								<option value="SAE-GW">SAE-GW</option>
+								<option value="PCRF">PCRF</option>
+								<option value="DNS">DNS</option>
+								<option value="VoLTE SBC">VoLTE SBC</option>
+								<option value="CSCF">CSCF</option>
+								<option value="VoLTE AS">VoLTE AS</option>
+								<option value="ENS">ENS</option>
+								<option value="固网CSCF">固网CSCF</option>
+								<option value="固网HSS">固网HSS</option>
+							</select>
 							<span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
 							</span>
@@ -110,10 +139,28 @@
 							</span>
 						</td>
 					</tr>
-					<tr style="height:30px;white-space: nowrap;">
+					<tr id="bakPathTr" style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>备份路径</td>
 						<td id="bakPath_box">
 							<input id="bakPath" name="bakPath" style="width:420px;" class="input" size="40"/>
+							<span class="validate_box">
+								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
+							</span>
+						</td>
+					</tr>
+					<tr id="bakUserdataTr" style="height:30px;white-space: nowrap;display: none;">
+						<td style="width:16%;background:#FAFAFA;" >用户数据路径</td>
+						<td id="bakUserdata_box">
+							<input id="bakUserdata" name="bakUserdata" style="width:420px;" class="input" size="40"/>
+							<span class="validate_box">
+								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
+							</span>
+						</td>
+					</tr>
+					<tr id="bakSystemTr" style="height:30px;white-space: nowrap;display: none;">
+						<td style="width:16%;background:#FAFAFA;" >系统数据路径</td>
+						<td id="bakSystem_box">
+							<input id="bakSystem" name="bakSystem" style="width:420px;" class="input" size="40"/>
 							<span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
 							</span>

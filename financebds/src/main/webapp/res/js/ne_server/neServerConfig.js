@@ -180,13 +180,19 @@ $(document).ready(function() {
     // 主动推类型无需ftp配置
     $("input:radio[name=bakType]").change(function () {
         var bakType = $('input:radio[name="bakType"]:checked').val();
+        // 主动推
         if(bakType == "1"){
             $("#deviceAddr").val("");
             $("#userName").val("");
             $("#passWord").val("");
-            $("#deviceAddrTr,#userNameTr,#passWordTr").hide();
+            $("#bakPath").val("");
+            $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").hide();
+            $("#bakUserdataTr,#bakSystemTr").show();
         }else{
-            $("#deviceAddrTr,#userNameTr,#passWordTr").show();
+            $("#bakUserdata").val("");
+            $("#bakSystem").val("");
+            $("#bakUserdataTr,#bakSystemTr").hide();
+            $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").show();
         }
     });
 
@@ -237,6 +243,8 @@ function delOne(serverId) {
 
 //新增网元
 function addNeServer(){
+    $("#bakUserdataTr,#bakSystemTr").hide();
+    $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").show();
     $('#neServerDialog').dialog({
         title: '添加网元'
     }).dialog('open');
@@ -248,12 +256,14 @@ function saveNeServer() {
     var orgId = $("#orgId").combobox("getValue"); // 所属地区id
     var orgName = $("#orgId").combobox("getText"); // 所属地区name
     var deviceName = $("#deviceName").val(); // 设备名称
-    var deviceType=$('input:radio[name="deviceType"]:checked').val(); // 网元类型
+    var deviceType=$("#deviceType").combobox("getValue"); // 网元类型
     var bakType = $('input:radio[name="bakType"]:checked').val(); // 备份类型
     var saveDay = $("#saveDay").val();// 保存天数
     var remarks = $("#remarks").val(); // 备注
     var deviceAddr = $("#deviceAddr").val(); // 设备地址
     var bakPath = $("#bakPath").val(); // 备份路径
+    var bakUserdata = $("#bakUserdata").val(); // 用户数据路径
+    var bakSystem = $("#bakSystem").val(); // 系统数据路径
     var userName = $("#userName").val(); // 用户名
     var passWord = $("#passWord").val(); // 密码
     var flag = true;
@@ -312,14 +322,6 @@ function saveNeServer() {
         $('#remarks_box .validate_box').hide();
         $('#remarks_box .validate_msg').html('');
     }
-    if(bakPath.length == 0) {
-        $('#bakPath_box .validate_box').show();
-        $('#bakPath_box .validate_msg').html('必选字段');
-        flag = false;
-    } else {
-        $('#bakPath_box .validate_box').hide();
-        $('#bakPath_box .validate_msg').html('');
-    }
     // 被动取类型校验ftp配置
     if(bakType == "0"){
         if(deviceAddr.length == 0) {
@@ -350,6 +352,27 @@ function saveNeServer() {
             $('#passWord_box .validate_box').hide();
             $('#passWord_box .validate_msg').html('');
         }
+        if(bakPath.length == 0) {
+            $('#bakPath_box .validate_box').show();
+            $('#bakPath_box .validate_msg').html('必选字段');
+            flag = false;
+        } else {
+            $('#bakPath_box .validate_box').hide();
+            $('#bakPath_box .validate_msg').html('');
+        }
+    }else if(bakType == "1"){
+        if(bakUserdata.length == 0 && bakSystem.length == 0) {
+            $('#bakUserdata_box .validate_box').show();
+            $('#bakUserdata_box .validate_msg').html('至少一项不为空');
+            $('#bakSystem_box .validate_box').show();
+            $('#bakSystem_box .validate_msg').html('至少一项不为空');
+            flag = false;
+        } else {
+            $('#bakUserdata_box .validate_box').hide();
+            $('#bakUserdata_box .validate_msg').html('');
+            $('#bakSystem_box .validate_box').hide();
+            $('#bakSystem_box .validate_msg').html('');
+        }
     }
     if(flag == false){
         return;
@@ -362,7 +385,7 @@ function saveNeServer() {
         dataType : 'json',
         url : 'saveNeserver.do',
         data : {
-            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,bakType:bakType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord
+            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,bakType:bakType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord,bakUserdata:bakUserdata,bakSystem:bakSystem
         },
         beforeSend:ajaxLoading,//发送请求前打开进度条
         success : function(data) { // 请求成功后处理函数。
@@ -387,9 +410,11 @@ function updateNeServer(index) {
         // 主动推类型无需ftp配置
         var bakType = row.bakType;
         if(bakType == "1"){
-            $("#deviceAddrTr,#userNameTr,#passWordTr").hide();
+            $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").hide();
+            $("#bakUserdataTr,#bakSystemTr").show();
         }else{
-            $("#deviceAddrTr,#userNameTr,#passWordTr").show();
+            $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").show();
+            $("#bakUserdataTr,#bakSystemTr").hide();
         }
         $('#neServerForm').form('load', row);
         $('#neServerDialog').dialog({

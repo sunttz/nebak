@@ -25,9 +25,23 @@
 						<td align="right" style="width: 120px;">网元类型：</td>
 						<td align="left"  style="width: 230px;">
 							<select id="device_type" class="easyui-combobox" name="device_type" style="width:150px;">
-							    <option value="-1" selected>全部</option>
-							    <option value="SERVER">SERVER</option>
-							    <option value="MGW">MGW</option>
+								<option value="-1" selected>全部</option>
+								<option value="MSC SERVER">MSC SERVER</option>
+								<option value="MGW">MGW</option>
+								<option value="HSS">HSS</option>
+								<option value="汇接局">汇接局</option>
+								<option value="STP">STP</option>
+								<option value="DRA">DRA</option>
+								<option value="MME">MME</option>
+								<option value="SAE-GW">SAE-GW</option>
+								<option value="PCRF">PCRF</option>
+								<option value="DNS">DNS</option>
+								<option value="VoLTE SBC">VoLTE SBC</option>
+								<option value="CSCF">CSCF</option>
+								<option value="VoLTE AS">VoLTE AS</option>
+								<option value="ENS">ENS</option>
+								<option value="固网CSCF">固网CSCF</option>
+								<option value="固网HSS">固网HSS</option>
 							</select>
 						</td>
 						<td style="padding-left: 20px;">
