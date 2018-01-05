@@ -35,7 +35,7 @@
 							    <option value="MSC SERVER">MSC SERVER</option>
 							    <option value="MGW">MGW</option>
 								<option value="HSS">HSS</option>
-								<option value="汇接局">汇接局</option>
+								<option value="SS">SS</option>
 								<option value="STP">STP</option>
 								<option value="DRA">DRA</option>
 								<option value="MME">MME</option>
@@ -46,8 +46,8 @@
 								<option value="CSCF">CSCF</option>
 								<option value="VoLTE AS">VoLTE AS</option>
 								<option value="ENS">ENS</option>
-								<option value="固网CSCF">固网CSCF</option>
-								<option value="固网HSS">固网HSS</option>
+								<option value="IMSCSCF">IMSCSCF</option>
+								<option value="IMSHSS">IMSHSS</option>
 							</select>
 						</td>
 						<td style="padding-left: 20px;">
@@ -93,7 +93,7 @@
 								<option value="MSC SERVER">MSC SERVER</option>
 								<option value="MGW">MGW</option>
 								<option value="HSS">HSS</option>
-								<option value="汇接局">汇接局</option>
+								<option value="SS">SS</option>
 								<option value="STP">STP</option>
 								<option value="DRA">DRA</option>
 								<option value="MME">MME</option>
@@ -104,8 +104,8 @@
 								<option value="CSCF">CSCF</option>
 								<option value="VoLTE AS">VoLTE AS</option>
 								<option value="ENS">ENS</option>
-								<option value="固网CSCF">固网CSCF</option>
-								<option value="固网HSS">固网HSS</option>
+								<option value="IMSCSCF">IMSCSCF</option>
+								<option value="IMSHSS">IMSHSS</option>
 							</select>
 							<span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>

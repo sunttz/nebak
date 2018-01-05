@@ -357,4 +357,30 @@ public class NeServerController {
 		return bakResults;
 	}
 
+	/**
+	 * 备份结果管理-删除
+	 * @param delPaths 文件、文件夹路径
+	 * @return
+	 */
+	@RequestMapping(value = "/delFilePaths.do", method = RequestMethod.POST)
+	@ResponseBody
+	public boolean delFilePaths(String delPaths){
+		boolean result = false;
+		try {
+			String[] delPathsTmp = delPaths.split(",");
+			for (String delPath : delPathsTmp) {
+                File file = new File(delPath);
+                if(file.isDirectory()){
+                    neServerService.deleteFile(file);
+                }else{
+                    file.delete();
+                }
+            }
+            result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = false;
+		}
+		return result;
+	}
 }

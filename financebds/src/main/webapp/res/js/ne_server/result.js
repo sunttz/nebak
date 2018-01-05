@@ -59,7 +59,7 @@ $(document).ready(function() {
 				},
 				{field:'childFileNum',title:'备份数量',halign:'center',align:'center',width:100},
 				{field:'fileDate',title:'备份时间',halign:'center',align:'center',width:100},
-				{field:'fileSize',title:'文件夹大小(kb)',halign:'center',align:'center',width:100}
+				{field:'fileSize',title:'文件夹大小',halign:'center',align:'center',width:100}
 		]],
 		toolbar: [{
 			iconCls: 'icon-add',
@@ -75,6 +75,46 @@ $(document).ready(function() {
 					$.messager.alert('提示','请选择您要修改的记录！','info');
 				}
 			}
+		},'-',{
+            iconCls: 'icon-remove',
+            text: '删除',
+            handler: function(){
+                var rows = $('#listTable').datagrid('getSelections');
+                if(rows.length == 0){
+                    $.messager.alert('提示','请选择您要删除的记录！','info');
+				}else {
+                    $.messager.confirm("提示", "确认删除吗？", function (data) {
+                        if (data) {
+                            var delPaths = "";
+                            for(var i in rows){
+                                var row = rows[i];
+                                delPaths += row.filePath + ",";
+                            }
+                            $.ajax({
+                                async : false,
+                                cache : false,
+                                type : 'POST',
+                                dataType : 'json',
+                                url : 'delFilePaths.do',
+                                data : {
+                                    delPaths : delPaths
+                                },
+                                success : function(data) { // 请求成功后处理函数。
+                                    if(data == true){
+                                        $('#listTable').datagrid('load', {
+                                            orgName:'',
+                                            dateTime:$('#date_time').val(),
+                                            filePath:tmpfilePath
+                                        });
+                                    }else{
+                                        $.messager.alert('提示','删除失败！','info');
+                                    }
+                                }
+                            });
+                        }
+                    });
+				}
+            }
 		},'-',
 		{
 			iconCls: 'icon-edit',
