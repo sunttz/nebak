@@ -29,7 +29,9 @@ public class AutoLogDto {
 	private int bakFlag;
 	//创建时间
 	private String createDate;
-	// 保存天数
+	// 保存类型
+	private String saveType;
+	// 保存份数
 	private Long saveDay;
 	
 	public Long getServerId() {
@@ -124,5 +126,13 @@ public class AutoLogDto {
 
 	public void setSaveDay(Long saveDay) {
 		this.saveDay = saveDay;
+	}
+
+	public String getSaveType() {
+		return saveType;
+	}
+
+	public void setSaveType(String saveType) {
+		this.saveType = saveType;
 	}
 }

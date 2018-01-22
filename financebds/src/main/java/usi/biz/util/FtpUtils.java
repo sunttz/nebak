@@ -327,6 +327,7 @@ public class FtpUtils {
      * @param activeTime
      * @return
      */
+    @Deprecated
     public static boolean dirExits(String dir,String hostname, int port, String username, String password,int activeTime) {
         FTPClient ftpClient = new FTPClient();
         Boolean flag = true;
@@ -370,6 +371,7 @@ public class FtpUtils {
      * @param activeTime
      * @return
      */
+    @Deprecated
     public static boolean deleteEmptyFile(String dir,String hostname, int port, String username, String password,int activeTime) {
         FTPClient ftpClient = new FTPClient();
         Boolean flag = true;

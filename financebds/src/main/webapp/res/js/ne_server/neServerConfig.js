@@ -45,15 +45,15 @@ $(document).ready(function() {
 				{field:'orgId',title:'机构ID',hidden:true,halign:'center',align:'center',width:100},
 				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:100},
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
-				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:100},
-				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:100,
+				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:80},
+				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80,
                     formatter: function(value, row, index) {
                         if(value == null || value == ""){
                             value = "-";
                         }
                         return value;
                     }},
-            	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:60,
+            	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:40,
                     formatter: function(value, row, index) {
             			var bakType = value;
             			if(value=='0'){
@@ -63,7 +63,17 @@ $(document).ready(function() {
 						}
                         return bakType;
                     }},
-                {field:'saveDay',title:'保存天数',halign:'center',align:'center',width:40},
+                {field:'saveType',title:'保存类型',halign:'center',align:'center',width:40,
+                    formatter: function(value, row, index) {
+                        var saveType = value;
+                        if(value=='D'){
+                            saveType = "按天";
+                        }else if(value=='W'){
+                            saveType = "按周";
+                        }
+                        return saveType;
+                }},
+                {field:'saveDay',title:'保存份数',halign:'center',align:'center',width:40},
 				{field:'remarks',title:'备注',halign:'center',align:'center',width:100},
 				{field:'operate',title:'操作',halign:'center',align:'center',width:70,
 					formatter: function(value, row, index) {
@@ -258,6 +268,7 @@ function saveNeServer() {
     var deviceName = $("#deviceName").val(); // 设备名称
     var deviceType=$("#deviceType").combobox("getValue"); // 网元类型
     var bakType = $('input:radio[name="bakType"]:checked').val(); // 备份类型
+    var saveType = $('input:radio[name="saveType"]:checked').val(); // 保存类型
     var saveDay = $("#saveDay").val();// 保存天数
     var remarks = $("#remarks").val(); // 备注
     var deviceAddr = $("#deviceAddr").val(); // 设备地址
@@ -299,6 +310,14 @@ function saveNeServer() {
     } else {
         $('#bakType_box .validate_box').hide();
         $('#bakType_box .validate_msg').html('');
+    }
+    if(saveType.length == 0) {
+        $('#saveType_box .validate_box').show();
+        $('#saveType_box .validate_msg').html('必选字段');
+        flag = false;
+    } else {
+        $('#saveType_box .validate_box').hide();
+        $('#saveType_box .validate_msg').html('');
     }
     if(saveDay.length == 0) {
         $('#saveDay_box .validate_box').show();
@@ -385,7 +404,7 @@ function saveNeServer() {
         dataType : 'json',
         url : 'saveNeserver.do',
         data : {
-            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,bakType:bakType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord,bakUserdata:bakUserdata,bakSystem:bakSystem
+            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,bakType:bakType,saveType:saveType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord,bakUserdata:bakUserdata,bakSystem:bakSystem
         },
         beforeSend:ajaxLoading,//发送请求前打开进度条
         success : function(data) { // 请求成功后处理函数。

@@ -35,7 +35,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 
 	@Override
 	public List<NeServer> getPageAllNE(PageObj pageObj, Long orgId,String deviceType) {
-		String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system from ne_server t"
+		String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type from ne_server t"
 					+" WHERE 1=1";
 	    
 		if(orgId!=null && !orgId.equals("") && orgId !=-1L){
@@ -63,13 +63,14 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setSaveDay(rs.getLong(12));
 				record.setBakUserdata(rs.getString(13));
 				record.setBakSystem(rs.getString(14));
+				record.setSaveType(rs.getString(15));
 				return record;
 			}}, pageObj);
 	}
 
 	@Override
 	public List<NeServer> getNeServerById(Long serverId) {
-		String sql="select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day from ne_server t"
+		String sql="select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type from ne_server t"
 				+" WHERE t.server_id="+serverId;
 		return this.getJdbcTemplate().query(sql, new RowMapper<NeServer>(){
 			@Override
@@ -87,6 +88,9 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setPassWord(rs.getString(10));
 				record.setBakType(rs.getString(11));
 				record.setSaveDay(rs.getLong(12));
+				record.setBakUserdata(rs.getString(13));
+				record.setBakSystem(rs.getString(14));
+				record.setSaveType(rs.getString(15));
 				return record;
 			}});
 	}
@@ -133,6 +137,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				     "b.bak_flag,"+
 					 "a.bak_type,"+
 					 "a.save_day,"+
+					 "a.save_type,"+
 				     "to_char(b.create_date, 'yyyy-mm-dd') as create_date"+
 				     " from ne_server a, biz_auto_log b"+
 				     " where a.server_id = b.server_id";
@@ -158,7 +163,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setBakFlag(rs.getInt(12));
 				record.setBakType(rs.getString(13));
 				record.setSaveDay(rs.getLong(14));
-				record.setCreateDate(rs.getString(15));
+				record.setSaveType(rs.getString(15));
+				record.setCreateDate(rs.getString(16));
 				return record;
 			}},pageObj);
 	}
@@ -166,8 +172,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 	@Override
 	public int saveNeServer(final NeServer neServer) {
 		String sql = "INSERT INTO NE_SERVER " +
-				" (SERVER_ID,ORG_NAME,DEVICE_NAME,DEVICE_TYPE,REMARKS,DEVICE_ADDR,BAK_PATH,USER_NAME,PASS_WORD,ORG_ID,BAK_TYPE,SAVE_DAY,BAK_USERDATA,BAK_SYSTEM)" +
-				" VALUES (NE_SERVER_SEQ.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?) ";
+				" (SERVER_ID,ORG_NAME,DEVICE_NAME,DEVICE_TYPE,REMARKS,DEVICE_ADDR,BAK_PATH,USER_NAME,PASS_WORD,ORG_ID,BAK_TYPE,SAVE_DAY,BAK_USERDATA,BAK_SYSTEM,SAVE_TYPE)" +
+				" VALUES (NE_SERVER_SEQ.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?) ";
 		return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
@@ -184,13 +190,14 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				ps.setLong(11,neServer.getSaveDay());
 				ps.setString(12,neServer.getBakUserdata());
 				ps.setString(13,neServer.getBakSystem());
+				ps.setString(14,neServer.getSaveType());
 			}
 		});
 	}
 
 	@Override
 	public int updateNeServer(final NeServer neServer) {
-		String sql = "UPDATE NE_SERVER SET ORG_NAME=?,DEVICE_NAME=?,DEVICE_TYPE=?,REMARKS=?,DEVICE_ADDR=?,BAK_PATH=?,USER_NAME=?,PASS_WORD=?,ORG_ID=?,BAK_TYPE=?,SAVE_DAY=?,BAK_USERDATA=?,BAK_SYSTEM=? WHERE SERVER_ID=?";
+		String sql = "UPDATE NE_SERVER SET ORG_NAME=?,DEVICE_NAME=?,DEVICE_TYPE=?,REMARKS=?,DEVICE_ADDR=?,BAK_PATH=?,USER_NAME=?,PASS_WORD=?,ORG_ID=?,BAK_TYPE=?,SAVE_DAY=?,BAK_USERDATA=?,BAK_SYSTEM=?,SAVE_TYPE=? WHERE SERVER_ID=?";
 		return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
@@ -207,7 +214,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				ps.setLong(11,neServer.getSaveDay());
 				ps.setString(12,neServer.getBakUserdata());
 				ps.setString(13,neServer.getBakSystem());
-				ps.setLong(14,neServer.getServerId());
+				ps.setString(14,neServer.getSaveType());
+				ps.setLong(15,neServer.getServerId());
 			}
 		});
 	}

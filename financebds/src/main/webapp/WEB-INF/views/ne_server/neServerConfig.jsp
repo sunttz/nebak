@@ -115,14 +115,23 @@
 					<tr style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>备份类型</td>
 						<td id="bakType_box">
-							<input id="bakType1" name="bakType" type="radio" value="0" style="margin-left:20px;" checked="checked" />
-							<label for="bakType1">被动取</label>
-							<input id="bakType2" name="bakType" type="radio" value="1" style="margin-left:30px;" />
-							<label for="bakType2">主动推</label>
+							<input id="bakType1" name="bakType" type="radio" value="0" style="margin-left:10px;vertical-align:middle;" checked="checked" />
+							<label for="bakType1" style="vertical-align:middle;display:inline-block;">被动取</label>
+							<input id="bakType2" name="bakType" type="radio" value="1" style="margin-left:15px;vertical-align:middle;" />
+							<label for="bakType2" style="vertical-align:middle;display:inline-block;">主动推</label>
 						</td>
 					</tr>
 					<tr style="height:30px;white-space: nowrap;">
-						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>保存天数</td>
+						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>保存类型</td>
+						<td id="saveType_box">
+							<input id="saveType1" name="saveType" type="radio" value="D" style="margin-left:10px;vertical-align:middle;" checked="checked" />
+							<label for="saveType1" style="vertical-align:middle;display:inline-block;">按天</label>
+							<input id="saveType2" name="saveType" type="radio" value="W" style="margin-left:25px;vertical-align:middle;" />
+							<label for="saveType2" style="vertical-align:middle;display:inline-block;">按周</label>
+						</td>
+					</tr>
+					<tr style="height:30px;white-space: nowrap;">
+						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>保存份数</td>
 						<td id="saveDay_box">
 							<input id="saveDay" name="saveDay" style="width:420px;" class="input" size="30" value="7"/>
 							<span class="validate_box">

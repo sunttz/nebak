@@ -13,6 +13,11 @@ update NE_SERVER set save_day = 7;
 alter table NE_SERVER add bak_userdata varchar2(2000);
 alter table NE_SERVER add bak_system varchar2(2000);
 
+-- 保存类型
+-- Add/modify columns
+alter table NE_SERVER add save_type char(1);
+update NE_SERVER set save_type = 'D';
+
 -- 备份结果表
 create table biz_bak_result
 (

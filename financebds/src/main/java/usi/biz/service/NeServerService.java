@@ -1,8 +1,6 @@
 package usi.biz.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.stereotype.Service;
 import usi.biz.dao.AutoLogDao;
 import usi.biz.dao.BakResultDao;
@@ -32,12 +30,13 @@ public class NeServerService {
 	
 	private static String rootName=ConfigUtil.getValue("download.file.path");
 	private SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd");
+	private SimpleDateFormat sdf2 = new SimpleDateFormat("EEE"); // 周几
 
-	// 备份ftp服务器配置
-	private static String ftpflag=ConfigUtil.getValue("bak.ftp.flag");
-	private static String ftpIp=ConfigUtil.getValue("bak.ftp.ip");
-	private static String ftpUsername=ConfigUtil.getValue("bak.ftp.username");
-	private static String ftpPassword=ConfigUtil.getValue("bak.ftp.password");
+	// 备份ftp服务器配置(弃用)
+	//private static String ftpflag=ConfigUtil.getValue("bak.ftp.flag");
+	//private static String ftpIp=ConfigUtil.getValue("bak.ftp.ip");
+	//private static String ftpUsername=ConfigUtil.getValue("bak.ftp.username");
+	//private static String ftpPassword=ConfigUtil.getValue("bak.ftp.password");
 
 	public List<NeServer> getAllOrg(){
 		return neServerDao.getAllOrg();
@@ -138,45 +137,80 @@ public class NeServerService {
 			}
 			// 主动推(检查指定路径是否有文件)
 			else if("1".equals(bakType)){
-				String bakDir = getBakDir(neserver.getBakPath(), neserver.getOrgName(), neserver.getDeviceType(), neserver.getDeviceName());
-				// 推送到ftp
-				if("true".equals(ftpflag)){
-					try{
-						boolean isExits = FtpUtils.dirExits(bakDir, ftpIp, port, ftpUsername, ftpPassword, activeTime);
-						if(!isExits){
-							if(result.equals("")){
-								result=serverIds[i];
-							}else{
-								result+=","+serverIds[i];
-							}
-						}
-					}catch(Exception e){
-						e.printStackTrace();
-						if(result.equals("")){
-							result=serverIds[i];
-						}else{
-							result+=","+serverIds[i];
-						}
-					}
-				}
-				// 推送到本地
-				else{
+				String curDay = sdf.format(new Date());// 当天日期字符串
+				String bakUserdata = neserver.getBakUserdata(); // 用户数据路径
+				String bakSystem = neserver.getBakSystem(); // 系统数据路径
+				boolean userdataResult = true;
+				boolean systemResult = true;
+				// 检查当天用户数据文件是否推送成功
+				if (StringUtils.isNotBlank(bakUserdata)) {
+					userdataResult = false;
 					try {
-						File file = new File(bakDir);
-						if(!file.exists() || file.listFiles().length == 0){
-							if(result.equals("")){
-								result=serverIds[i];
-							}else{
-								result+=","+serverIds[i];
+						File userDataFile = new File(bakUserdata);
+						File[] userDatafiles = userDataFile.listFiles();
+						for (File f : userDatafiles) {
+							if (f.isDirectory()) {
+								String filename = f.getName();
+								if(filename.indexOf(curDay) > -1 && f.listFiles().length > 0){
+									userdataResult = true;
+									break;
+								}
 							}
-                        }
+						}
 					} catch (Exception e) {
 						e.printStackTrace();
-						if(result.equals("")){
-							result=serverIds[i];
-						}else{
-							result+=","+serverIds[i];
+					}
+				}
+				// 检查当天系统数据文件是否推送成功
+				if (StringUtils.isNotBlank(bakSystem)) {
+					systemResult = false;
+					// 判断是否多模块网元
+					int multiModule = 0; // 模块数
+					try {
+						File bakSystemFile = new File(bakSystem);
+						File[] bakSystemFiles = bakSystemFile.listFiles();
+						for (File file : bakSystemFiles) {
+							if(file.isDirectory()){
+								multiModule ++;
+							}
 						}
+						if(multiModule > 0){
+							int tmpNum = 0;
+							for (File f : bakSystemFiles) {
+								if(f.isDirectory()){
+									File[] moduleFiles = f.listFiles();
+									for (File moduleFile : moduleFiles) {
+										String moduleFileName = moduleFile.getName();
+										if(moduleFileName.indexOf(curDay) > -1){
+											tmpNum ++;
+											break;
+										}
+									}
+								}
+							}
+							if(tmpNum == multiModule){
+								systemResult = true;
+							}
+						}else{
+							for(File f : bakSystemFiles){
+								String fname = f.getName();
+								if(fname.indexOf(curDay) > -1){
+									systemResult = true;
+									break;
+								}
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				// 用户数据文件和系统数据文件都备份成功才判定网元备份成功
+				System.out.printf(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName()), userdataResult, systemResult);
+				if(!(userdataResult && systemResult) || (StringUtils.isBlank(bakUserdata) && StringUtils.isBlank(bakSystem))){
+					if(result.equals("")){
+						result=serverIds[i];
+					}else{
+						result+=","+serverIds[i];
 					}
 				}
 			}else{
@@ -193,6 +227,9 @@ public class NeServerService {
 	
 	/**
 	 * 自动网元备份
+	 * 1、遍历网元信息，查询备份类型（被动取、主动推）、保存类型（按周、按天）
+	 * 2、如果保存类型为按周，判断当天是否周五，不是则删除当天数据，是则启动备份和删除流程
+	 * 3、如果保存类型为按天，则启动备份和删除流程
 	 * @return
 	 */
 	public String autoBakNow(String ids){
@@ -222,73 +259,68 @@ public class NeServerService {
 
 		//先删除日志，再进行备份
 		bakResultDao.deleteBakResultByTime();
-		// 删除备份路径下空文件夹
-		deleteEmptyFile();
 		//第一步获取单个网元信息
 		String[] serverIds=ids.split(",");
+		String week = sdf2.format(new Date()); // 获取当前是周几
+		/*
+		  for(网元列表){
+			备份类型（主动推、被动取）；
+			保存类型（按周、按天）；
+			if(主动推){
+				if(按周 && 当天非周五){
+					删除当天推送文件；
+				}
+				if（按周 && 当天周五 || 按天）{
+					删除备份过期文件，区分按天、按周；
+					执行备份逻辑，检查当天文件是否存在；
+					记录日志；
+				}
+			}else if（被动取）{
+				if（按周 && 当天周五 || 按天）{
+					删除备份过期文件，区分按天、按周；
+					执行备份逻辑，去指定主机下载文件；
+					记录日志；
+				}
+			}
+		}*/
 		for(int i=0;i<serverIds.length;i++){
 			bakFlag = 1;
 			List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 			NeServer neserver=list.get(0);
 			System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份开始=======");
 			String bakType = neserver.getBakType(); // 备份类型
+			String saveType = neserver.getSaveType();// 保存类型
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
-				try {
-					// 删除该网元本地过期文件
-					deleteLocalExpireFile("",neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				downloadPath=checkBakAddr(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
-				dir=neserver.getBakPath();
-				hostname=neserver.getDeviceAddr();
-				username=neserver.getUserName();
-				password=neserver.getPassWord();
-				System.out.println("==============downloadPath(本机路径):"+downloadPath);
-				System.out.println("==============dir(ftp服务器路径):"+dir);
-				System.out.println("==============hostname(主机名):"+hostname);
-				System.out.println("==============port(端口):"+port);
-				System.out.println("==============username(用户名):"+username);
-				System.out.println("==============password(密码):"+password);
-				try{
-					Boolean flag=FtpUtils.fileDownload(downloadPath,dir,fileName,hostname,port, username,password,activeTime);
-					System.out.println("==============ftp下载flag(返回标志位):"+flag);
-					if(!flag){
-						if(result.equals("")){
-							result=serverIds[i];
-						}else{
-							result+=","+serverIds[i];
-						}
+				if("W".equals(saveType) && "Fri".equals(week) || "D".equals(saveType)){
+					try {
+						// 删除过期备份文件，区分按天、按周
+						deleteExpireFile_get(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay(),neserver.getSaveType());
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-					bakFlag=flag==true?1:0;
-				}catch(Exception e){
-					e.printStackTrace();
-					if(result.equals("")){
-						result=serverIds[i];
-					}else{
-						result+=","+serverIds[i];
-					}
-					bakFlag = 0;
-				}
-			}
-			// 主动推(检查指定路径是否有文件)
-			else if("1".equals(bakType)){
-				String bakDir = getBakDir(neserver.getBakPath(), neserver.getOrgName(), neserver.getDeviceType(), neserver.getDeviceName());
-				// 推送到ftp
-				if("true".equals(ftpflag)){
+					downloadPath=checkBakAddr(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
+					dir=neserver.getBakPath();
+					hostname=neserver.getDeviceAddr();
+					username=neserver.getUserName();
+					password=neserver.getPassWord();
+					System.out.println("==============downloadPath(本机路径):"+downloadPath);
+					System.out.println("==============dir(ftp服务器路径):"+dir);
+					System.out.println("==============hostname(主机名):"+hostname);
+					System.out.println("==============port(端口):"+port);
+					System.out.println("==============username(用户名):"+username);
+					System.out.println("==============password(密码):"+password);
 					try{
-						// 删除ftp过期文件
-						deleteFtpExpireFile(neserver.getBakPath(),neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay());
-						boolean isExits = FtpUtils.dirExits(bakDir, ftpIp, port, ftpUsername, ftpPassword, activeTime);
-						if(!isExits){
+						Boolean flag=FtpUtils.fileDownload(downloadPath,dir,fileName,hostname,port, username,password,activeTime);
+						System.out.println("==============ftp下载flag(返回标志位):"+flag);
+						if(!flag){
 							if(result.equals("")){
 								result=serverIds[i];
 							}else{
 								result+=","+serverIds[i];
 							}
 						}
-						bakFlag=isExits==true?1:0;
+						bakFlag=flag==true?1:0;
 					}catch(Exception e){
 						e.printStackTrace();
 						if(result.equals("")){
@@ -298,31 +330,128 @@ public class NeServerService {
 						}
 						bakFlag = 0;
 					}
+					this.addAutoLog(Long.parseLong(serverIds[i]),bakFlag);
+					succNum += bakFlag;
+					failNum += bakFlag==0?1:0;
+				}else {
+					System.out.println("该网元今天无需备份");
 				}
-				// 推送到本地
-				else{
-					try {
-						// 删除本地过期文件
-						deleteLocalExpireFile(neserver.getBakPath(),neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay());
-						// 开始检查备份
-						File file = new File(bakDir);
-						if(!file.exists() || file.listFiles().length == 0){
-							if(result.equals("")){
-								result=serverIds[i];
-							}else{
-								result+=","+serverIds[i];
+			}
+			// 主动推(检查指定路径是否有文件)
+			else if("1".equals(bakType)){
+				String curDay = sdf.format(new Date());// 当天日期字符串
+				String bakUserdata = neserver.getBakUserdata(); // 用户数据路径
+				String bakSystem = neserver.getBakSystem(); // 系统数据路径
+				boolean userdataResult = true;
+				boolean systemResult = true;
+				// 如果按周且当天非周五，删除当天推送文件
+				if("W".equals(saveType) && !"Fri".equals(week)){
+					if (StringUtils.isNotBlank(bakUserdata)) {
+						File userdataFile = new File(bakUserdata);
+						File[] userdataFiles = userdataFile.listFiles();
+						for (File file : userdataFiles) {
+							if(file.isDirectory()){
+								String filename = file.getName();
+								if(filename.indexOf(curDay) > -1){
+									deleteFile(file);
+									break;
+								}
 							}
-							bakFlag = 0;
 						}
-					} catch (Exception e) {
-						e.printStackTrace();
+					}
+					if (StringUtils.isNotBlank(bakSystem)) {
+						File systemFile = new File(bakSystem);
+						File[] systemFiles = systemFile.listFiles();
+						for (File file : systemFiles) {
+							if(file.isFile()){
+								String filename = file.getName();
+								if(filename.indexOf(curDay) > -1){
+									deleteFile(file);
+									break;
+								}
+							}
+						}
+					}
+				}
+				// 如果按周且当天周五，或者按天备份
+				if("W".equals(saveType) && "Fri".equals(week) || "D".equals(saveType)){
+					// todo 删除备份过期文件，区分按天、按周
+
+					// 检查当天用户数据文件是否推送成功
+					if (StringUtils.isNotBlank(bakUserdata)) {
+						userdataResult = false;
+						try {
+							File userDataFile = new File(bakUserdata);
+							File[] userDatafiles = userDataFile.listFiles();
+							for (File f : userDatafiles) {
+								if (f.isDirectory()) {
+									String filename = f.getName();
+									if(filename.indexOf(curDay) > -1 && f.listFiles().length > 0){
+										userdataResult = true;
+										break;
+									}
+								}
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					// 检查当天系统数据文件是否推送成功
+					if (StringUtils.isNotBlank(bakSystem)) {
+						systemResult = false;
+						// 判断是否多模块网元
+						int multiModule = 0; // 模块数
+						try {
+							File bakSystemFile = new File(bakSystem);
+							File[] bakSystemFiles = bakSystemFile.listFiles();
+							for (File file : bakSystemFiles) {
+								if(file.isDirectory()){
+									multiModule ++;
+								}
+							}
+							if(multiModule > 0){
+								int tmpNum = 0;
+								for (File f : bakSystemFiles) {
+									if(f.isDirectory()){
+										File[] moduleFiles = f.listFiles();
+										for (File moduleFile : moduleFiles) {
+											String moduleFileName = moduleFile.getName();
+											if(moduleFileName.indexOf(curDay) > -1){
+												tmpNum ++;
+												break;
+											}
+										}
+									}
+								}
+								if(tmpNum == multiModule){
+									systemResult = true;
+								}
+							}else{
+								for(File f : bakSystemFiles){
+									String fname = f.getName();
+									if(fname.indexOf(curDay) > -1){
+										systemResult = true;
+										break;
+									}
+								}
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					// 用户数据文件和系统数据文件都备份成功才判定网元备份成功
+					System.out.printf(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName()), userdataResult, systemResult);
+					if(!(userdataResult && systemResult) || (StringUtils.isBlank(bakUserdata) && StringUtils.isBlank(bakSystem))){
+						bakFlag = 0;
 						if(result.equals("")){
 							result=serverIds[i];
 						}else{
 							result+=","+serverIds[i];
 						}
-						bakFlag = 0;
 					}
+					this.addAutoLog(Long.parseLong(serverIds[i]),bakFlag);
+					succNum += bakFlag;
+					failNum += bakFlag==0?1:0;
 				}
 			}else{
 				if(result.equals("")){
@@ -331,12 +460,15 @@ public class NeServerService {
 					result+=","+serverIds[i];
 				}
 				bakFlag = 0;
+				this.addAutoLog(Long.parseLong(serverIds[i]),bakFlag);
+				succNum += bakFlag;
+				failNum += bakFlag==0?1:0;
 			}
-			this.addAutoLog(Long.parseLong(serverIds[i]),bakFlag);
-			succNum += bakFlag;
-			failNum += bakFlag==0?1:0;
+
 			System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份结束=======");
 		}
+		// 被动取类型，当某网元类型下所有网元均过期删除，删除该空文件夹
+		deleteEmptyFile();
 		// 保存备份结果
 		BakResult bakResult = new BakResult(succNum,failNum);
 		bakResultDao.saveBakResult(bakResult);
@@ -362,25 +494,38 @@ public class NeServerService {
 	}
 
 	/**
-	 * 删除本地超过保存天数的备份文件
-	 * @param bakPath 备份路径
-	 * @param orgName
-	 * @param deviceType
-	 * @param deviceName
-	 * @param saveDay
+	 * 删除被动取类型的过期备份文件
+	 * @param orgName 地区
+ 	 * @param deviceType 网元类型
+	 * @param deviceName 网元名
+	 * @param saveDay 保存份数
+	 * @param saveType 保存类型
 	 */
-	private void deleteLocalExpireFile(String bakPath,String orgName,String deviceType,String deviceName, long saveDay) throws Exception {
-		String rootName = ""; // 被动取的根目录为rootName,主动推送的为配置项
-		if(StringUtils.isNotEmpty(bakPath)){
-			rootName = bakPath;
-		}else{
-			rootName = this.rootName;
+	private void deleteExpireFile_get(String orgName,String deviceType,String deviceName,long saveDay,String saveType) throws Exception {
+		List<String> keepDays = new ArrayList<>(); // 未过期日期集合
+		Date date=new Date();
+		Calendar calendar = Calendar.getInstance();
+		// 按周
+		if("W".equals(saveType)){
+			for(int i = 0; i < saveDay; i++){
+				calendar.setTime(date);
+				calendar.add(Calendar.DAY_OF_MONTH, -i*7);
+				keepDays.add(sdf.format(calendar.getTime()));
+			}
 		}
-		// 1.遍历所有一级文件夹，取出地域和网元类型匹配且日期在当前设备备份天数之前的文件夹名放到expireFolder集合中
+		// 按天
+		else if("D".equals(saveType)){
+			for(int i = 0; i < saveDay; i++){
+				calendar.setTime(date);
+				calendar.add(Calendar.DAY_OF_MONTH, -i);
+				keepDays.add(sdf.format(calendar.getTime()));
+			}
+		}
+		// 1.遍历所有一级文件夹，取出地域和网元类型匹配且已过期文件夹名放到expireFolder集合中
 		List<String> expireFolders = new ArrayList<>();
 		String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);//获取地市首字母
 		String matchStr = englishOrgName + "_" + deviceType; // 匹配字符
-		Date expireDate = getExpireDate(saveDay); // 过期日期
+		// Date expireDate = getExpireDate(saveDay); // 过期日期
 		File rootFile = new File(rootName);
 		File[] files = rootFile.listFiles();
 		if(files != null){
@@ -391,8 +536,7 @@ public class NeServerService {
 						String[] splitName = fileName.split("_");
 						if(splitName.length == 3){
 							String fileDateStr = splitName[2];
-							Date fileDate = sdf.parse(fileDateStr);
-							if(fileDate.getTime() < expireDate.getTime()){
+							if(!keepDays.contains(fileDateStr)){
 								expireFolders.add(fileName);
 							}
 						}
@@ -409,7 +553,7 @@ public class NeServerService {
 				String secondFileName = f.getName();
 				if(secondFileName.indexOf(matchStr2) > -1){
 					deleteFile(f);
-					System.out.printf("删除本地备份过期文件夹%s%n", secondFileName);
+					System.out.printf("删除过期备份文件夹%s%n", secondFileName);
 					break;
 				}
 			}
@@ -425,6 +569,7 @@ public class NeServerService {
 	 * @param saveDay
 	 * @throws Exception
 	 */
+	/**
 	public void deleteFtpExpireFile(String bakPath,String orgName,String deviceType,String deviceName, long saveDay) throws Exception {
 		FtpUtils.deleteEmptyFile(bakPath,ftpIp,21,ftpUsername,ftpPassword,3000); // 删除空文件
 		List<String> expireFolders = new ArrayList<>();
@@ -473,7 +618,7 @@ public class NeServerService {
 			}
 		}
 	}
-
+*/
 	/**
 	 * 获取过期日期
 	 * @param day

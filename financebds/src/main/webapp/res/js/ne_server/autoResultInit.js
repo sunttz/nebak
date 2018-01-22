@@ -18,8 +18,8 @@ $(document).ready(function() {
 				{field:'orgId',title:'机构ID',hidden:true,halign:'center',align:'center',width:100},
 				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:100},
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
-				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:100},
-				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:100,
+				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:80},
+				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80,
                     formatter: function(value, row, index) {
                         if(value == null || value == ""){
                         	value = "-";
@@ -27,7 +27,7 @@ $(document).ready(function() {
 						return value;
                     }
 				},
-            	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:60,
+            	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:40,
                 	formatter: function(value, row, index) {
 						var bakType = value;
 						if(value=='0'){
@@ -37,9 +37,19 @@ $(document).ready(function() {
 						}
 						return bakType;
                 }},
-            	{field:'saveDay',title:'保存天数',halign:'center',align:'center',width:40},
+            	{field:'saveType',title:'保存类型',halign:'center',align:'center',width:40,
+					formatter: function(value, row, index) {
+						var saveType = value;
+						if(value=='D'){
+							saveType = "按天";
+						}else if(value=='W'){
+							saveType = "按周";
+						}
+						return saveType;
+                }},
+            	{field:'saveDay',title:'保存份数',halign:'center',align:'center',width:40},
 				{field:'remarks',title:'备注',halign:'center',align:'center',width:100},
-				{field:'bakFlag',title:'操作结果',halign:'center',align:'center',width:100,
+				{field:'bakFlag',title:'操作结果',halign:'center',align:'center',width:80,
 					formatter: function(value,row,index){
 		        		if(value==0){
 		        			return "<font color='red'>失败</font>";

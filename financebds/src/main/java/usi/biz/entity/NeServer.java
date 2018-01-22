@@ -28,7 +28,9 @@ public class NeServer {
     private String passWord;
     //备份类型(0被动取1主动推)
     private String bakType;
-    // 保存天数
+    // 保存类型(D按天W按周)
+    private String saveType;
+    // 保存份数
     private Long saveDay;
     // 用户数据路径
     private String bakUserdata;
@@ -145,5 +147,13 @@ public class NeServer {
 
     public void setBakSystem(String bakSystem) {
         this.bakSystem = bakSystem;
+    }
+
+    public String getSaveType() {
+        return saveType;
+    }
+
+    public void setSaveType(String saveType) {
+        this.saveType = saveType;
     }
 }
