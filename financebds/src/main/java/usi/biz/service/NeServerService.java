@@ -224,7 +224,7 @@ public class NeServerService {
 		System.out.println("==============result(错误结果):"+result);
 		return result;
 	}
-	
+
 	/**
 	 * 自动网元备份
 	 * 1、遍历网元信息，查询备份类型（被动取、主动推）、保存类型（按周、按天）
@@ -256,6 +256,8 @@ public class NeServerService {
 		long succNum = 0l;
 		// 备份失败数
 		long failNum = 0l;
+		// 备份日期,默认周五
+		String bakWeek = "Fri";
 
 		//先删除日志，再进行备份
 		bakResultDao.deleteBakResultByTime();
@@ -263,6 +265,7 @@ public class NeServerService {
 		String[] serverIds=ids.split(",");
 		String week = sdf2.format(new Date()); // 获取当前是周几
 		/*
+		备份逻辑伪代码：
 		  for(网元列表){
 			备份类型（主动推、被动取）；
 			保存类型（按周、按天）；
@@ -290,12 +293,13 @@ public class NeServerService {
 			System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份开始=======");
 			String bakType = neserver.getBakType(); // 备份类型
 			String saveType = neserver.getSaveType();// 保存类型
+			long saveDay = neserver.getSaveDay();// 保存份数
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
-				if("W".equals(saveType) && "Fri".equals(week) || "D".equals(saveType)){
+				if("W".equals(saveType) && bakWeek.equals(week) || "D".equals(saveType)){
 					try {
 						// 删除过期备份文件，区分按天、按周
-						deleteExpireFile_get(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),neserver.getSaveDay(),neserver.getSaveType());
+						deleteExpireFile_get(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),saveDay,saveType);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -342,10 +346,22 @@ public class NeServerService {
 				String curDay = sdf.format(new Date());// 当天日期字符串
 				String bakUserdata = neserver.getBakUserdata(); // 用户数据路径
 				String bakSystem = neserver.getBakSystem(); // 系统数据路径
+				int multiModule = 0; // 模块数
 				boolean userdataResult = true;
 				boolean systemResult = true;
+				File[] bakSystemFiles = null;
+				// 判断是否多模块网元
+				if (StringUtils.isNotBlank(bakSystem)){
+					File bakSystemFile = new File(bakSystem);
+					bakSystemFiles = bakSystemFile.listFiles();
+					for (File file : bakSystemFiles) {
+						if(file.isDirectory()){
+							multiModule ++;
+						}
+					}
+				}
 				// 如果按周且当天非周五，删除当天推送文件
-				if("W".equals(saveType) && !"Fri".equals(week)){
+				if("W".equals(saveType) && !bakWeek.equals(week)){
 					if (StringUtils.isNotBlank(bakUserdata)) {
 						File userdataFile = new File(bakUserdata);
 						File[] userdataFiles = userdataFile.listFiles();
@@ -354,29 +370,51 @@ public class NeServerService {
 								String filename = file.getName();
 								if(filename.indexOf(curDay) > -1){
 									deleteFile(file);
+									System.out.printf("非备份日，删除当天推送文件夹%s%n", filename);
 									break;
 								}
 							}
 						}
 					}
 					if (StringUtils.isNotBlank(bakSystem)) {
-						File systemFile = new File(bakSystem);
-						File[] systemFiles = systemFile.listFiles();
-						for (File file : systemFiles) {
-							if(file.isFile()){
-								String filename = file.getName();
-								if(filename.indexOf(curDay) > -1){
-									deleteFile(file);
-									break;
+						if(multiModule > 0){
+							for (File module : bakSystemFiles) {
+								if(module.isDirectory()){
+									File[] files = module.listFiles();
+									for (File f : files) {
+										if (f.isFile()) {
+											String fname = f.getName();
+											if(fname.indexOf(curDay) > -1){
+												f.delete();
+												System.out.printf("非备份日，删除当天推送文件%s%n", fname);
+												break;
+											}
+										}
+									}
+								}
+							}
+						}else{
+							for (File file : bakSystemFiles) {
+								if(file.isFile()){
+									String filename = file.getName();
+									if(filename.indexOf(curDay) > -1){
+										file.delete();
+										System.out.printf("非备份日，删除当天推送文件%s%n", filename);
+										break;
+									}
 								}
 							}
 						}
 					}
 				}
 				// 如果按周且当天周五，或者按天备份
-				if("W".equals(saveType) && "Fri".equals(week) || "D".equals(saveType)){
-					// todo 删除备份过期文件，区分按天、按周
-
+				if("W".equals(saveType) && bakWeek.equals(week) || "D".equals(saveType)){
+					// 删除备份过期文件，区分按天、按周
+					try {
+						deleteExpireFile_put(bakUserdata,bakSystem,saveDay,saveType,multiModule);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					// 检查当天用户数据文件是否推送成功
 					if (StringUtils.isNotBlank(bakUserdata)) {
 						userdataResult = false;
@@ -399,16 +437,8 @@ public class NeServerService {
 					// 检查当天系统数据文件是否推送成功
 					if (StringUtils.isNotBlank(bakSystem)) {
 						systemResult = false;
-						// 判断是否多模块网元
-						int multiModule = 0; // 模块数
 						try {
-							File bakSystemFile = new File(bakSystem);
-							File[] bakSystemFiles = bakSystemFile.listFiles();
-							for (File file : bakSystemFiles) {
-								if(file.isDirectory()){
-									multiModule ++;
-								}
-							}
+							// 判断是否多模块网元
 							if(multiModule > 0){
 								int tmpNum = 0;
 								for (File f : bakSystemFiles) {
@@ -452,6 +482,8 @@ public class NeServerService {
 					this.addAutoLog(Long.parseLong(serverIds[i]),bakFlag);
 					succNum += bakFlag;
 					failNum += bakFlag==0?1:0;
+				}else{
+					System.out.println("该网元今天无需备份");
 				}
 			}else{
 				if(result.equals("")){
@@ -488,6 +520,77 @@ public class NeServerService {
 			for (File f : files) {
 				if(f.isDirectory() && f.listFiles().length == 0){
 					f.delete();
+					System.out.printf("删除空文件%s%n", f.getName());
+				}
+			}
+		}
+	}
+
+	/**
+	 * 删除主动推类型的过期备份文件
+	 * @param bakUserdata 用户数据路径
+	 * @param bakSystem 系统数据路径
+	 * @param saveDay 保存份数
+	 * @param saveType 保存类型
+	 * @param multiModule 模块数
+	 */
+	private void deleteExpireFile_put(String bakUserdata, String bakSystem,long saveDay,String saveType,int multiModule){
+		List<String> keepDays = getKeepDays(saveDay,saveType); // 未过期日期集合
+		// 删除用户数据过期文件
+		if(StringUtils.isNotBlank(bakUserdata)){
+			File userdataFile = new File(bakUserdata);
+			File[] userdataFiles = userdataFile.listFiles();
+			for (File file : userdataFiles) {
+				if (file.isDirectory()) {
+					String filename = file.getName();
+					String[] split = filename.split("_");
+					if(split.length > 1){
+						String date = split[1].substring(0,8);
+						if(!keepDays.contains(date)){
+							deleteFile(file);
+							System.out.printf("删除过期备份文件夹%s%n", filename);
+						}
+					}
+				}
+			}
+		}
+		// 删除系统数据过期文件
+		if (StringUtils.isNotBlank(bakSystem)) {
+			File bakSystemFile = new File(bakSystem);
+			File [] bakSystemFiles = bakSystemFile.listFiles();
+			// 判断是否多模块网元
+			if(multiModule > 0){
+				for(File module : bakSystemFiles){
+					if(module.isDirectory()){
+						File[] moduleFiles = module.listFiles();
+						for (File f : moduleFiles) {
+							if(f.isFile()){
+								String fname = f.getName();
+								String[] split = fname.split("_");
+								if(split.length > 1){
+									String date = split[1].substring(0,8);
+									if(!keepDays.contains(date)){
+										f.delete();
+										System.out.printf("删除过期备份文件%s%n", fname);
+									}
+								}
+							}
+						}
+					}
+				}
+			}else{
+				for (File f : bakSystemFiles) {
+					if (f.isFile()) {
+						String filename = f.getName();
+						String[] split = filename.split("_");
+						if(split.length > 1){
+							String date = split[1].substring(0,8);
+							if(!keepDays.contains(date)){
+								f.delete();
+								System.out.printf("删除过期备份文件%s%n", filename);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -502,25 +605,7 @@ public class NeServerService {
 	 * @param saveType 保存类型
 	 */
 	private void deleteExpireFile_get(String orgName,String deviceType,String deviceName,long saveDay,String saveType) throws Exception {
-		List<String> keepDays = new ArrayList<>(); // 未过期日期集合
-		Date date=new Date();
-		Calendar calendar = Calendar.getInstance();
-		// 按周
-		if("W".equals(saveType)){
-			for(int i = 0; i < saveDay; i++){
-				calendar.setTime(date);
-				calendar.add(Calendar.DAY_OF_MONTH, -i*7);
-				keepDays.add(sdf.format(calendar.getTime()));
-			}
-		}
-		// 按天
-		else if("D".equals(saveType)){
-			for(int i = 0; i < saveDay; i++){
-				calendar.setTime(date);
-				calendar.add(Calendar.DAY_OF_MONTH, -i);
-				keepDays.add(sdf.format(calendar.getTime()));
-			}
-		}
+		List<String> keepDays = getKeepDays(saveDay,saveType);
 		// 1.遍历所有一级文件夹，取出地域和网元类型匹配且已过期文件夹名放到expireFolder集合中
 		List<String> expireFolders = new ArrayList<>();
 		String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);//获取地市首字母
@@ -558,6 +643,35 @@ public class NeServerService {
 				}
 			}
 		}
+	}
+
+	/**
+	 * 查询未过期日期集合
+	 * @param saveDay
+	 * @param saveType
+	 * @return
+	 */
+	private List<String> getKeepDays(long saveDay,String saveType){
+		List<String> keepDays = new ArrayList<>(); // 未过期日期集合
+		Date date=new Date();
+		Calendar calendar = Calendar.getInstance();
+		// 按周
+		if("W".equals(saveType)){
+			for(int i = 0; i < saveDay; i++){
+				calendar.setTime(date);
+				calendar.add(Calendar.DAY_OF_MONTH, -i*7);
+				keepDays.add(sdf.format(calendar.getTime()));
+			}
+		}
+		// 按天
+		else if("D".equals(saveType)){
+			for(int i = 0; i < saveDay; i++){
+				calendar.setTime(date);
+				calendar.add(Calendar.DAY_OF_MONTH, -i);
+				keepDays.add(sdf.format(calendar.getTime()));
+			}
+		}
+		return keepDays;
 	}
 
 	/**
