@@ -78,6 +78,18 @@ public class NeServerController {
 		}
 		return result;
 	}
+
+	/**
+	 * 获取所有orgName(新增网元时使用)
+	 * @return
+	 */
+	@RequestMapping(value = "/getAllOrg2.do", method = RequestMethod.POST)
+	@ResponseBody
+	public List<NeServer> getAllOrg2(HttpSession session){
+		List<NeServer> result = neServerService.getAllOrg2();
+		return result;
+	}
+
 	/**
 	 * 获取所有网元列表
 	 * @return

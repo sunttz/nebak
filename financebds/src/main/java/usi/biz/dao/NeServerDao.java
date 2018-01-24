@@ -7,6 +7,7 @@ import usi.sys.dto.PageObj;
 import java.util.List;
 public interface NeServerDao {
 	public List<NeServer> getAllOrg();
+	List<NeServer> getAllOrg2();
 	public List<NeServer> getPageAllNE(PageObj pageObj,Long orgId,String deviceType);
 	public List<NeServer> getAllNE();
 	public List<NeServer> getNeServerById(Long serverId);
@@ -38,5 +39,19 @@ public interface NeServerDao {
 	 * @return
 	 */
 	List<AutoLogDto> getFailResult(String dateTime,PageObj pageObj);
+
+	/**
+	 * 根据安徽地市中文返回安徽地市字母缩写
+	 * @param str
+	 * @return
+	 */
+	String getPinYinHeadChar(String str);
+
+	/**
+	 * 根据安徽地市字母缩写返回安徽地市中文
+	 * @param str
+	 * @return
+	 */
+	String getNameByHeadchar(String str);
 
 }

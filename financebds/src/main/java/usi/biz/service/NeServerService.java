@@ -9,7 +9,6 @@ import usi.biz.entity.AutoLog;
 import usi.biz.entity.AutoLogDto;
 import usi.biz.entity.BakResult;
 import usi.biz.entity.NeServer;
-import usi.biz.util.ChineseToEnglishUtil;
 import usi.biz.util.FtpUtils;
 import usi.sys.dto.PageObj;
 import usi.sys.util.ConfigUtil;
@@ -41,6 +40,11 @@ public class NeServerService {
 	public List<NeServer> getAllOrg(){
 		return neServerDao.getAllOrg();
 	}
+
+	public List<NeServer> getAllOrg2(){
+		return neServerDao.getAllOrg2();
+	}
+
 	/**
 	 * 查询所有网元信息（分页）
 	 * @return
@@ -608,7 +612,8 @@ public class NeServerService {
 		List<String> keepDays = getKeepDays(saveDay,saveType);
 		// 1.遍历所有一级文件夹，取出地域和网元类型匹配且已过期文件夹名放到expireFolder集合中
 		List<String> expireFolders = new ArrayList<>();
-		String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);//获取地市首字母
+		//String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);//获取地市首字母
+		String englishOrgName=neServerDao.getPinYinHeadChar(orgName);
 		String matchStr = englishOrgName + "_" + deviceType; // 匹配字符
 		// Date expireDate = getExpireDate(saveDay); // 过期日期
 		File rootFile = new File(rootName);
@@ -767,7 +772,8 @@ public class NeServerService {
 	 */
 	public String checkBakAddr(String orgName,String deviceType,String deviceName){
 		//获取地市首字母
-		String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);
+		//String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);
+		String englishOrgName = neServerDao.getPinYinHeadChar(orgName);
 		//获取当前年月日
 		String date=getDate();
 		String firstFolderName=rootName+File.separator+englishOrgName+"_"+deviceType+"_"+date;
@@ -787,25 +793,6 @@ public class NeServerService {
 			fileSecond.delete();
 			fileSecond.mkdir();
 		}
-		return secondFolderName;
-	}
-
-	/**
-	 * 返回主动推送备份文件夹路径
-	 * @param rootName
-	 * @param orgName
-	 * @param deviceType
-	 * @param deviceName
-	 * @return
-	 */
-	public String getBakDir(String rootName, String orgName,String deviceType,String deviceName){
-		//获取地市首字母
-		String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);
-		//获取当前年月日
-		String date=getDate();
-		String firstFolderName=rootName+File.separator+englishOrgName+"_"+deviceType+"_"+date;
-		String secondFolderName=firstFolderName+File.separator+englishOrgName+"_"+deviceType+"_"+deviceName+"_"+date;
-		System.out.println("===============备份文件夹路径:"+secondFolderName);
 		return secondFolderName;
 	}
 
@@ -833,7 +820,8 @@ public class NeServerService {
 		String englishOrgName="";
 		//获取地市首字母
 		if(orgName!=null && !orgName.equals("")){
-			englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);
+			//englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);
+			englishOrgName = neServerDao.getPinYinHeadChar(orgName);
 		}
 		//标记位设置  0 无参数  1 有地市名称  2 有时间日期  3 既有地市名称也有时间日期
 		int flag=0;
@@ -890,7 +878,7 @@ public class NeServerService {
 						 if(fileName.contains(dateTime)){
 							 //设置地市名称
 							 String[] nameArray=fileName.split("_");
-							 map.put("orgName", ChineseToEnglishUtil.getNameByHeadchar(nameArray[0]));
+							 map.put("orgName", neServerDao.getNameByHeadchar(nameArray[0]));
 							 //设置文件夹名称
 							 map.put("fileName", fileName);
 							 //取得子文件夹个数
@@ -950,7 +938,7 @@ public class NeServerService {
 					 default:{
 						 //设置地市名称
 						 String[] nameArray=fileName.split("_");
-						 map.put("orgName", ChineseToEnglishUtil.getNameByHeadchar(nameArray[0]));
+						 map.put("orgName", neServerDao.getNameByHeadchar(nameArray[0]));
 						 //设置文件夹名称
 						 map.put("fileName", fileName);
 						 //取得子文件夹个数

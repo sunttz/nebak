@@ -23,7 +23,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 	public List<NeServer> getAllOrg() {
 		String sql = " select  distinct t.org_id,t.org_name  from ne_server t order by t.org_id asc";
 	
-	return this.getJdbcTemplate().query(sql, new RowMapper<NeServer>(){
+		return this.getJdbcTemplate().query(sql, new RowMapper<NeServer>(){
 		@Override
 		public NeServer mapRow(ResultSet rs, int rowNum) throws SQLException {
 			NeServer record = new NeServer();
@@ -31,6 +31,19 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 			record.setOrgName(rs.getString(2));
 			return record;
 		}});
+	}
+
+	@Override
+	public List<NeServer> getAllOrg2() {
+		String sql = "SELECT ORG_ID,replace(ORG_NAME,'分公司','') ORG_NAME FROM SYS_ORG WHERE PARENT_ORG_ID = 0 AND ORG_ID <> 1 AND STATUS = 1";
+		return this.getJdbcTemplate().query(sql, new RowMapper<NeServer>(){
+			@Override
+			public NeServer mapRow(ResultSet rs, int rowNum) throws SQLException {
+				NeServer record = new NeServer();
+				record.setOrgId(rs.getLong(1));
+				record.setOrgName(rs.getString(2));
+				return record;
+			}});
 	}
 
 	@Override
@@ -273,5 +286,35 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setCreateDate(rs.getString(14));
 				return record;
 			}},pageObj);
+	}
+
+	@Override
+	public String getPinYinHeadChar(String str) {
+		String sql = "SELECT MEMO FROM SYS_ORG WHERE ORG_NAME LIKE '%"+ str +"%'";
+		List<String> results = this.getJdbcTemplate().query(sql, new RowMapper<String>() {
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString(1);
+			}
+		});
+		if(results != null && results.size() > 0){
+			return results.get(0);
+		}
+		return "";
+	}
+
+	@Override
+	public String getNameByHeadchar(String str) {
+		String sql = "SELECT replace(ORG_NAME,'分公司','') ORG_NAME FROM SYS_ORG WHERE MEMO = '"+ str +"'";
+		List<String> results = this.getJdbcTemplate().query(sql, new RowMapper<String>() {
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString(1);
+			}
+		});
+		if(results != null && results.size() > 0){
+			return results.get(0);
+		}
+		return "";
 	}
 }

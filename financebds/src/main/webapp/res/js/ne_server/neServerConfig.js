@@ -12,7 +12,7 @@ $(document).ready(function() {
             var option = $("#org_id").combobox("getData")[0].orgId;
             $("#org_id").combobox("setValue",option);
             // 网元新增的所属地区初始化
-            var options = $("#org_id").combobox("getData");
+            /*var options = $("#org_id").combobox("getData");
             var newOptions=JSON.parse(JSON.stringify(options))
             if(newOptions[0].orgId==-1){
                 newOptions.shift();
@@ -20,7 +20,7 @@ $(document).ready(function() {
             $("#orgId").combobox({
                 data : newOptions,
                 valueField: 'orgId',
-                textField: 'orgName'});
+                textField: 'orgName'});*/
         },
     });
 
@@ -145,22 +145,22 @@ $(document).ready(function() {
         }]
 	});
 
-    // $("#orgId").combobox({
-    //     url:'getAllOrg.do',
-    //     method:'post',
-    //     valueField:'orgId',
-    //     textField:'orgName',
-    //     editable:false,
-    //     multiple:false,
-    //     cascadeCheck:false,
-    //     onLoadSuccess: function () { //加载完成后,设置选中第一项
-    //         var options = $("#orgId").combobox("getData");
-    //         if(options[0].orgId==-1){
-    //             options.shift();
-    //         }
-    //         $("#orgId").combobox('loadData',options);
-    //     },
-    // });
+    $("#orgId").combobox({
+        url:'getAllOrg2.do',
+        method:'post',
+        valueField:'orgId',
+        textField:'orgName',
+        editable:false,
+        multiple:false,
+        cascadeCheck:false,
+        onLoadSuccess: function () { //加载完成后,设置选中第一项
+            var options = $("#orgId").combobox("getData");
+            if(options[0].orgId==-1){
+                options.shift();
+            }
+            $("#orgId").combobox('loadData',options);
+        },
+    });
 	
 	//点击搜索按钮
 	$('#job_log_btn').click(function(){
