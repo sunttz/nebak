@@ -265,18 +265,18 @@ function saveNeServer() {
     var serverId = $("#serverId").val();
     var orgId = $("#orgId").combobox("getValue"); // 所属地区id
     var orgName = $("#orgId").combobox("getText"); // 所属地区name
-    var deviceName = $("#deviceName").val(); // 设备名称
+    var deviceName = $("#deviceName").val().trim(); // 设备名称
     var deviceType=$("#deviceType").combobox("getValue"); // 网元类型
     var bakType = $('input:radio[name="bakType"]:checked').val(); // 备份类型
     var saveType = $('input:radio[name="saveType"]:checked').val(); // 保存类型
-    var saveDay = $("#saveDay").val();// 保存天数
-    var remarks = $("#remarks").val(); // 备注
-    var deviceAddr = $("#deviceAddr").val(); // 设备地址
-    var bakPath = $("#bakPath").val(); // 备份路径
-    var bakUserdata = $("#bakUserdata").val(); // 用户数据路径
-    var bakSystem = $("#bakSystem").val(); // 系统数据路径
-    var userName = $("#userName").val(); // 用户名
-    var passWord = $("#passWord").val(); // 密码
+    var saveDay = $("#saveDay").val().trim();// 保存天数
+    var remarks = $("#remarks").val().trim(); // 备注
+    var deviceAddr = $("#deviceAddr").val().trim(); // 设备地址
+    var bakPath = $("#bakPath").val().trim(); // 备份路径
+    var bakUserdata = $("#bakUserdata").val().trim(); // 用户数据路径
+    var bakSystem = $("#bakSystem").val().trim(); // 系统数据路径
+    var userName = $("#userName").val().trim(); // 用户名
+    var passWord = $("#passWord").val().trim(); // 密码
     var flag = true;
     // 校验
     if(orgId.length == 0) {
