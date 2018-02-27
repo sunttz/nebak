@@ -6,7 +6,6 @@
 <html>
 	<head>
 		<%@ include file="/WEB-INF/views/common/taglibs.jsp"%>
-		<script type="text/javascript" src="${ctx }/res/My97DatePicker/WdatePicker.js"></script>
 		<script type="text/javascript" src="${ctx }/res/js/ne_server/neServerConfig.js"></script>
 		<script>
 			var ctx='${ctx}';
@@ -20,17 +19,17 @@
 	</head>	
 	
 	<body class="easyui-layout">
-		<div data-options="region:'north', border:false" style="height:80px;padding: 1px 1px 1px 0px;">
+		<div data-options="region:'north', border:false" style="height:90px;padding: 1px 1px 1px 0px;">
 			<div id="searchPanel" class="easyui-panel" data-options="fit:true,title:'备份配置列表'" style="background:#F4F4F4;">
 				<table style="height:100%;">
 					<tr>
-						<td align="right" style="width: 120px;">所属地区：</td>
-						<td align="left"  style="width: 230px;">
+						<td align="right" style="width: 100px;">所属地区：</td>
+						<td align="left"  style="width: 200px;">
 							<input type="text" id="org_id" name="org_id">
 						</td>
-						<td align="right" style="width: 120px;">网元类型：</td>
-						<td align="left"  style="width: 230px;">
-							<select id="device_type" class="easyui-combobox" name="device_type" style="width:150px;">
+						<td align="right" style="width: 100px;">网元类型：</td>
+						<td align="left"  style="width: 200px;">
+							<select id="device_type" class="easyui-combobox" name="device_type" style="width:130px;">
 							    <option value="-1" selected>全部</option>
 							    <option value="MSC SERVER">MSC SERVER</option>
 							    <option value="MGW">MGW</option>
@@ -50,7 +49,35 @@
 								<option value="IMSHSS">IMSHSS</option>
 							</select>
 						</td>
+						<td align="right" style="width: 100px;">设备名称：</td>
+						<td align="left"  style="width: 200px;">
+							<input type="text" id="device_name" name="device_name">
+						</td>
 						<td style="padding-left: 20px;">
+						</td>
+					</tr>
+					<tr>
+						<td align="right" style="width: 100px;">备份类型：</td>
+						<td align="left"  style="width: 200px;">
+							<select id="bak_type" class="easyui-combobox" name="bak_type" style="width:130px;">
+								<option value="" selected>全部</option>
+								<option value="0">被动取</option>
+								<option value="1">主动推</option>
+							</select>
+						</td>
+						<td align="right" style="width: 100px;">保存类型：</td>
+						<td align="left"  style="width: 200px;">
+							<select id="save_type" class="easyui-combobox" name="save_type" style="width:130px;">
+								<option value="" selected>全部</option>
+								<option value="D">按天</option>
+								<option value="W">按周</option>
+							</select>
+						</td>
+						<td align="right" style="width: 100px;">保存份数：</td>
+						<td align="left"  style="width: 200px;">
+							<input type="text" id="save_day" name="save_day" onkeyup="value=value.replace(/[^\d]/g,'')" placeholder="只能输入数字">
+						</td>
+						<td style="padding-left: 20px;width: 80px;">
 							<a id="job_log_btn" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'">搜索</a>
 						</td>
 					</tr>
@@ -64,7 +91,7 @@
 
 	<div style="display:none;">
 		<div id="neServerDialog" style="padding:5px;">
-			<form id="neServerForm" method="post" style="height: 330px;">
+			<form id="neServerForm" method="post" style="height: 360px;">
 				<input name="serverId" id="serverId" type="text" style="display: none;" />
 				<table style="width:100%;" class="info_table">
 					<tr style="height:30px;white-space: nowrap;">
@@ -107,6 +134,15 @@
 								<option value="IMSCSCF">IMSCSCF</option>
 								<option value="IMSHSS">IMSHSS</option>
 							</select>
+							<span class="validate_box">
+								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
+							</span>
+						</td>
+					</tr>
+					<tr style="height:30px;white-space: nowrap;">
+						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>所属厂家</td>
+						<td id="firms_box">
+							<input type="text" id="firms" name="firms" style="width:425px;">
 							<span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
 							</span>

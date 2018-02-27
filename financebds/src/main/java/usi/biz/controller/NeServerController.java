@@ -13,10 +13,12 @@ import usi.biz.service.NeServerService;
 import usi.biz.util.DiskInfoUtil;
 import usi.sys.dto.AuthInfo;
 import usi.sys.dto.PageObj;
+import usi.sys.entity.BusiDict;
 import usi.sys.util.ConfigUtil;
 import usi.sys.util.ConstantUtil;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
@@ -91,13 +93,28 @@ public class NeServerController {
 	}
 
 	/**
+	 * 获取所有厂家名称
+	 * @return
+	 */
+	@RequestMapping(value = "/getAllFirms.do")
+	@ResponseBody
+	public List<BusiDict> getAllFirms(){
+		List<BusiDict> result = neServerService.getAllFirms();
+		return result;
+	}
+
+	/**
 	 * 获取所有网元列表
 	 * @return
 	 */
 	@RequestMapping(value = "/getPageAllNE.do", method = RequestMethod.POST)
 	@ResponseBody
-	public  Map<String,Object> getPageAllNE(PageObj getAllJob,HttpSession session,Long orgId,String deviceType){
-		return neServerService.getPageAllNE(getAllJob,orgId,deviceType);
+	public  Map<String,Object> getPageAllNE(PageObj getAllJob, HttpServletRequest request, Long orgId, String deviceType){
+		String deviceName = request.getParameter("deviceName");
+		String bakType = request.getParameter("bakType");
+		String saveType = request.getParameter("saveType");
+		String saveDay = request.getParameter("saveDay");
+		return neServerService.getPageAllNE(getAllJob,orgId,deviceType,deviceName,bakType,saveType,saveDay);
 	}
 	
 	/**

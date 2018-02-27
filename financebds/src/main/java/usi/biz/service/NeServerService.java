@@ -11,6 +11,7 @@ import usi.biz.entity.BakResult;
 import usi.biz.entity.NeServer;
 import usi.biz.util.FtpUtils;
 import usi.sys.dto.PageObj;
+import usi.sys.entity.BusiDict;
 import usi.sys.util.ConfigUtil;
 
 import javax.annotation.Resource;
@@ -45,13 +46,17 @@ public class NeServerService {
 		return neServerDao.getAllOrg2();
 	}
 
+	public List<BusiDict> getAllFirms(){
+		return neServerDao.getAllFirms();
+	}
+
 	/**
 	 * 查询所有网元信息（分页）
 	 * @return
 	 */
-	public Map<String,Object> getPageAllNE(PageObj pageObj,Long orgId,String deviceType){
+	public Map<String,Object> getPageAllNE(PageObj pageObj,Long orgId,String deviceType,String deviceName,String bakType,String saveType,String saveDay){
 		Map<String,Object> map = new HashMap<String, Object>();
-		List<NeServer> list = neServerDao.getPageAllNE(pageObj,orgId,deviceType);
+		List<NeServer> list = neServerDao.getPageAllNE(pageObj,orgId,deviceType,deviceName,bakType,saveType,saveDay);
 		map.put("total", pageObj.getTotal());
 		map.put("rows", list);
 		return map;

@@ -25,6 +25,9 @@ $(document).ready(function() {
 		striped:true,
 		pagination:true,
 		singleSelect:false,
+        remoteSort:false,
+        sortName:'fileDate',
+        sortOrder:'desc',
 		queryParams: {
 			orgName:$('#org_id').combobox('getText'),
 			dateTime:$('#date_time').val(),
@@ -58,7 +61,21 @@ $(document).ready(function() {
 		        	}
 				},
 				{field:'childFileNum',title:'备份数量',halign:'center',align:'center',width:100},
-				{field:'fileDate',title:'备份时间',halign:'center',align:'center',width:100},
+				{field:'fileDate',title:'备份时间',halign:'center',align:'center',width:100,sortable:true,
+					sorter:function (a,b) {
+                        a = a.split('-');
+                        b = b.split('-');
+                        if (a[0] == b[0]){
+                            if (a[1] == b[1]){
+                                return (a[2]>b[2]?1:-1);
+                            } else {
+                                return (a[1]>b[1]?1:-1);
+                            }
+                        } else {
+                            return (a[0]>b[0]?1:-1);
+                        }
+
+                }},
 				{field:'fileSize',title:'文件夹大小',halign:'center',align:'center',width:100}
 		]],
 		toolbar: [{

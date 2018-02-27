@@ -252,7 +252,7 @@ function ajax_bakResultByTime() {
             lineChart.setOption(option);
         },
         success : function(data) { // 请求成功后处理函数。
-            console.info(data);
+            // console.info(data);
             if(data != null && data != "") {
                 var xAxisData = [];
                 var succData = [];

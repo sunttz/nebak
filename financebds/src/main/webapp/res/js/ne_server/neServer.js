@@ -27,7 +27,11 @@ $(document).ready(function() {
         pageSize : 20,
 		queryParams: {
 			orgId:$('#org_id').combobox('getValue'),
-			deviceType:$('#device_type').combobox('getValue')
+			deviceType:$('#device_type').combobox('getValue'),
+            deviceName:$('#device_name').val(),
+            bakType:$('#bak_type').combobox('getValue'),
+            saveType:$('#save_type').combobox('getValue'),
+            saveDay:$('#save_day').val()
 		},
 		columns:[[
 		        {field:'ck',title:'全选',checkbox:true,halign:'center',align:'center',width:100},  
@@ -36,6 +40,7 @@ $(document).ready(function() {
 				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:100},
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
 				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:80},
+            	{field:'firms',title:'所属厂家',halign:'center',align:'center',width:50},
 				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80,
                     formatter: function(value, row, index) {
                         if(value == null || value == ""){
@@ -122,7 +127,11 @@ $(document).ready(function() {
 	$('#job_log_btn').click(function(){
 		$('#listTable').datagrid('load', {
 			orgId:$('#org_id').combobox('getValue'),
-			deviceType:$('#device_type').combobox('getValue')
+			deviceType:$('#device_type').combobox('getValue'),
+            deviceName:$('#device_name').val(),
+            bakType:$('#bak_type').combobox('getValue'),
+            saveType:$('#save_type').combobox('getValue'),
+            saveDay:$('#save_day').val()
 		});
 	});
 });

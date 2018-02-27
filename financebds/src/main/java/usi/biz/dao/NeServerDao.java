@@ -3,12 +3,14 @@ package usi.biz.dao;
 import usi.biz.entity.AutoLogDto;
 import usi.biz.entity.NeServer;
 import usi.sys.dto.PageObj;
+import usi.sys.entity.BusiDict;
 
 import java.util.List;
 public interface NeServerDao {
 	public List<NeServer> getAllOrg();
 	List<NeServer> getAllOrg2();
-	public List<NeServer> getPageAllNE(PageObj pageObj,Long orgId,String deviceType);
+	List<BusiDict> getAllFirms();
+	public List<NeServer> getPageAllNE(PageObj pageObj,Long orgId,String deviceType,String deviceName,String bakType,String saveType,String saveDay);
 	public List<NeServer> getAllNE();
 	public List<NeServer> getNeServerById(Long serverId);
 	public List<AutoLogDto> getAutoResult(String dateTime,PageObj pageObj);

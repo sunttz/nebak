@@ -17,7 +17,7 @@
 	</head>	
 	
 	<body class="easyui-layout">
-		<div data-options="region:'north', border:false" style="height:130px;padding: 1px 1px 1px 0px;">
+		<div data-options="region:'north', border:false" style="height:100px;padding: 1px 1px 1px 0px;">
 			<div id="searchPanel" class="easyui-panel" data-options="fit:true,title:'备份管理列表'" style="background:#F4F4F4;">
 				<table style="height:100%;">
 					<tr>

@@ -11,16 +11,6 @@ $(document).ready(function() {
         onLoadSuccess: function () { //加载完成后,设置选中第一项
             var option = $("#org_id").combobox("getData")[0].orgId;
             $("#org_id").combobox("setValue",option);
-            // 网元新增的所属地区初始化
-            /*var options = $("#org_id").combobox("getData");
-            var newOptions=JSON.parse(JSON.stringify(options))
-            if(newOptions[0].orgId==-1){
-                newOptions.shift();
-            }
-            $("#orgId").combobox({
-                data : newOptions,
-                valueField: 'orgId',
-                textField: 'orgName'});*/
         },
     });
 
@@ -37,7 +27,11 @@ $(document).ready(function() {
 		singleSelect:false,
 		queryParams: {
 			orgId:$('#org_id').combobox('getValue'),
-			deviceType:$('#device_type').combobox('getValue')
+			deviceType:$('#device_type').combobox('getValue'),
+            deviceName:$('#device_name').val(),
+            bakType:$('#bak_type').combobox('getValue'),
+            saveType:$('#save_type').combobox('getValue'),
+            saveDay:$('#save_day').val()
 		},
 		columns:[[
 		        {field:'ck',title:'全选',checkbox:true,halign:'center',align:'center',width:100},  
@@ -46,6 +40,7 @@ $(document).ready(function() {
 				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:100},
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
 				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:80},
+                {field:'firms',title:'所属厂家',halign:'center',align:'center',width:50},
 				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80,
                     formatter: function(value, row, index) {
                         if(value == null || value == ""){
@@ -145,6 +140,7 @@ $(document).ready(function() {
         }]
 	});
 
+	// 地区
     $("#orgId").combobox({
         url:'getAllOrg2.do',
         method:'post',
@@ -153,12 +149,20 @@ $(document).ready(function() {
         editable:false,
         multiple:false,
         cascadeCheck:false,
-        onLoadSuccess: function () { //加载完成后,设置选中第一项
-            var options = $("#orgId").combobox("getData");
-            if(options[0].orgId==-1){
-                options.shift();
-            }
-            $("#orgId").combobox('loadData',options);
+        onLoadSuccess: function () {
+        },
+    });
+
+    // 厂家
+    $("#firms").combobox({
+        url:'getAllFirms.do',
+        method:'post',
+        valueField:'dicName',
+        textField:'dicName',
+        editable:false,
+        multiple:false,
+        cascadeCheck:false,
+        onLoadSuccess: function () {
         },
     });
 	
@@ -166,7 +170,11 @@ $(document).ready(function() {
 	$('#job_log_btn').click(function(){
 		$('#listTable').datagrid('load', {
 			orgId:$('#org_id').combobox('getValue'),
-			deviceType:$('#device_type').combobox('getValue')
+			deviceType:$('#device_type').combobox('getValue'),
+            deviceName:$('#device_name').val(),
+            bakType:$('#bak_type').combobox('getValue'),
+            saveType:$('#save_type').combobox('getValue'),
+            saveDay:$('#save_day').val()
 		});
 	});
 
@@ -267,6 +275,7 @@ function saveNeServer() {
     var orgName = $("#orgId").combobox("getText"); // 所属地区name
     var deviceName = $("#deviceName").val().trim(); // 设备名称
     var deviceType=$("#deviceType").combobox("getValue"); // 网元类型
+    var firms = $("#firms").combobox("getValue"); // 厂家
     var bakType = $('input:radio[name="bakType"]:checked').val(); // 备份类型
     var saveType = $('input:radio[name="saveType"]:checked').val(); // 保存类型
     var saveDay = $("#saveDay").val().trim();// 保存天数
@@ -302,6 +311,14 @@ function saveNeServer() {
     } else {
         $('#deviceType_box .validate_box').hide();
         $('#deviceType_box .validate_msg').html('');
+    }
+    if(firms.length == 0) {
+        $('#firms_box .validate_box').show();
+        $('#firms_box .validate_msg').html('必选字段');
+        flag = false;
+    } else {
+        $('#firms_box .validate_box').hide();
+        $('#firms_box .validate_msg').html('');
     }
     if(bakType.length == 0) {
         $('#bakType_box .validate_box').show();
@@ -404,7 +421,7 @@ function saveNeServer() {
         dataType : 'json',
         url : 'saveNeserver.do',
         data : {
-            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,bakType:bakType,saveType:saveType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord,bakUserdata:bakUserdata,bakSystem:bakSystem
+            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,firms:firms,bakType:bakType,saveType:saveType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord,bakUserdata:bakUserdata,bakSystem:bakSystem
         },
         beforeSend:ajaxLoading,//发送请求前打开进度条
         success : function(data) { // 请求成功后处理函数。
@@ -413,7 +430,11 @@ function saveNeServer() {
                 $('#neServerDialog').dialog('close');
                 $('#listTable').datagrid('load', {
                     orgId:$('#org_id').combobox('getValue'),
-                    deviceType:$('#device_type').combobox('getValue')
+                    deviceType:$('#device_type').combobox('getValue'),
+                    deviceName:$('#device_name').val(),
+                    bakType:$('#bak_type').combobox('getValue'),
+                    saveType:$('#save_type').combobox('getValue'),
+                    saveDay:$('#save_day').val()
                 });
             }else{
                 $.messager.alert('提示','保存失败！','info');

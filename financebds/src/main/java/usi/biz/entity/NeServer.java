@@ -36,6 +36,8 @@ public class NeServer {
     private String bakUserdata;
     // 系统数据路径
     private String bakSystem;
+    // 厂家
+    private String firms;
 
     public Long getServerId() {
         return serverId;
@@ -155,5 +157,13 @@ public class NeServer {
 
     public void setSaveType(String saveType) {
         this.saveType = saveType;
+    }
+
+    public String getFirms() {
+        return firms;
+    }
+
+    public void setFirms(String firms) {
+        this.firms = firms;
     }
 }

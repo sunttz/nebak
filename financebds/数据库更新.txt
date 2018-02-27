@@ -68,3 +68,19 @@ INSERT INTO SYS_ORG (ORG_ID, ORG_NAME, PARENT_ORG_ID, ORG_SEQ, ORG_TYPE_ID, ORG_
 INSERT INTO SYS_ORG (ORG_ID, ORG_NAME, PARENT_ORG_ID, ORG_SEQ, ORG_TYPE_ID, ORG_GRADE, ORG_CONTACTER, CONTACT_TEL, ORG_ADDRESS, IS_LEAF, DISPLAY_ORDER, MEMO, STATUS) VALUES (7, '马鞍山分公司', 0, '0.7.', 0, 1, null, null, null, 1, 7, 'MAS', 1);
 INSERT INTO SYS_ORG (ORG_ID, ORG_NAME, PARENT_ORG_ID, ORG_SEQ, ORG_TYPE_ID, ORG_GRADE, ORG_CONTACTER, CONTACT_TEL, ORG_ADDRESS, IS_LEAF, DISPLAY_ORDER, MEMO, STATUS) VALUES (8, '芜湖分公司', 0, '0.8.', 0, 1, null, null, null, 1, 8, 'WUH', 1);
 INSERT INTO SYS_ORG (ORG_ID, ORG_NAME, PARENT_ORG_ID, ORG_SEQ, ORG_TYPE_ID, ORG_GRADE, ORG_CONTACTER, CONTACT_TEL, ORG_ADDRESS, IS_LEAF, DISPLAY_ORDER, MEMO, STATUS) VALUES (9, '宣城分公司', 0, '0.9.', 0, 1, null, null, null, 1, 9, 'XUC', 1);
+
+-- 厂家字典
+insert into sys_scene (BUSI_SCENE_CODE, BUSI_SCENE_NAME, SCENE_DESC, DISPLAY_ORDER, CREATE_STAFF, CREATE_TIME, LAST_MODI_TIME, STATUS)
+values ('FIRMS', '厂家', '', null, 'admin', to_date('26-02-2018 14:20:04', 'dd-mm-yyyy hh24:mi:ss'), to_date('26-02-2018 14:20:04', 'dd-mm-yyyy hh24:mi:ss'), 1);
+
+insert into sys_dic (DIC_ID, BUSI_SCENE_CODE, DIC_CODE, DIC_NAME, DISPLAY_ORDER, CREATE_STAFF, CREATE_TIME, LAST_MODI_TIME, STATUS)
+values (224, 'FIRMS', 'huawei', '华为', 1, 'admin', to_date('26-02-2018 14:20:55', 'dd-mm-yyyy hh24:mi:ss'), to_date('26-02-2018 14:20:55', 'dd-mm-yyyy hh24:mi:ss'), 1);
+
+insert into sys_dic (DIC_ID, BUSI_SCENE_CODE, DIC_CODE, DIC_NAME, DISPLAY_ORDER, CREATE_STAFF, CREATE_TIME, LAST_MODI_TIME, STATUS)
+values (225, 'FIRMS', 'ailixin', '爱立信', 2, 'admin', to_date('26-02-2018 14:21:13', 'dd-mm-yyyy hh24:mi:ss'), to_date('26-02-2018 14:21:13', 'dd-mm-yyyy hh24:mi:ss'), 1);
+
+insert into sys_dic (DIC_ID, BUSI_SCENE_CODE, DIC_CODE, DIC_NAME, DISPLAY_ORDER, CREATE_STAFF, CREATE_TIME, LAST_MODI_TIME, STATUS)
+values (226, 'FIRMS', 'kate', '卡特', 3, 'admin', to_date('26-02-2018 14:21:31', 'dd-mm-yyyy hh24:mi:ss'), to_date('26-02-2018 14:21:31', 'dd-mm-yyyy hh24:mi:ss'), 1);
+
+-- 增加厂家字段
+alter table NE_SERVER add firms varchar2(32);
