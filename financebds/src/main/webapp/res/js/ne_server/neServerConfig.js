@@ -48,6 +48,13 @@ $(document).ready(function() {
                         }
                         return value;
                     }},
+                {field:'devicePort',title:'设备端口',halign:'center',align:'center',width:50,
+                    formatter: function(value, row, index) {
+                        if(value == null || value == ""){
+                            value = "-";
+                        }
+                        return value;
+                }},
             	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:40,
                     formatter: function(value, row, index) {
             			var bakType = value;
@@ -204,13 +211,15 @@ $(document).ready(function() {
             $("#userName").val("");
             $("#passWord").val("");
             $("#bakPath").val("");
-            $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").hide();
+            $("#devicePort").val("0");
+            $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").hide();
             $("#bakUserdataTr,#bakSystemTr").show();
         }else{
             $("#bakUserdata").val("");
             $("#bakSystem").val("");
+            $("#devicePort").val("21");
             $("#bakUserdataTr,#bakSystemTr").hide();
-            $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").show();
+            $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
         }
     });
 
@@ -262,7 +271,7 @@ function delOne(serverId) {
 //新增网元
 function addNeServer(){
     $("#bakUserdataTr,#bakSystemTr").hide();
-    $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").show();
+    $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
     $('#neServerDialog').dialog({
         title: '添加网元'
     }).dialog('open');
@@ -281,6 +290,7 @@ function saveNeServer() {
     var saveDay = $("#saveDay").val().trim();// 保存天数
     var remarks = $("#remarks").val().trim(); // 备注
     var deviceAddr = $("#deviceAddr").val().trim(); // 设备地址
+    var devicePort = $("#devicePort").val().trim(); // 设备端口
     var bakPath = $("#bakPath").val().trim(); // 备份路径
     var bakUserdata = $("#bakUserdata").val().trim(); // 用户数据路径
     var bakSystem = $("#bakSystem").val().trim(); // 系统数据路径
@@ -372,6 +382,18 @@ function saveNeServer() {
             $('#deviceAddr_box .validate_box').hide();
             $('#deviceAddr_box .validate_msg').html('');
         }
+        if(devicePort.length == 0) {
+            $('#devicePort_box .validate_box').show();
+            $('#devicePort_box .validate_msg').html('必选字段');
+            flag = false;
+        } else if (!/^([1-9][0-9]*){1,3}$/.test(devicePort)) {
+            $('#devicePort_box .validate_box').show();
+            $('#devicePort_box .validate_msg').html('格式不正确')
+            flag = false;
+        } else {
+            $('#devicePort_box .validate_box').hide();
+            $('#devicePort_box .validate_msg').html('');
+        }
         if(userName.length == 0) {
             $('#userName_box .validate_box').show();
             $('#userName_box .validate_msg').html('必选字段');
@@ -421,7 +443,7 @@ function saveNeServer() {
         dataType : 'json',
         url : 'saveNeserver.do',
         data : {
-            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,firms:firms,bakType:bakType,saveType:saveType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,bakPath:bakPath,userName:userName,passWord:passWord,bakUserdata:bakUserdata,bakSystem:bakSystem
+            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,firms:firms,bakType:bakType,saveType:saveType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,devicePort:devicePort,bakPath:bakPath,userName:userName,passWord:passWord,bakUserdata:bakUserdata,bakSystem:bakSystem
         },
         beforeSend:ajaxLoading,//发送请求前打开进度条
         success : function(data) { // 请求成功后处理函数。
@@ -449,11 +471,12 @@ function updateNeServer(index) {
     if(row != undefined && row != null) {
         // 主动推类型无需ftp配置
         var bakType = row.bakType;
+        // 主动推
         if(bakType == "1"){
-            $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").hide();
+            $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").hide();
             $("#bakUserdataTr,#bakSystemTr").show();
         }else{
-            $("#deviceAddrTr,#userNameTr,#passWordTr,#bakPathTr").show();
+            $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
             $("#bakUserdataTr,#bakSystemTr").hide();
         }
         $('#neServerForm').form('load', row);

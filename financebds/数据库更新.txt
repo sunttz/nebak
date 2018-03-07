@@ -84,3 +84,6 @@ values (226, 'FIRMS', 'kate', '卡特', 3, 'admin', to_date('26-02-2018 14:21:31
 
 -- 增加厂家字段
 alter table NE_SERVER add firms varchar2(32);
+
+-- 增加设备端口字段
+alter table NE_SERVER add device_port number(18);

@@ -211,7 +211,11 @@ public class FtpUtils {
         //ftpClient.configure(new FTPClientConfig("usi.biz.util.UnixFTPEntryParser"));
         FTPFile[] files = ftpClient.listFiles();
         for(FTPFile f:files){
-            //如果当前目录还没有创建，那么就在这里创建  
+            String name = f.getName();
+            if(".".equals(name) || "..".equals(name)){
+                continue;
+            }
+            //如果当前目录还没有创建，那么就在这里创建
             File filedown = new File(downloadPath);
             if(!filedown.exists()){
                 filedown.mkdirs();
@@ -228,7 +232,7 @@ public class FtpUtils {
                 System.out.println("==============path(目标文件):"+path);
                 Boolean flag=ftpClient.retrieveFile(path, fos);
                 System.out.println("==============flag(返回下载结果):"+flag);
-                //Boolean flag=ftpClient.retrieveFile(new String(path.getBytes("GBK"),"ISO-8859-1"), fos);   
+                //Boolean flag=ftpClient.retrieveFile(new String(path.getBytes("GBK"),"ISO-8859-1"), fos);
                 IOUtils.closeQuietly(fos);
             }else if(f.isDirectory()){
                 file.mkdirs();

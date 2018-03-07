@@ -20,6 +20,8 @@ public class NeServer {
     private String remarks;
     //设备地址
     private String deviceAddr;
+    //设备端口
+    private Long devicePort;
     //备份路径
     private String bakPath;
     //用户名
@@ -165,5 +167,13 @@ public class NeServer {
 
     public void setFirms(String firms) {
         this.firms = firms;
+    }
+
+    public Long getDevicePort() {
+        return devicePort;
+    }
+
+    public void setDevicePort(Long devicePort) {
+        this.devicePort = devicePort;
     }
 }

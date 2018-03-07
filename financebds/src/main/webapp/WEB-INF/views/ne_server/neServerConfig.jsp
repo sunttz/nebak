@@ -91,7 +91,7 @@
 
 	<div style="display:none;">
 		<div id="neServerDialog" style="padding:5px;">
-			<form id="neServerForm" method="post" style="height: 360px;">
+			<form id="neServerForm" method="post" style="height: 390px;">
 				<input name="serverId" id="serverId" type="text" style="display: none;" />
 				<table style="width:100%;" class="info_table">
 					<tr style="height:30px;white-space: nowrap;">
@@ -215,6 +215,15 @@
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>设备地址</td>
 						<td id="deviceAddr_box">
 							<input id="deviceAddr" name="deviceAddr" style="width:420px;" class="input" size="40" />
+							<span class="validate_box">
+								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
+							</span>
+						</td>
+					</tr>
+					<tr id="devicePortTr" style="height:30px;white-space: nowrap;">
+						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>设备端口</td>
+						<td id="devicePort_box">
+							<input id="devicePort" name="devicePort" style="width:420px;" onkeyup="value=value.replace(/[^\d]/g,'')" class="input" size="40" value="21"/>
 							<span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
 							</span>

@@ -112,6 +112,10 @@ public class NeServerService {
 			List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 			NeServer neserver=list.get(0);
 			String bakType = neserver.getBakType(); // 备份类型
+			Long devicePort = neserver.getDevicePort(); // 备份端口
+			if(devicePort != null && devicePort != 0L){
+				port = devicePort.intValue();
+			}
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
 				downloadPath=checkBakAddr(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
@@ -304,6 +308,10 @@ public class NeServerService {
 				List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 				NeServer neserver = list.get(0);
 				System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份开始=======");
+				Long devicePort = neserver.getDevicePort(); // 备份端口
+				if(devicePort != null && devicePort != 0L){
+					port = devicePort.intValue();
+				}
 				String bakType = neserver.getBakType(); // 备份类型
 				String saveType = neserver.getSaveType();// 保存类型
 				long saveDay = neserver.getSaveDay();// 保存份数

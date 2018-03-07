@@ -48,6 +48,13 @@ $(document).ready(function() {
                         }
                         return value;
                     }},
+            	{field:'devicePort',title:'设备端口',halign:'center',align:'center',width:50,
+					formatter: function(value, row, index) {
+						if(value == null || value == ""){
+							value = "-";
+						}
+						return value;
+                }},
             	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:40,
                 	formatter: function(value, row, index) {
 						var bakType = value;

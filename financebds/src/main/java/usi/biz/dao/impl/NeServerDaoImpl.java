@@ -63,7 +63,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 
 	@Override
 	public List<NeServer> getPageAllNE(PageObj pageObj, Long orgId,String deviceType,String deviceName,String bakType,String saveType,String saveDay) {
-		String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type,t.firms from ne_server t"
+		String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type,t.firms,t.device_port from ne_server t"
 					+" WHERE 1=1";
 	    
 		if(orgId!=null && !orgId.equals("") && orgId !=-1L){
@@ -105,13 +105,14 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setBakSystem(rs.getString(14));
 				record.setSaveType(rs.getString(15));
 				record.setFirms(rs.getString(16));
+				record.setDevicePort(rs.getLong(17));
 				return record;
 			}}, pageObj);
 	}
 
 	@Override
 	public List<NeServer> getNeServerById(Long serverId) {
-		String sql="select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type from ne_server t"
+		String sql="select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type,t.device_port from ne_server t"
 				+" WHERE t.server_id="+serverId;
 		return this.getJdbcTemplate().query(sql, new RowMapper<NeServer>(){
 			@Override
@@ -132,6 +133,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setBakUserdata(rs.getString(13));
 				record.setBakSystem(rs.getString(14));
 				record.setSaveType(rs.getString(15));
+				record.setDevicePort(rs.getLong(16));
 				return record;
 			}});
 	}
@@ -213,8 +215,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 	@Override
 	public int saveNeServer(final NeServer neServer) {
 		String sql = "INSERT INTO NE_SERVER " +
-				" (SERVER_ID,ORG_NAME,DEVICE_NAME,DEVICE_TYPE,REMARKS,DEVICE_ADDR,BAK_PATH,USER_NAME,PASS_WORD,ORG_ID,BAK_TYPE,SAVE_DAY,BAK_USERDATA,BAK_SYSTEM,SAVE_TYPE,FIRMS)" +
-				" VALUES (NE_SERVER_SEQ.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?) ";
+				" (SERVER_ID,ORG_NAME,DEVICE_NAME,DEVICE_TYPE,REMARKS,DEVICE_ADDR,BAK_PATH,USER_NAME,PASS_WORD,ORG_ID,BAK_TYPE,SAVE_DAY,BAK_USERDATA,BAK_SYSTEM,SAVE_TYPE,FIRMS,DEVICE_PORT)" +
+				" VALUES (NE_SERVER_SEQ.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?) ";
 		return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
@@ -233,13 +235,14 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				ps.setString(13,neServer.getBakSystem());
 				ps.setString(14,neServer.getSaveType());
 				ps.setString(15,neServer.getFirms());
+				ps.setLong(16,neServer.getDevicePort());
 			}
 		});
 	}
 
 	@Override
 	public int updateNeServer(final NeServer neServer) {
-		String sql = "UPDATE NE_SERVER SET ORG_NAME=?,DEVICE_NAME=?,DEVICE_TYPE=?,REMARKS=?,DEVICE_ADDR=?,BAK_PATH=?,USER_NAME=?,PASS_WORD=?,ORG_ID=?,BAK_TYPE=?,SAVE_DAY=?,BAK_USERDATA=?,BAK_SYSTEM=?,SAVE_TYPE=?,FIRMS=? WHERE SERVER_ID=?";
+		String sql = "UPDATE NE_SERVER SET ORG_NAME=?,DEVICE_NAME=?,DEVICE_TYPE=?,REMARKS=?,DEVICE_ADDR=?,BAK_PATH=?,USER_NAME=?,PASS_WORD=?,ORG_ID=?,BAK_TYPE=?,SAVE_DAY=?,BAK_USERDATA=?,BAK_SYSTEM=?,SAVE_TYPE=?,FIRMS=?,DEVICE_PORT=? WHERE SERVER_ID=?";
 		return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
@@ -258,7 +261,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				ps.setString(13,neServer.getBakSystem());
 				ps.setString(14,neServer.getSaveType());
 				ps.setString(15,neServer.getFirms());
-				ps.setLong(16,neServer.getServerId());
+				ps.setLong(16,neServer.getDevicePort());
+				ps.setLong(17,neServer.getServerId());
 			}
 		});
 	}
