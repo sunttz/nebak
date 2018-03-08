@@ -115,6 +115,8 @@ public class NeServerService {
 			Long devicePort = neserver.getDevicePort(); // 备份端口
 			if(devicePort != null && devicePort != 0L){
 				port = devicePort.intValue();
+			}else {
+				port = 21;
 			}
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
@@ -311,6 +313,8 @@ public class NeServerService {
 				Long devicePort = neserver.getDevicePort(); // 备份端口
 				if(devicePort != null && devicePort != 0L){
 					port = devicePort.intValue();
+				}else {
+					port = 21;
 				}
 				String bakType = neserver.getBakType(); // 备份类型
 				String saveType = neserver.getSaveType();// 保存类型
