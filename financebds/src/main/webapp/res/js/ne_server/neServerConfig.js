@@ -36,6 +36,7 @@ $(document).ready(function() {
 		columns:[[
 		        {field:'ck',title:'全选',checkbox:true,halign:'center',align:'center',width:100},  
 				{field:'serverId',title:'主键ID',hidden:true,halign:'center',align:'center',width:100},
+                {field:'neServerModuleId',title:'关联ID',hidden:true,halign:'center',align:'center',width:100},
 				{field:'orgId',title:'机构ID',hidden:true,halign:'center',align:'center',width:100},
 				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:100},
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
@@ -207,21 +208,45 @@ $(document).ready(function() {
         var bakType = $('input:radio[name="bakType"]:checked').val();
         // 主动推
         if(bakType == "1"){
-            $("#deviceAddr").val("");
-            $("#userName").val("");
-            $("#passWord").val("");
-            $("#bakPath").val("");
-            $("#devicePort").val("0");
-            $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").hide();
+            // $("#deviceAddr").val("");
+            // $("#userName").val("");
+            // $("#passWord").val("");
+            // $("#bakPath").val("");
+            // $("#devicePort").val("0");
+            $("#moduleListTr").hide();
             $("#bakUserdataTr,#bakSystemTr").show();
         }else{
             $("#bakUserdata").val("");
             $("#bakSystem").val("");
-            $("#devicePort").val("21");
+            // $("#devicePort").val("21");
+            // $("input[name='moduleType']").each(function(){
+            //     if($(this).val() == 'single'){
+            //         $(this).prop( "checked", true );
+            //     }
+            // });
             $("#bakUserdataTr,#bakSystemTr").hide();
-            $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
+            $("#moduleListTr").show();
         }
     });
+
+    // 模块类型切换
+    // $("input:radio[name=moduleType]").change(function () {
+    //     var moduleType = $('input:radio[name="moduleType"]:checked').val();
+    //     // 多模块
+    //     if(moduleType == "multi"){
+    //         $("#deviceAddr").val("");
+    //         $("#userName").val("");
+    //         $("#passWord").val("");
+    //         $("#bakPath").val("");
+    //         $("#devicePort").val("0");
+    //         $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").hide();
+    //         $("#moduleListTr").show();
+    //     }else{
+    //         $("#devicePort").val("21");
+    //         $("#moduleListTr").hide();
+    //         $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
+    //     }
+    // });
 
 });
 
@@ -271,10 +296,24 @@ function delOne(serverId) {
 //新增网元
 function addNeServer(){
     $("#bakUserdataTr,#bakSystemTr").hide();
-    $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
-    $('#neServerDialog').dialog({
-        title: '添加网元'
-    }).dialog('open');
+    // $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
+    $("#moduleListTr").show();
+    $("#addOrUpdate").val("add");
+
+    $.ajax({
+        async : false,
+        cache : false,
+        type : 'GET',
+        url : '/neServerModule/neServerModuleConfigId.do',
+        success : function(data) {
+            if(data != undefined && data != null && data != ""){
+                $("#neServerModuleId").val(data); // 关联ID
+                $('#neServerDialog').dialog({
+                    title: '添加网元'
+                }).dialog('open');
+            }
+        }
+    });
 }
 
 // 保存网元
@@ -286,16 +325,19 @@ function saveNeServer() {
     var deviceType=$("#deviceType").combobox("getValue"); // 网元类型
     var firms = $("#firms").combobox("getValue"); // 厂家
     var bakType = $('input:radio[name="bakType"]:checked').val(); // 备份类型
+    //var moduleType = $('input:radio[name="moduleType"]:checked').val(); // 模块类型
     var saveType = $('input:radio[name="saveType"]:checked').val(); // 保存类型
     var saveDay = $("#saveDay").val().trim();// 保存天数
     var remarks = $("#remarks").val().trim(); // 备注
-    var deviceAddr = $("#deviceAddr").val().trim(); // 设备地址
-    var devicePort = $("#devicePort").val().trim(); // 设备端口
-    var bakPath = $("#bakPath").val().trim(); // 备份路径
+    // var deviceAddr = $("#deviceAddr").val().trim(); // 设备地址
+    // var devicePort = $("#devicePort").val().trim(); // 设备端口
+    // var bakPath = $("#bakPath").val().trim(); // 备份路径
     var bakUserdata = $("#bakUserdata").val().trim(); // 用户数据路径
     var bakSystem = $("#bakSystem").val().trim(); // 系统数据路径
-    var userName = $("#userName").val().trim(); // 用户名
-    var passWord = $("#passWord").val().trim(); // 密码
+    // var userName = $("#userName").val().trim(); // 用户名
+    // var passWord = $("#passWord").val().trim(); // 密码
+    var neServerModuleId = $("#neServerModuleId").val(); // 关联ID
+    var moduleNum = $("#moduleNum").text(); // 模块数
     var flag = true;
     // 校验
     if(orgId.length == 0) {
@@ -370,54 +412,62 @@ function saveNeServer() {
     }
     // 被动取类型校验ftp配置
     if(bakType == "0"){
-        if(deviceAddr.length == 0) {
-            $('#deviceAddr_box .validate_box').show();
-            $('#deviceAddr_box .validate_msg').html('必选字段');
+        if(moduleNum == "0"){
+            $('#moduleList_box .validate_box').show();
+            $('#moduleList_box .validate_msg').html('模块未配置');
             flag = false;
-        } else if (!/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.test(deviceAddr)) {
-            $('#deviceAddr_box .validate_box').show();
-            $('#deviceAddr_box .validate_msg').html('格式不正确')
-            flag = false;
-        } else {
-            $('#deviceAddr_box .validate_box').hide();
-            $('#deviceAddr_box .validate_msg').html('');
+        }else{
+            $('#moduleList_box .validate_box').hide();
+            $('#moduleList_box .validate_msg').html('');
         }
-        if(devicePort.length == 0) {
-            $('#devicePort_box .validate_box').show();
-            $('#devicePort_box .validate_msg').html('必选字段');
-            flag = false;
-        } else if (!/^([1-9][0-9]*){1,3}$/.test(devicePort)) {
-            $('#devicePort_box .validate_box').show();
-            $('#devicePort_box .validate_msg').html('格式不正确')
-            flag = false;
-        } else {
-            $('#devicePort_box .validate_box').hide();
-            $('#devicePort_box .validate_msg').html('');
-        }
-        if(userName.length == 0) {
-            $('#userName_box .validate_box').show();
-            $('#userName_box .validate_msg').html('必选字段');
-            flag = false;
-        } else {
-            $('#userName_box .validate_box').hide();
-            $('#userName_box .validate_msg').html('');
-        }
-        if(passWord.length == 0) {
-            $('#passWord_box .validate_box').show();
-            $('#passWord_box .validate_msg').html('必选字段');
-            flag = false;
-        } else {
-            $('#passWord_box .validate_box').hide();
-            $('#passWord_box .validate_msg').html('');
-        }
-        if(bakPath.length == 0) {
-            $('#bakPath_box .validate_box').show();
-            $('#bakPath_box .validate_msg').html('必选字段');
-            flag = false;
-        } else {
-            $('#bakPath_box .validate_box').hide();
-            $('#bakPath_box .validate_msg').html('');
-        }
+        // if(deviceAddr.length == 0) {
+        //     $('#deviceAddr_box .validate_box').show();
+        //     $('#deviceAddr_box .validate_msg').html('必选字段');
+        //     flag = false;
+        // } else if (!/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.test(deviceAddr)) {
+        //     $('#deviceAddr_box .validate_box').show();
+        //     $('#deviceAddr_box .validate_msg').html('格式不正确')
+        //     flag = false;
+        // } else {
+        //     $('#deviceAddr_box .validate_box').hide();
+        //     $('#deviceAddr_box .validate_msg').html('');
+        // }
+        // if(devicePort.length == 0) {
+        //     $('#devicePort_box .validate_box').show();
+        //     $('#devicePort_box .validate_msg').html('必选字段');
+        //     flag = false;
+        // } else if (!/^([1-9][0-9]*){1,3}$/.test(devicePort)) {
+        //     $('#devicePort_box .validate_box').show();
+        //     $('#devicePort_box .validate_msg').html('格式不正确')
+        //     flag = false;
+        // } else {
+        //     $('#devicePort_box .validate_box').hide();
+        //     $('#devicePort_box .validate_msg').html('');
+        // }
+        // if(userName.length == 0) {
+        //     $('#userName_box .validate_box').show();
+        //     $('#userName_box .validate_msg').html('必选字段');
+        //     flag = false;
+        // } else {
+        //     $('#userName_box .validate_box').hide();
+        //     $('#userName_box .validate_msg').html('');
+        // }
+        // if(passWord.length == 0) {
+        //     $('#passWord_box .validate_box').show();
+        //     $('#passWord_box .validate_msg').html('必选字段');
+        //     flag = false;
+        // } else {
+        //     $('#passWord_box .validate_box').hide();
+        //     $('#passWord_box .validate_msg').html('');
+        // }
+        // if(bakPath.length == 0) {
+        //     $('#bakPath_box .validate_box').show();
+        //     $('#bakPath_box .validate_msg').html('必选字段');
+        //     flag = false;
+        // } else {
+        //     $('#bakPath_box .validate_box').hide();
+        //     $('#bakPath_box .validate_msg').html('');
+        // }
     }else if(bakType == "1"){
         if(bakUserdata.length == 0 && bakSystem.length == 0) {
             $('#bakUserdata_box .validate_box').show();
@@ -443,7 +493,7 @@ function saveNeServer() {
         dataType : 'json',
         url : 'saveNeserver.do',
         data : {
-            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,firms:firms,bakType:bakType,saveType:saveType,saveDay:saveDay,remarks:remarks,deviceAddr:deviceAddr,devicePort:devicePort,bakPath:bakPath,userName:userName,passWord:passWord,bakUserdata:bakUserdata,bakSystem:bakSystem
+            serverId:serverId,orgId:orgId,orgName:orgName,deviceName:deviceName,deviceType:deviceType,firms:firms,bakType:bakType,saveType:saveType,saveDay:saveDay,remarks:remarks,bakUserdata:bakUserdata,bakSystem:bakSystem,devicePort:0,neServerModuleId:neServerModuleId
         },
         beforeSend:ajaxLoading,//发送请求前打开进度条
         success : function(data) { // 请求成功后处理函数。
@@ -473,12 +523,16 @@ function updateNeServer(index) {
         var bakType = row.bakType;
         // 主动推
         if(bakType == "1"){
-            $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").hide();
+            //$("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").hide();
+            $("#moduleListTr").hide();
             $("#bakUserdataTr,#bakSystemTr").show();
         }else{
-            $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
+            //$("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
+            $("#moduleListTr").show();
             $("#bakUserdataTr,#bakSystemTr").hide();
         }
+        $("#addOrUpdate").val("update");
+        $("#neServerModuleId").val('');
         $('#neServerForm').form('load', row);
         $('#neServerDialog').dialog({
             title:'修改网元信息',
@@ -491,4 +545,30 @@ function updateNeServer(index) {
     } else {
         $.messager.alert('提示','请选择您要修改的网元！','info');
     }
+}
+
+//url：窗口调用地址，title：窗口标题，width：宽度，height：高度，shadow：是否显示背景阴影罩层
+function showMessageDialog(url, title, width, height, shadow) {
+    var content = '<iframe src="' + url + '" width="100%" height="99%" frameborder="0" scrolling="no"></iframe>';
+    var boarddiv = '<div id="msgwindow" title="' + title + '"></div>'//style="overflow:hidden;"可以去掉滚动条
+    $(document.body).append(boarddiv);
+    var win = $('#msgwindow').dialog({
+        content: content,
+        width: width,
+        height: height,
+        modal: shadow,
+        title: title,
+        onClose: function () {
+            $(this).dialog('destroy');//后面可以关闭后的事件
+        }
+    });
+    win.dialog('open');
+}
+
+// 打开模块列表
+function editModule() {
+    var addOrUpdate = $("#addOrUpdate").val(); // 新增or修改
+    var neServerModuleId = $("#neServerModuleId").val(); // 关联ID
+    var url = "/neServerModule/neServerModuleConfig.do?neServerModuleId="+neServerModuleId+"&addOrUpdate="+addOrUpdate;
+    showMessageDialog(url, '模块列表', 800, 400, true);
 }

@@ -91,7 +91,7 @@
 
 	<div style="display:none;">
 		<div id="neServerDialog" style="padding:5px;">
-			<form id="neServerForm" method="post" style="height: 390px;">
+			<form id="neServerForm" method="post" style="height: 300px;">
 				<input name="serverId" id="serverId" type="text" style="display: none;" />
 				<table style="width:100%;" class="info_table">
 					<tr style="height:30px;white-space: nowrap;">
@@ -157,6 +157,17 @@
 							<label for="bakType2" style="vertical-align:middle;display:inline-block;">主动推</label>
 						</td>
 					</tr>
+					<!--
+					<tr id="moduleTypeTr" style="height:30px;white-space: nowrap;">
+						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>模块类型</td>
+						<td id="moduleType_box">
+							<input id="moduleType1" name="moduleType" type="radio" value="single" style="margin-left:10px;vertical-align:middle;" checked="checked" />
+							<label for="moduleType1" style="vertical-align:middle;display:inline-block;">单模块</label>
+							<input id="moduleType2" name="moduleType" type="radio" value="multi" style="margin-left:15px;vertical-align:middle;" />
+							<label for="moduleType2" style="vertical-align:middle;display:inline-block;">多模块</label>
+						</td>
+					</tr>
+					-->
 					<tr style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>保存类型</td>
 						<td id="saveType_box">
@@ -184,6 +195,7 @@
 							</span>
 						</td>
 					</tr>
+					<!--
 					<tr id="bakPathTr" style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>备份路径</td>
 						<td id="bakPath_box">
@@ -193,6 +205,7 @@
 							</span>
 						</td>
 					</tr>
+					-->
 					<tr id="bakUserdataTr" style="height:30px;white-space: nowrap;display: none;">
 						<td style="width:16%;background:#FAFAFA;" >用户数据路径</td>
 						<td id="bakUserdata_box">
@@ -211,6 +224,7 @@
 							</span>
 						</td>
 					</tr>
+					<!--
 					<tr id="deviceAddrTr" style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>设备地址</td>
 						<td id="deviceAddr_box">
@@ -242,6 +256,18 @@
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>密码</td>
 						<td id="passWord_box">
 							<input id="passWord" name="passWord"  style="width:420px;" class="input" size="30" />
+							<span class="validate_box">
+								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
+							</span>
+						</td>
+					</tr>
+					-->
+					<tr id="moduleListTr" style="height:30px;white-space: nowrap;">
+						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>模块列表</td>
+						<td id="moduleList_box">
+							<a id="moduleList" href="#" onclick="editModule();" style="margin-left: 10px;text-decoration: none;">查 看（<span id="moduleNum">0</span>）</a>
+							<input id="addOrUpdate" name="addOrUpdate" type="hidden" value="add">
+							<input id="neServerModuleId" name="neServerModuleId" type="hidden" value="">
 							<span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
 							</span>

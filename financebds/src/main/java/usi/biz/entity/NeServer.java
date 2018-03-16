@@ -40,6 +40,8 @@ public class NeServer {
     private String bakSystem;
     // 厂家
     private String firms;
+    // 关联ID
+    private String neServerModuleId;
 
     public Long getServerId() {
         return serverId;
@@ -175,5 +177,13 @@ public class NeServer {
 
     public void setDevicePort(Long devicePort) {
         this.devicePort = devicePort;
+    }
+
+    public String getNeServerModuleId() {
+        return neServerModuleId;
+    }
+
+    public void setNeServerModuleId(String neServerModuleId) {
+        this.neServerModuleId = neServerModuleId;
     }
 }

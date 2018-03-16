@@ -87,3 +87,27 @@ alter table NE_SERVER add firms varchar2(32);
 
 -- 增加设备端口字段
 alter table NE_SERVER add device_port number(18);
+
+-- 增加关联ID
+alter table NE_SERVER add neServer_ModuleId varchar2(32);
+
+-- 模块配置表
+create table NE_SERVER_MODULE
+(
+  MODULE_ID          NUMBER(18) not null,
+  MODULE_NAME        VARCHAR2(32),
+  DEVICE_ADDR        VARCHAR2(128),
+  DEVICE_PORT        NUMBER(18),
+  USER_NAME          VARCHAR2(128),
+  PASS_WORD          VARCHAR2(128),
+  BAK_PATH           VARCHAR2(1024),
+  NESERVER_MODULE_ID VARCHAR2(32)
+)
+
+-- Create sequence
+create sequence NE_SERVER_MODULE_SEQ
+minvalue 1
+maxvalue 999999999999999999999999999
+start with 100
+increment by 1
+cache 10;
