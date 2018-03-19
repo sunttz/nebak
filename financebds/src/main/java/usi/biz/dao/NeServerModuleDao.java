@@ -34,4 +34,11 @@ public interface NeServerModuleDao {
      * @return
      */
     int deleteNeServerModule(Long moduleId);
+
+    /**
+     * 查询模块数量
+     * @param neServerModuleId
+     * @return
+     */
+    String getModuleNum(String neServerModuleId);
 }

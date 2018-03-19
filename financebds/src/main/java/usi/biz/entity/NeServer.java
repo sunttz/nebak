@@ -42,6 +42,8 @@ public class NeServer {
     private String firms;
     // 关联ID
     private String neServerModuleId;
+    // 模块数
+    private int moduleNum;
 
     public Long getServerId() {
         return serverId;
@@ -185,5 +187,13 @@ public class NeServer {
 
     public void setNeServerModuleId(String neServerModuleId) {
         this.neServerModuleId = neServerModuleId;
+    }
+
+    public int getModuleNum() {
+        return moduleNum;
+    }
+
+    public void setModuleNum(int moduleNum) {
+        this.moduleNum = moduleNum;
     }
 }

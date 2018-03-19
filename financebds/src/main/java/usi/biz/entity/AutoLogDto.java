@@ -33,6 +33,8 @@ public class AutoLogDto {
 	private String saveType;
 	// 保存份数
 	private Long saveDay;
+	// 模块数
+	private int moduleNum;
 	
 	public Long getServerId() {
 		return serverId;
@@ -134,5 +136,13 @@ public class AutoLogDto {
 
 	public void setSaveType(String saveType) {
 		this.saveType = saveType;
+	}
+
+	public int getModuleNum() {
+		return moduleNum;
+	}
+
+	public void setModuleNum(int moduleNum) {
+		this.moduleNum = moduleNum;
 	}
 }

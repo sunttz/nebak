@@ -82,4 +82,19 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
             }
         });
     }
+
+    @Override
+    public String getModuleNum(String neServerModuleId) {
+        String sql = "SELECT count(*) NUM FROM NE_SERVER_MODULE WHERE NESERVER_MODULE_ID = '"+neServerModuleId+"'";
+        List<String> results = this.getJdbcTemplate().query(sql, new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet rs, int i) throws SQLException {
+                return rs.getString(1);
+            }
+        });
+        if (results != null && results.size() > 0) {
+            return results.get(0);
+        }
+        return "";
+    }
 }

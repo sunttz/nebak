@@ -100,4 +100,19 @@ public class NeServerModuleController {
         return flag;
     }
 
+    /**
+     * 查询模块数量
+     * @param neServerModuleId
+     * @return
+     */
+    @RequestMapping(value = "/getModuleNum.do", method = RequestMethod.POST)
+    @ResponseBody
+    public String getModuleNum(String neServerModuleId){
+        String moduleNum = "";
+        if(neServerModuleId != null && !"".equals(neServerModuleId)){
+            moduleNum = neServerModuleService.getModuleNum(neServerModuleId);
+        }
+        return moduleNum;
+    }
+
 }

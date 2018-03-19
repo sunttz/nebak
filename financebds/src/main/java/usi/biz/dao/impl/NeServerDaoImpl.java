@@ -63,7 +63,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 
 	@Override
 	public List<NeServer> getPageAllNE(PageObj pageObj, Long orgId,String deviceType,String deviceName,String bakType,String saveType,String saveDay) {
-		String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type,t.firms,t.device_port,t.neserver_moduleid from ne_server t"
+		String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type,t.firms,t.device_port,t.neserver_moduleid,case when t.neserver_moduleid is not null then (select count(*) num from ne_server_module where neserver_module_id = t.neserver_moduleid) else 0 end modulenum from ne_server t"
 					+" WHERE 1=1";
 	    
 		if(orgId!=null && !orgId.equals("") && orgId !=-1L){
@@ -107,6 +107,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setFirms(rs.getString(16));
 				record.setDevicePort(rs.getLong(17));
 				record.setNeServerModuleId(rs.getString(18));
+				record.setModuleNum(rs.getInt(19));
 				return record;
 			}}, pageObj);
 	}
@@ -166,7 +167,6 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 
 	@Override
 	public List<AutoLogDto> getAutoResult(String dateTime,PageObj pageObj) {
-		// TODO Auto-generated method stub
 		String sql = "select a.server_id,"+
 				     "a.org_id,"+
 				     "a.org_name,"+
@@ -182,7 +182,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 					 "a.bak_type,"+
 					 "a.save_day,"+
 					 "a.save_type,"+
-				     "to_char(b.create_date, 'yyyy-mm-dd') as create_date"+
+				     "to_char(b.create_date, 'yyyy-mm-dd') as create_date,"+
+					 "case when a.neserver_moduleid is not null then (select count(*) num from ne_server_module where neserver_module_id = a.neserver_moduleid) else 0 end modulenum"+
 				     " from ne_server a, biz_auto_log b"+
 				     " where a.server_id = b.server_id";
 		if(!dateTime.equals("")){
@@ -209,6 +210,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setSaveDay(rs.getLong(14));
 				record.setSaveType(rs.getString(15));
 				record.setCreateDate(rs.getString(16));
+				record.setModuleNum(rs.getInt(17));
 				return record;
 			}},pageObj);
 	}
@@ -244,7 +246,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 
 	@Override
 	public int updateNeServer(final NeServer neServer) {
-		String sql = "UPDATE NE_SERVER SET ORG_NAME=?,DEVICE_NAME=?,DEVICE_TYPE=?,REMARKS=?,DEVICE_ADDR=?,BAK_PATH=?,USER_NAME=?,PASS_WORD=?,ORG_ID=?,BAK_TYPE=?,SAVE_DAY=?,BAK_USERDATA=?,BAK_SYSTEM=?,SAVE_TYPE=?,FIRMS=?,DEVICE_PORT=? WHERE SERVER_ID=?";
+		String sql = "UPDATE NE_SERVER SET ORG_NAME=?,DEVICE_NAME=?,DEVICE_TYPE=?,REMARKS=?,DEVICE_ADDR=?,BAK_PATH=?,USER_NAME=?,PASS_WORD=?,ORG_ID=?,BAK_TYPE=?,SAVE_DAY=?,BAK_USERDATA=?,BAK_SYSTEM=?,SAVE_TYPE=?,FIRMS=?,DEVICE_PORT=?,NESERVER_MODULEID=? WHERE SERVER_ID=?";
 		return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
@@ -264,7 +266,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				ps.setString(14,neServer.getSaveType());
 				ps.setString(15,neServer.getFirms());
 				ps.setLong(16,neServer.getDevicePort());
-				ps.setLong(17,neServer.getServerId());
+				ps.setString(17,neServer.getNeServerModuleId());
+				ps.setLong(18,neServer.getServerId());
 			}
 		});
 	}
@@ -295,7 +298,8 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				"b.log_id,"+
 				"b.bak_flag,"+
 				"a.bak_type,"+
-				"to_char(b.create_date, 'yyyy-mm-dd') as create_date"+
+				"to_char(b.create_date, 'yyyy-mm-dd') as create_date,"+
+				"case when a.neserver_moduleid is not null then (select count(*) num from ne_server_module where neserver_module_id = a.neserver_moduleid) else 0 end modulenum"+
 				" from ne_server a, biz_auto_log b"+
 				" where a.server_id = b.server_id and b.bak_flag = 0";
 		if(!dateTime.equals("")){
@@ -320,6 +324,7 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 				record.setBakFlag(rs.getInt(12));
 				record.setBakType(rs.getString(13));
 				record.setCreateDate(rs.getString(14));
+				record.setModuleNum(rs.getInt(15));
 				return record;
 			}},pageObj);
 	}

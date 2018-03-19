@@ -56,4 +56,13 @@ public class NeServerModuleService {
         return neServerModuleDao.deleteNeServerModule(moduleId);
     }
 
+    /**
+     * 查询模块数量
+     * @param neServerModuleId
+     * @return
+     */
+    public String getModuleNum(String neServerModuleId){
+        return neServerModuleDao.getModuleNum(neServerModuleId);
+    }
+
 }

@@ -42,20 +42,20 @@ $(document).ready(function() {
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
 				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:80},
                 {field:'firms',title:'所属厂家',halign:'center',align:'center',width:50},
-				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80,
-                    formatter: function(value, row, index) {
-                        if(value == null || value == ""){
-                            value = "-";
-                        }
-                        return value;
-                    }},
-                {field:'devicePort',title:'设备端口',halign:'center',align:'center',width:50,
-                    formatter: function(value, row, index) {
-                        if(value == null || value == ""){
-                            value = "-";
-                        }
-                        return value;
-                }},
+                // {field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80,
+                //     formatter: function(value, row, index) {
+                //         if(value == null || value == ""){
+                //             value = "-";
+                //         }
+                //         return value;
+                //     }},
+                // {field:'devicePort',title:'设备端口',halign:'center',align:'center',width:50,
+                //     formatter: function(value, row, index) {
+                //         if(value == null || value == ""){
+                //             value = "-";
+                //         }
+                //         return value;
+                // }},
             	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:40,
                     formatter: function(value, row, index) {
             			var bakType = value;
@@ -66,6 +66,13 @@ $(document).ready(function() {
 						}
                         return bakType;
                     }},
+                {field:'moduleNum',title:'模块数',halign:'center',align:'center',width:40,
+                    formatter: function(value, row, index) {
+                        if(row.bakType == "1"){
+                            value = "-";
+                        }
+                        return value;
+                }},
                 {field:'saveType',title:'保存类型',halign:'center',align:'center',width:40,
                     formatter: function(value, row, index) {
                         var saveType = value;
@@ -299,6 +306,7 @@ function addNeServer(){
     // $("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").show();
     $("#moduleListTr").show();
     $("#addOrUpdate").val("add");
+    $("#moduleNum").text("0");
 
     $.ajax({
         async : false,
@@ -521,6 +529,7 @@ function updateNeServer(index) {
     if(row != undefined && row != null) {
         // 主动推类型无需ftp配置
         var bakType = row.bakType;
+        console.info(bakType);
         // 主动推
         if(bakType == "1"){
             //$("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").hide();
@@ -532,7 +541,7 @@ function updateNeServer(index) {
             $("#bakUserdataTr,#bakSystemTr").hide();
         }
         $("#addOrUpdate").val("update");
-        $("#neServerModuleId").val('');
+        $("#neServerModuleId").val("");
         $('#neServerForm').form('load', row);
         $('#neServerDialog').dialog({
             title:'修改网元信息',
@@ -540,6 +549,25 @@ function updateNeServer(index) {
                 $("#neServerForm").form('reset');
                 $('.validate_box').hide();
                 $('.validate_msg').html('');
+            },
+            onOpen: function(){
+                if(bakType == "0"){
+                    getModuleNum();
+                    // 对于关联ID为空的，去后台获取一个ID
+                    if(row.neServerModuleId == null || row.neServerModuleId == ""){
+                        $.ajax({
+                            async : false,
+                            cache : false,
+                            type : 'GET',
+                            url : '/neServerModule/neServerModuleConfigId.do',
+                            success : function(data) {
+                                if(data != undefined && data != null && data != ""){
+                                    $("#neServerModuleId").val(data); // 关联ID
+                                }
+                            }
+                        });
+                    }
+                }
             }
         }).dialog('open');
     } else {
@@ -560,6 +588,7 @@ function showMessageDialog(url, title, width, height, shadow) {
         title: title,
         onClose: function () {
             $(this).dialog('destroy');//后面可以关闭后的事件
+            getModuleNum();
         }
     });
     win.dialog('open');
@@ -571,4 +600,26 @@ function editModule() {
     var neServerModuleId = $("#neServerModuleId").val(); // 关联ID
     var url = "/neServerModule/neServerModuleConfig.do?neServerModuleId="+neServerModuleId+"&addOrUpdate="+addOrUpdate;
     showMessageDialog(url, '模块列表', 800, 400, true);
+}
+
+// 查看模块数
+function getModuleNum() {
+    var neServerModuleId = $("#neServerModuleId").val();
+    $.ajax({
+        async : false,
+        cache : false,
+        type : 'POST',
+        dataType : 'text',
+        url : '/neServerModule/getModuleNum.do',
+        data : {
+            neServerModuleId:neServerModuleId
+        },
+        success : function(data) { // 请求成功后处理函数。
+            if(data != ""){
+                $("#moduleNum").text(data);
+            }else{
+                $("#moduleNum").text("0");
+            }
+        }
+    });
 }

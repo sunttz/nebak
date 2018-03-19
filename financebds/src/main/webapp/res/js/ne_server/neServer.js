@@ -41,20 +41,20 @@ $(document).ready(function() {
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
 				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:80},
             	{field:'firms',title:'所属厂家',halign:'center',align:'center',width:50},
-				{field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80,
-                    formatter: function(value, row, index) {
-                        if(value == null || value == ""){
-                            value = "-";
-                        }
-                        return value;
-                    }},
-            	{field:'devicePort',title:'设备端口',halign:'center',align:'center',width:50,
-					formatter: function(value, row, index) {
-						if(value == null || value == ""){
-							value = "-";
-						}
-						return value;
-                }},
+                // {field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80,
+                //     formatter: function(value, row, index) {
+                //         if(value == null || value == ""){
+                //             value = "-";
+                //         }
+                //         return value;
+                //     }},
+                // {field:'devicePort',title:'设备端口',halign:'center',align:'center',width:50,
+					// formatter: function(value, row, index) {
+					// 	if(value == null || value == ""){
+					// 		value = "-";
+					// 	}
+					// 	return value;
+                // }},
             	{field:'bakType',title:'备份类型',halign:'center',align:'center',width:40,
                 	formatter: function(value, row, index) {
 						var bakType = value;
@@ -64,6 +64,13 @@ $(document).ready(function() {
 							bakType = "主动推";
 						}
 						return bakType;
+                }},
+				{field:'moduleNum',title:'模块数',halign:'center',align:'center',width:40,
+					formatter: function(value, row, index) {
+						if(row.bakType == "1"){
+							value = "-";
+						}
+						return value;
                 }},
             	{field:'saveType',title:'保存类型',halign:'center',align:'center',width:40,
 					formatter: function(value, row, index) {
