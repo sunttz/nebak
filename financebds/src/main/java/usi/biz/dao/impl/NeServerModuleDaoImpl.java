@@ -39,6 +39,26 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
     }
 
     @Override
+    public List<NeServerModule> getAllModule(String neServerModuleId) {
+        String sql = "SELECT MODULE_ID,MODULE_NAME,DEVICE_ADDR,DEVICE_PORT,USER_NAME,PASS_WORD,BAK_PATH,NESERVER_MODULE_ID FROM NE_SERVER_MODULE WHERE NESERVER_MODULE_ID = '"+neServerModuleId+"' ORDER BY MODULE_ID";
+        return this.getJdbcTemplate().query(sql, new RowMapper<NeServerModule>() {
+            @Override
+            public NeServerModule mapRow(ResultSet rs, int i) throws SQLException {
+                NeServerModule nsm = new NeServerModule();
+                nsm.setModuleId(rs.getLong(1));
+                nsm.setModuleName(rs.getString(2));
+                nsm.setDeviceAddr(rs.getString(3));
+                nsm.setDevicePort(rs.getLong(4));
+                nsm.setUserName(rs.getString(5));
+                nsm.setPassWord(rs.getString(6));
+                nsm.setBakPath(rs.getString(7));
+                nsm.setNeServerModuleId(rs.getString(8));
+                return nsm;
+            }
+        });
+    }
+
+    @Override
     public int saveNeServerModule(final NeServerModule neServerModule) {
         String sql = "INSERT INTO NE_SERVER_MODULE (MODULE_ID,MODULE_NAME,DEVICE_ADDR,DEVICE_PORT,USER_NAME,PASS_WORD,BAK_PATH,NESERVER_MODULE_ID) VALUES (NE_SERVER_MODULE_SEQ.nextval,?,?,?,?,?,?,?)";
         return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
