@@ -5,10 +5,8 @@ import org.springframework.stereotype.Service;
 import usi.biz.dao.AutoLogDao;
 import usi.biz.dao.BakResultDao;
 import usi.biz.dao.NeServerDao;
-import usi.biz.entity.AutoLog;
-import usi.biz.entity.AutoLogDto;
-import usi.biz.entity.BakResult;
-import usi.biz.entity.NeServer;
+import usi.biz.dao.NeServerModuleDao;
+import usi.biz.entity.*;
 import usi.biz.util.FtpUtils;
 import usi.sys.dto.PageObj;
 import usi.sys.entity.BusiDict;
@@ -23,6 +21,8 @@ import java.util.*;
 public class NeServerService {
 	@Resource
 	private NeServerDao neServerDao;
+	@Resource
+	private NeServerModuleDao neServerModuleDao;
 	@Resource 
 	private AutoLogDao autoLogDao;
 	@Resource
@@ -103,6 +103,10 @@ public class NeServerService {
 		String username="";
 		//密码
 		String password="";
+		//模块名称
+		String moduleName="";
+		//当天日期
+		String date = getDate();
 		//超时时间
 		int activeTime=3000;
 		
@@ -112,37 +116,59 @@ public class NeServerService {
 			List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 			NeServer neserver=list.get(0);
 			String bakType = neserver.getBakType(); // 备份类型
-			Long devicePort = neserver.getDevicePort(); // 备份端口
-			if(devicePort != null && devicePort != 0L){
-				port = devicePort.intValue();
-			}else {
-				port = 21;
-			}
 			// 被动取(去指定ftp主机下载)
 			if("0".equals(bakType)){
-				downloadPath=checkBakAddr(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
-				dir=neserver.getBakPath();
-				hostname=neserver.getDeviceAddr();
-				username=neserver.getUserName();
-				password=neserver.getPassWord();
-				System.out.println("==============downloadPath(本机路径):"+downloadPath);
-				System.out.println("==============dir(ftp服务器路径):"+dir);
-				System.out.println("==============hostname(主机名):"+hostname);
-				System.out.println("==============port(端口):"+port);
-				System.out.println("==============username(用户名):"+username);
-				System.out.println("==============password(密码):"+password);
-				try{
-					Boolean flag=FtpUtils.fileDownload(downloadPath,dir,fileName,hostname,port, username,password,activeTime);
-					System.out.println("==============flag(返回标志位):"+flag);
-					if(!flag){
-						if(result.equals("")){
-							result=serverIds[i];
-						}else{
-							result+=","+serverIds[i];
+				// 1、获取网元下载到本机的路径
+				// 2、遍历网元模块，下载各模块指定ftp路径下当天和前一天修改的文件
+				// 3、如果任一模块下载失败，则认为该网元备份失败
+				boolean bakResult = true; // 被动取备份结果
+				String neServerModuleId = neserver.getNeServerModuleId(); // 关联ID
+				if(StringUtils.isEmpty(neServerModuleId)){
+					bakResult = false;
+				}else{
+					downloadPath=checkBakAddr2(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
+					List<NeServerModule> modules = neServerModuleDao.getAllModule(neServerModuleId);
+					String moduleDownloadPath = ""; // 模块下载路径
+					if(modules.size() > 0){
+						for(NeServerModule neServerModule : modules) {
+							moduleName = neServerModule.getModuleName();
+							moduleDownloadPath = downloadPath + File.separator + moduleName + File.separator + date;
+							File moduleDownloadFile = new File(moduleDownloadPath);
+							if(!moduleDownloadFile.exists()){
+								moduleDownloadFile.mkdir();
+							}else {
+								deleteFile(moduleDownloadFile);
+								moduleDownloadFile.mkdir();
+							}
+							dir = neServerModule.getBakPath();
+							hostname = neServerModule.getDeviceAddr();
+							Long devicePort = neServerModule.getDevicePort(); // 备份端口
+							if(devicePort != null && devicePort != 0L){
+								port = devicePort.intValue();
+							}else {
+								port = 21;
+							}
+							username = neServerModule.getUserName();
+							password = neServerModule.getPassWord();
+							System.out.println("==============moduleName(模块名):"+moduleName);
+							System.out.println("==============moduleDownloadPath(模块下载路径):"+moduleDownloadPath);
+							System.out.println("==============dir(ftp服务器路径):"+dir);
+							System.out.println("==============hostname(主机名):"+hostname);
+							System.out.println("==============port(端口):"+port);
+							System.out.println("==============username(用户名):"+username);
+							System.out.println("==============password(密码):"+password);
+							Boolean flag=FtpUtils.fileDownload(moduleDownloadPath,dir,fileName,hostname,port,username,password,activeTime);
+							System.out.println("==============flag(返回标志位):"+flag);
+							if(!flag){
+								bakResult = false;
+								break;
+							}
 						}
+					}else{
+						bakResult = false;
 					}
-				}catch(Exception e){
-					e.printStackTrace();
+				}
+				if(!bakResult){
 					if(result.equals("")){
 						result=serverIds[i];
 					}else{
@@ -773,10 +799,12 @@ public class NeServerService {
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * 检查备份服务器地址名称是否存在  不存在创建,返回路径，存在不创建
 	 * @return
 	 */
+	@Deprecated
 	public String checkBakAddr(String orgName,String deviceType,String deviceName){
 		//获取地市首字母
 		//String englishOrgName=ChineseToEnglishUtil.getPinYinHeadChar(orgName);
@@ -798,6 +826,32 @@ public class NeServerService {
 			fileSecond.mkdir();
 		}else{
 			fileSecond.delete();
+			fileSecond.mkdir();
+		}
+		return secondFolderName;
+	}
+
+	/**
+	 * 检查备份服务器地址名称是否存在  不存在则创建，返回路径，存在则不创建
+	 * @param orgName
+	 * @param deviceType
+	 * @param deviceName
+	 * @return
+	 */
+	public String checkBakAddr2(String orgName,String deviceType,String deviceName){
+		String englishOrgName = neServerDao.getPinYinHeadChar(orgName);
+		String firstFolderName=rootName+File.separator+englishOrgName+"_"+deviceType;
+		//检查一级目录是否存在
+		File fileFirst = new File(firstFolderName);
+		System.out.println("===============fileFirst:"+fileFirst);
+		if (!fileFirst.exists()) {
+			fileFirst.mkdir();
+		}
+		//检查二级目录是否存在
+		String secondFolderName=firstFolderName+File.separator+deviceName;
+		File fileSecond=new File(secondFolderName);
+		System.out.println("===============fileSecond:"+fileSecond);
+		if (!fileSecond.exists()) {
 			fileSecond.mkdir();
 		}
 		return secondFolderName;

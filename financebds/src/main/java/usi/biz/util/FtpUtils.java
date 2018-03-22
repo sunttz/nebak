@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  *
@@ -21,29 +23,6 @@ import java.math.BigDecimal;
  */
 
 public class FtpUtils {
-
-
-    public static void main(String[] args) {
-    	 String hostname = "127.0.0.1";
-         int port = 21;
-         String username = "stt";
-         String password = "123";
-         int activeTime=3000;
-//        boolean flag = fileUpload("E:/tt/data","/admin/");  
-         //boolean flag =  fileDownload("E:/tt/te/128","/admin/748/","748",hostname, port, username, password,activeTime);
-//       System.out.println(flag);  
-//        boolean flag = deleteDir("/admin/3128/");  
-//        boolean flag = deleteFile("/admin/2616/input/a0012.xml");
-        boolean flag = false;
-        try {
-            //flag = iterateDelete(getFTPClient(hostname,port,username,password,activeTime), "/home/ftp/test/a.txt");
-            flag = deleteFile("/home/ftp/test/a.txt",hostname,port,username,password,activeTime);
-            //deleteDir("/home/ftp/a/HF_SERVER_20171218/HF_SERVER_HEFEI22_20171218",hostname,port,username,password,activeTime);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println(flag);
-    }
 
     /**
      *
@@ -209,6 +188,7 @@ public class FtpUtils {
         }
         //ftpClient.enterLocalPassiveMode();
         //ftpClient.configure(new FTPClientConfig("usi.biz.util.UnixFTPEntryParser"));
+        Date lastDate = getLastDate();
         FTPFile[] files = ftpClient.listFiles();
         for(FTPFile f:files){
             String name = f.getName();
@@ -224,16 +204,21 @@ public class FtpUtils {
             ftpClient.enterLocalPassiveMode(); //通知服务器开通给一个端口，防止挂死
             File file = new File(localPath);
             if(f.isFile()){
-                FileOutputStream fos = null;
-                fos = new FileOutputStream(file);
-                System.out.println("本地文件大小为:"+getFormatSize(f.getSize()));
-                String path = f.getName();
-                System.out.println("==============localPath(本地路径):"+localPath);
-                System.out.println("==============path(目标文件):"+path);
-                Boolean flag=ftpClient.retrieveFile(path, fos);
-                System.out.println("==============flag(返回下载结果):"+flag);
-                //Boolean flag=ftpClient.retrieveFile(new String(path.getBytes("GBK"),"ISO-8859-1"), fos);
-                IOUtils.closeQuietly(fos);
+                Date lastModifiedDate = f.getTimestamp().getTime(); // 最后修改日期
+                System.out.println("=========最后修改日期:"+lastModifiedDate);
+                // 只有修改日期在今天和昨天的文件才下载备份
+                if(lastModifiedDate.after(lastDate)){
+                    FileOutputStream fos = null;
+                    fos = new FileOutputStream(file);
+                    System.out.println("本地文件大小为:"+getFormatSize(f.getSize()));
+                    String path = f.getName();
+                    System.out.println("==============localPath(本地路径):"+localPath);
+                    System.out.println("==============path(目标文件):"+path);
+                    Boolean flag=ftpClient.retrieveFile(path, fos);
+                    System.out.println("==============flag(返回下载结果):"+flag);
+                    //Boolean flag=ftpClient.retrieveFile(new String(path.getBytes("GBK"),"ISO-8859-1"), fos);
+                    IOUtils.closeQuietly(fos);
+                }
             }else if(f.isDirectory()){
                 file.mkdirs();
                 iterateDown(ftpClient,dir+File.separator+f.getName(),localPath);
@@ -241,7 +226,21 @@ public class FtpUtils {
         }
     }
 
-
+    /**
+     * 获取前一天零点日期
+     * @return
+     */
+    private static Date getLastDate() {
+        Date date = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        date = calendar.getTime();
+        return date;
+    }
 
     /**
      *
