@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $('#date_time').val(getDateStr(0));
+    // $('#date_time').val(getDateStr(0));
 	//地区初始化
 	$("#org_id").combobox({
 		url:'getAllOrg.do',

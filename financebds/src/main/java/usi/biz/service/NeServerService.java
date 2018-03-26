@@ -1,6 +1,8 @@
 package usi.biz.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import usi.biz.dao.AutoLogDao;
 import usi.biz.dao.BakResultDao;
@@ -31,6 +33,7 @@ public class NeServerService {
 	private static String rootName=ConfigUtil.getValue("download.file.path");
 	private SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd");
 	private SimpleDateFormat sdf2 = new SimpleDateFormat("EEE"); // 周几
+	private static Logger logger = LoggerFactory.getLogger(NeServerService.class);
 
 	// 备份ftp服务器配置(弃用)
 	//private static String ftpflag=ConfigUtil.getValue("bak.ftp.flag");
@@ -109,7 +112,8 @@ public class NeServerService {
 		String date = getDate();
 		//超时时间
 		int activeTime=3000;
-		
+
+		logger.info("==================网元手工备份开始");
 		//第一步获取单个网元信息
 		String[] serverIds=ids.split(",");
 		for(int i=0;i<serverIds.length;i++){
@@ -150,15 +154,15 @@ public class NeServerService {
 							}
 							username = neServerModule.getUserName();
 							password = neServerModule.getPassWord();
-							System.out.println("==============moduleName(模块名):"+moduleName);
-							System.out.println("==============moduleDownloadPath(模块下载路径):"+moduleDownloadPath);
-							System.out.println("==============dir(ftp服务器路径):"+dir);
-							System.out.println("==============hostname(主机名):"+hostname);
-							System.out.println("==============port(端口):"+port);
-							System.out.println("==============username(用户名):"+username);
-							System.out.println("==============password(密码):"+password);
+							logger.info("==============moduleName(模块名):"+moduleName);
+							logger.info("==============moduleDownloadPath(模块下载路径):"+moduleDownloadPath);
+							logger.info("==============dir(ftp服务器路径):"+dir);
+							logger.info("==============hostname(主机名):"+hostname);
+							logger.info("==============port(端口):"+port);
+							logger.info("==============username(用户名):"+username);
+							logger.info("==============password(密码):"+password);
 							Boolean flag=FtpUtils.fileDownload(moduleDownloadPath,dir,fileName,hostname,port,username,password,activeTime);
-							System.out.println("==============flag(返回标志位):"+flag);
+							logger.info("==============flag(返回标志位):"+flag);
 							if(!flag){
 								bakResult = false;
 								break;
@@ -246,7 +250,7 @@ public class NeServerService {
 					}
 				}
 				// 用户数据文件和系统数据文件都备份成功才判定网元备份成功
-				System.out.printf(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName()), userdataResult, systemResult);
+				logger.info(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName()), userdataResult, systemResult);
 				if(!(userdataResult && systemResult) || (StringUtils.isBlank(bakUserdata) && StringUtils.isBlank(bakSystem))){
 					if(result.equals("")){
 						result=serverIds[i];
@@ -262,7 +266,8 @@ public class NeServerService {
 				}
 			}
 		}
-		System.out.println("==============result(错误结果):"+result);
+		logger.info("==============result(错误结果):"+result);
+		logger.info("==================网元手工备份结束");
 		return result;
 	}
 
@@ -330,18 +335,12 @@ public class NeServerService {
 			}
 		}*/
 		for(int i=0;i<serverIds.length;i++){
-			isBak = false;
-			bakFlag = 1;
+			isBak = false; // 是否需要备份
+			bakFlag = 1; // 备份结果
 			try {
 				List<NeServer> list = neServerDao.getNeServerById(Long.parseLong(serverIds[i]));
 				NeServer neserver = list.get(0);
-				System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份开始=======");
-				Long devicePort = neserver.getDevicePort(); // 备份端口
-				if(devicePort != null && devicePort != 0L){
-					port = devicePort.intValue();
-				}else {
-					port = 21;
-				}
+				logger.info("========网元设备【"+neserver.getDeviceName()+"】备份开始=======");
 				String bakType = neserver.getBakType(); // 备份类型
 				String saveType = neserver.getSaveType();// 保存类型
 				long saveDay = neserver.getSaveDay();// 保存份数
@@ -353,30 +352,69 @@ public class NeServerService {
 				if("0".equals(bakType)){
                     if("W".equals(saveType) && bakWeek.equals(week) || "D".equals(saveType)){
 						// 删除过期备份文件，区分按天、按周
-						deleteExpireFile_get(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),saveDay,saveType);
-                        downloadPath=checkBakAddr(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
-                        dir=neserver.getBakPath();
-                        hostname=neserver.getDeviceAddr();
-                        username=neserver.getUserName();
-                        password=neserver.getPassWord();
-                        System.out.println("==============downloadPath(本机路径):"+downloadPath);
-                        System.out.println("==============dir(ftp服务器路径):"+dir);
-                        System.out.println("==============hostname(主机名):"+hostname);
-                        System.out.println("==============port(端口):"+port);
-                        System.out.println("==============username(用户名):"+username);
-                        System.out.println("==============password(密码):"+password);
-						Boolean flag=FtpUtils.fileDownload(downloadPath,dir,fileName,hostname,port, username,password,activeTime);
-						System.out.println("==============ftp下载flag(返回标志位):"+flag);
-						if(!flag){
+						deleteExpireFile_get2(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName(),saveDay,saveType);
+						// 1、获取网元下载到本机的路径
+						// 2、遍历网元模块，下载各模块指定ftp路径下当天和前一天修改的文件
+						// 3、如果任一模块下载失败，则认为该网元备份失败
+						boolean bakGetResult = true; // 被动取备份结果
+						String neServerModuleId = neserver.getNeServerModuleId(); // 关联ID
+						if(StringUtils.isEmpty(neServerModuleId)){
+							bakGetResult = false;
+						}else{
+							downloadPath=checkBakAddr2(neserver.getOrgName(),neserver.getDeviceType(),neserver.getDeviceName());
+							List<NeServerModule> modules = neServerModuleDao.getAllModule(neServerModuleId);
+							String moduleName = ""; // 模块名
+							String moduleDownloadPath = ""; // 模块下载路径
+							String date = getDate(); // 当前年月日
+							if(modules.size() > 0){
+								for(NeServerModule neServerModule : modules) {
+									moduleName = neServerModule.getModuleName();
+									moduleDownloadPath = downloadPath + File.separator + moduleName + File.separator + date;
+									File moduleDownloadFile = new File(moduleDownloadPath);
+									if(!moduleDownloadFile.exists()){
+										moduleDownloadFile.mkdir();
+									}else {
+										deleteFile(moduleDownloadFile);
+										moduleDownloadFile.mkdir();
+									}
+									dir = neServerModule.getBakPath();
+									hostname = neServerModule.getDeviceAddr();
+									Long devicePort = neServerModule.getDevicePort(); // 备份端口
+									if(devicePort != null && devicePort != 0L){
+										port = devicePort.intValue();
+									}else {
+										port = 21;
+									}
+									username = neServerModule.getUserName();
+									password = neServerModule.getPassWord();
+									logger.info("==============moduleName(模块名):"+moduleName);
+									logger.info("==============moduleDownloadPath(模块下载路径):"+moduleDownloadPath);
+									logger.info("==============dir(ftp服务器路径):"+dir);
+									logger.info("==============hostname(主机名):"+hostname);
+									logger.info("==============port(端口):"+port);
+									logger.info("==============username(用户名):"+username);
+									logger.info("==============password(密码):"+password);
+									Boolean flag=FtpUtils.fileDownload(moduleDownloadPath,dir,fileName,hostname,port,username,password,activeTime);
+									logger.info("==============flag(返回标志位):"+flag);
+									if(!flag){
+										bakGetResult = false;
+										break;
+									}
+								}
+							}else{
+								bakGetResult = false;
+							}
+						}
+						if(!bakGetResult){
 							if(result.equals("")){
 								result=serverIds[i];
 							}else{
 								result+=","+serverIds[i];
 							}
 						}
-						bakFlag=flag==true?1:0;
+						bakFlag=bakGetResult==true?1:0;
                     }else {
-                        System.out.println("该网元今天无需备份");
+                        logger.info("该网元今天无需备份");
                     }
                 }
                 // 主动推(检查指定路径是否有文件)
@@ -408,7 +446,7 @@ public class NeServerService {
                                     String filename = file.getName();
                                     if(filename.indexOf(curDay) > -1){
                                         deleteFile(file);
-                                        System.out.printf("非备份日，删除当天推送文件夹%s%n", filename);
+                                        logger.info("非备份日，删除当天推送文件夹%s%n", filename);
                                         break;
                                     }
                                 }
@@ -424,7 +462,7 @@ public class NeServerService {
                                                 String fname = f.getName();
                                                 if(fname.indexOf(curDay) > -1){
                                                     f.delete();
-                                                    System.out.printf("非备份日，删除当天推送文件%s%n", fname);
+                                                    logger.info("非备份日，删除当天推送文件%s%n", fname);
                                                     break;
                                                 }
                                             }
@@ -437,7 +475,7 @@ public class NeServerService {
                                         String filename = file.getName();
                                         if(filename.indexOf(curDay) > -1){
                                             file.delete();
-                                            System.out.printf("非备份日，删除当天推送文件%s%n", filename);
+                                            logger.info("非备份日，删除当天推送文件%s%n", filename);
                                             break;
                                         }
                                     }
@@ -496,7 +534,7 @@ public class NeServerService {
 							}
                         }
                         // 用户数据文件和系统数据文件都备份成功才判定网元备份成功
-                        System.out.printf(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName()), userdataResult, systemResult);
+                        logger.info(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName()), userdataResult, systemResult);
                         if(!(userdataResult && systemResult) || (StringUtils.isBlank(bakUserdata) && StringUtils.isBlank(bakSystem))){
                             bakFlag = 0;
                             if(result.equals("")){
@@ -506,7 +544,7 @@ public class NeServerService {
                             }
                         }
                     }else{
-                        System.out.println("该网元今天无需备份");
+                        logger.info("该网元今天无需备份");
                     }
                 }else{
                     if(result.equals("")){
@@ -516,7 +554,7 @@ public class NeServerService {
                     }
                     bakFlag = 0;
                 }
-				System.out.println("========网元设备【"+neserver.getDeviceName()+"】备份结束=======");
+                logger.info("========网元设备【"+neserver.getDeviceName()+"】备份结束=======");
 			} catch (Exception e) {
 				e.printStackTrace();
 				if(result.equals("")){
@@ -533,17 +571,17 @@ public class NeServerService {
 			}
 		}
 		// 被动取类型，当某网元类型下所有网元均过期删除，删除该空文件夹
-		try {
-			deleteEmptyFile();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//			deleteEmptyFile();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		// 保存备份结果
 		BakResult bakResult = new BakResult(succNum,failNum);
 		bakResultDao.saveBakResult(bakResult);
-		System.out.println("==============result(错误结果):"+result);
-		System.out.println("==============备份成功数:"+succNum);
-		System.out.println("==============备份失败数:"+failNum);
+		logger.info("==============result(错误结果):"+result);
+		logger.info("==============备份成功数:"+succNum);
+		logger.info("==============备份失败数:"+failNum);
 		return result;
 	}
 
@@ -641,6 +679,7 @@ public class NeServerService {
 	 * @param saveDay 保存份数
 	 * @param saveType 保存类型
 	 */
+	@Deprecated
 	private void deleteExpireFile_get(String orgName,String deviceType,String deviceName,long saveDay,String saveType) throws Exception {
 		List<String> keepDays = getKeepDays(saveDay,saveType);
 		// 1.遍历所有一级文件夹，取出地域和网元类型匹配且已过期文件夹名放到expireFolder集合中
@@ -678,6 +717,36 @@ public class NeServerService {
 					deleteFile(f);
 					System.out.printf("删除过期备份文件夹%s%n", secondFileName);
 					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * 删除被动取类型的过期备份文件
+	 * @param orgName 地区
+	 * @param deviceType 网元类型
+	 * @param deviceName 网元名
+	 * @param saveDay 保存份数
+	 * @param saveType 保存类型
+	 */
+	private void deleteExpireFile_get2(String orgName,String deviceType,String deviceName,long saveDay,String saveType) throws Exception {
+		List<String> keepDays = getKeepDays(saveDay,saveType);
+		String englishOrgName = neServerDao.getPinYinHeadChar(orgName);
+		String bakPath = rootName+File.separator+englishOrgName+"_"+deviceType+File.separator+deviceName;
+		File bakFile = new File(bakPath);
+		if (bakFile != null) {
+			File[] modules = bakFile.listFiles();
+			for (File module : modules) {
+				File[] bakFileByDay = module.listFiles();
+				if (bakFileByDay != null) {
+					for (File f : bakFileByDay) {
+						String day = f.getName();
+						if (!keepDays.contains(day)) {
+							deleteFile(f);
+							logger.info(String.format("删除过期备份文件夹%s%n", f.getAbsolutePath()));
+						}
+					}
 				}
 			}
 		}

@@ -3,6 +3,8 @@ package usi.biz.util;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +26,8 @@ import java.util.Date;
 
 public class FtpUtils {
 
+    private static Logger logger = LoggerFactory.getLogger(FtpUtils.class);
+
     /**
      *
      *【功能描述：得到ftp 登陆结果 FtpClient】
@@ -44,7 +48,7 @@ public class FtpUtils {
         // socket连接，设置socket连接超时时间
         ftpClient.setSoTimeout(10 * 1000);
         boolean flag = ftpClient.login(username, password);
-        System.out.println("=================获取FTP连接flag:"+flag);
+        logger.info("=================获取FTP连接flag:"+flag);
         if(flag){
             ftpClient.setControlKeepAliveTimeout(activeTime);
             return ftpClient;
@@ -170,9 +174,9 @@ public class FtpUtils {
      * @throws IOException
      */
     public static void iterateDown(FTPClient ftpClient,String dir,String downloadPath) throws IOException{
-        // 列出这个地址对应到的是文件夹还是文件  
-    	System.out.println("==============dir(目标路径):"+dir);
-    	System.out.println("==============downloadPath(结果路径):"+downloadPath);
+        // 列出这个地址对应到的是文件夹还是文件
+        logger.info("==============dir(目标路径):"+dir);
+        logger.info("==============downloadPath(结果路径):"+downloadPath);
     	//由于apache不支持中文语言环境，通过定制类解析中文日期类型
         boolean changeResult = false; // 解决备份路径配置为不存在地址会循环创建文件bug
     	if(dir.contains(":")){
@@ -183,7 +187,7 @@ public class FtpUtils {
             changeResult = ftpClient.changeWorkingDirectory(dir);
     	}
     	if(!changeResult){
-            System.out.println("=============FTP路径切换失败");
+            logger.info("=============FTP路径切换失败");
             throw new RuntimeException("FTP路径切换失败");
         }
         //ftpClient.enterLocalPassiveMode();
@@ -205,17 +209,17 @@ public class FtpUtils {
             File file = new File(localPath);
             if(f.isFile()){
                 Date lastModifiedDate = f.getTimestamp().getTime(); // 最后修改日期
-                System.out.println("=========最后修改日期:"+lastModifiedDate);
+                logger.info(String.format("=========文件【%s】最后修改日期:%s", name, lastModifiedDate));
                 // 只有修改日期在今天和昨天的文件才下载备份
                 if(lastModifiedDate.after(lastDate)){
                     FileOutputStream fos = null;
                     fos = new FileOutputStream(file);
-                    System.out.println("本地文件大小为:"+getFormatSize(f.getSize()));
+                    logger.info("本地文件大小为:"+getFormatSize(f.getSize()));
                     String path = f.getName();
-                    System.out.println("==============localPath(本地路径):"+localPath);
-                    System.out.println("==============path(目标文件):"+path);
+                    logger.info("==============localPath(本地路径):"+localPath);
+                    logger.info("==============path(目标文件):"+path);
                     Boolean flag=ftpClient.retrieveFile(path, fos);
-                    System.out.println("==============flag(返回下载结果):"+flag);
+                    logger.info("==============flag(返回下载结果):"+flag);
                     //Boolean flag=ftpClient.retrieveFile(new String(path.getBytes("GBK"),"ISO-8859-1"), fos);
                     IOUtils.closeQuietly(fos);
                 }
