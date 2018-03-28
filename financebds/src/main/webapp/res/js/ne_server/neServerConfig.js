@@ -529,7 +529,7 @@ function updateNeServer(index) {
     if(row != undefined && row != null) {
         // 主动推类型无需ftp配置
         var bakType = row.bakType;
-        console.info(bakType);
+        // console.info(bakType);
         // 主动推
         if(bakType == "1"){
             //$("#deviceAddrTr,#devicePortTr,#userNameTr,#passWordTr,#bakPathTr").hide();
@@ -551,22 +551,22 @@ function updateNeServer(index) {
                 $('.validate_msg').html('');
             },
             onOpen: function(){
+                // 对于关联ID为空的，去后台获取一个ID
+                if(row.neServerModuleId == null || row.neServerModuleId == ""){
+                    $.ajax({
+                        async : false,
+                        cache : false,
+                        type : 'GET',
+                        url : '/neServerModule/neServerModuleConfigId.do',
+                        success : function(data) {
+                            if(data != undefined && data != null && data != ""){
+                                $("#neServerModuleId").val(data); // 关联ID
+                            }
+                        }
+                    });
+                }
                 if(bakType == "0"){
                     getModuleNum();
-                    // 对于关联ID为空的，去后台获取一个ID
-                    if(row.neServerModuleId == null || row.neServerModuleId == ""){
-                        $.ajax({
-                            async : false,
-                            cache : false,
-                            type : 'GET',
-                            url : '/neServerModule/neServerModuleConfigId.do',
-                            success : function(data) {
-                                if(data != undefined && data != null && data != ""){
-                                    $("#neServerModuleId").val(data); // 关联ID
-                                }
-                            }
-                        });
-                    }
                 }
             }
         }).dialog('open');

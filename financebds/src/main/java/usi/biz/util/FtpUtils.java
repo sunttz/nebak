@@ -150,13 +150,15 @@ public class FtpUtils {
         } catch (Exception e) {
             e.printStackTrace();
             flag=false;
-            throw new RuntimeException("FTP下载失败", e);
+            // throw new RuntimeException("FTP下载失败", e);
+            logger.info("FTP下载失败");
         } finally {
             try {
                 ftpClient.disconnect();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException("关闭FTP连接失败", e);
+                //throw new RuntimeException("关闭FTP连接失败", e);
+                logger.info("关闭FTP连接失败");
             }
             return flag;
         }

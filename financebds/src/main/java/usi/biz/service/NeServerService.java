@@ -250,7 +250,7 @@ public class NeServerService {
 					}
 				}
 				// 用户数据文件和系统数据文件都备份成功才判定网元备份成功
-				logger.info(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName()), userdataResult, systemResult);
+				logger.info(String.format("网元【%s】用户数据文件推送结果【%s】，系统数据文件推送结果【%s】%n", neserver.getDeviceName(), userdataResult, systemResult));
 				if(!(userdataResult && systemResult) || (StringUtils.isBlank(bakUserdata) && StringUtils.isBlank(bakSystem))){
 					if(result.equals("")){
 						result=serverIds[i];
@@ -570,12 +570,6 @@ public class NeServerService {
 				failNum += bakFlag==0?1:0;
 			}
 		}
-		// 被动取类型，当某网元类型下所有网元均过期删除，删除该空文件夹
-//		try {
-//			deleteEmptyFile();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
 		// 保存备份结果
 		BakResult bakResult = new BakResult(succNum,failNum);
 		bakResultDao.saveBakResult(bakResult);
@@ -912,14 +906,14 @@ public class NeServerService {
 		String firstFolderName=rootName+File.separator+englishOrgName+"_"+deviceType;
 		//检查一级目录是否存在
 		File fileFirst = new File(firstFolderName);
-		System.out.println("===============fileFirst:"+fileFirst);
+		logger.info("===============fileFirst:"+fileFirst);
 		if (!fileFirst.exists()) {
 			fileFirst.mkdir();
 		}
 		//检查二级目录是否存在
 		String secondFolderName=firstFolderName+File.separator+deviceName;
 		File fileSecond=new File(secondFolderName);
-		System.out.println("===============fileSecond:"+fileSecond);
+		logger.info("===============fileSecond:"+fileSecond);
 		if (!fileSecond.exists()) {
 			fileSecond.mkdir();
 		}
