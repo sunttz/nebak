@@ -4,7 +4,7 @@ $(document).ready(function() {
 
     //列表初始化
     $('#listTable').datagrid({
-        url:'/neServerModule/getPageAllModule.do',
+        url:ctx+'/neServerModule/getPageAllModule.do',
         fit:true,
         fitColumns:true,
         rownumbers:true,
@@ -130,7 +130,7 @@ function saveNeServerModule() {
         cache : false,
         type : 'POST',
         dataType : 'json',
-        url : '/neServerModule/addNeserverModule.do',
+        url : ctx+'/neServerModule/addNeserverModule.do',
         data : {
             moduleId:moduleId,moduleName:moduleName,deviceAddr:deviceAddr,devicePort:devicePort,userName:userName,passWord:passWord,bakPath:bakPath,neServerModuleId:neServerModuleId
         },
@@ -181,7 +181,7 @@ function delOne(moduleId) {
                 cache : false,
                 type : 'POST',
                 dataType : 'json',
-                url : '/neServerModule/deleteNeserverModule.do',
+                url : ctx+'/neServerModule/deleteNeserverModule.do',
                 data : {
                     moduleId : moduleId
                 },

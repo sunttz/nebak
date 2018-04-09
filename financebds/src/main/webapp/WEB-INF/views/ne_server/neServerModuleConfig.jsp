@@ -6,10 +6,10 @@
 <html>
 <head>
     <%@ include file="/WEB-INF/views/common/taglibs.jsp"%>
-    <script type="text/javascript" src="${ctx }/res/js/ne_server/neServerModuleConfig.js"></script>
     <script>
         var ctx='${ctx}';
     </script>
+    <script type="text/javascript" src="${ctx }/res/js/ne_server/neServerModuleConfig.js"></script>
     <style type="text/css">
         .info_table{border-collapse:collapse;border-spacing:0;}
         .info_table td{padding:0 15px;border:1px solid #DCDCDC;}

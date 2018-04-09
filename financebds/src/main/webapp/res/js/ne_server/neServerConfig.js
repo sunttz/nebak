@@ -312,7 +312,7 @@ function addNeServer(){
         async : false,
         cache : false,
         type : 'GET',
-        url : '/neServerModule/neServerModuleConfigId.do',
+        url : ctx+'/neServerModule/neServerModuleConfigId.do',
         success : function(data) {
             if(data != undefined && data != null && data != ""){
                 $("#neServerModuleId").val(data); // 关联ID
@@ -557,7 +557,7 @@ function updateNeServer(index) {
                         async : false,
                         cache : false,
                         type : 'GET',
-                        url : '/neServerModule/neServerModuleConfigId.do',
+                        url : ctx+'/neServerModule/neServerModuleConfigId.do',
                         success : function(data) {
                             if(data != undefined && data != null && data != ""){
                                 $("#neServerModuleId").val(data); // 关联ID
@@ -598,7 +598,7 @@ function showMessageDialog(url, title, width, height, shadow) {
 function editModule() {
     var addOrUpdate = $("#addOrUpdate").val(); // 新增or修改
     var neServerModuleId = $("#neServerModuleId").val(); // 关联ID
-    var url = "/neServerModule/neServerModuleConfig.do?neServerModuleId="+neServerModuleId+"&addOrUpdate="+addOrUpdate;
+    var url = ctx+"/neServerModule/neServerModuleConfig.do?neServerModuleId="+neServerModuleId+"&addOrUpdate="+addOrUpdate;
     showMessageDialog(url, '模块列表', 800, 400, true);
 }
 
@@ -610,7 +610,7 @@ function getModuleNum() {
         cache : false,
         type : 'POST',
         dataType : 'text',
-        url : '/neServerModule/getModuleNum.do',
+        url : ctx+'/neServerModule/getModuleNum.do',
         data : {
             neServerModuleId:neServerModuleId
         },
