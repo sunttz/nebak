@@ -475,7 +475,7 @@ public class NeServerService {
                                         String filename = file.getName();
                                         if(filename.indexOf(curDay) > -1){
                                             file.delete();
-                                            logger.info("非备份日，删除当天推送文件%s%n", filename);
+                                            logger.info(String.format("非备份日，删除当天推送文件%s", filename));
                                             break;
                                         }
                                     }
@@ -534,7 +534,7 @@ public class NeServerService {
 							}
                         }
                         // 用户数据文件和系统数据文件都备份成功才判定网元备份成功
-                        logger.info(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName()), userdataResult, systemResult);
+                        logger.info(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName(), userdataResult, systemResult));
                         if(!(userdataResult && systemResult) || (StringUtils.isBlank(bakUserdata) && StringUtils.isBlank(bakSystem))){
                             bakFlag = 0;
                             if(result.equals("")){
