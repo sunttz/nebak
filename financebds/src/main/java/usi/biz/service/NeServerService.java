@@ -492,12 +492,14 @@ public class NeServerService {
                             userdataResult = false;
 							File userDataFile = new File(bakUserdata);
 							File[] userDatafiles = userDataFile.listFiles();
-							for (File f : userDatafiles) {
-								if (f.isDirectory()) {
-									String filename = f.getName();
-									if(filename.indexOf(curDay) > -1 && f.listFiles().length > 0){
-										userdataResult = true;
-										break;
+							if(userDatafiles != null){
+								for (File f : userDatafiles) {
+									if (f.isDirectory()) {
+										String filename = f.getName();
+										if(filename.indexOf(curDay) > -1 && f.listFiles().length > 0){
+											userdataResult = true;
+											break;
+										}
 									}
 								}
 							}
@@ -534,7 +536,7 @@ public class NeServerService {
 							}
                         }
                         // 用户数据文件和系统数据文件都备份成功才判定网元备份成功
-                        logger.info(String.format("网元【%s】用户数据文件推送结果【%%s】，系统数据文件推送结果【%%s】%%n", neserver.getDeviceName(), userdataResult, systemResult));
+                        logger.info(String.format("网元【%s】用户数据文件推送结果【%s】，系统数据文件推送结果【%s】", neserver.getDeviceName(), userdataResult, systemResult));
                         if(!(userdataResult && systemResult) || (StringUtils.isBlank(bakUserdata) && StringUtils.isBlank(bakSystem))){
                             bakFlag = 0;
                             if(result.equals("")){
@@ -557,6 +559,7 @@ public class NeServerService {
                 logger.info("========网元设备【"+neserver.getDeviceName()+"】备份结束=======");
 			} catch (Exception e) {
 				e.printStackTrace();
+				logger.error("网元备份", e);
 				if(result.equals("")){
 					result=serverIds[i];
 				}else{
@@ -609,15 +612,17 @@ public class NeServerService {
 		if(StringUtils.isNotBlank(bakUserdata)){
 			File userdataFile = new File(bakUserdata);
 			File[] userdataFiles = userdataFile.listFiles();
-			for (File file : userdataFiles) {
-				if (file.isDirectory()) {
-					String filename = file.getName();
-					String[] split = filename.split("_");
-					if(split.length > 1){
-						String date = split[1].substring(0,8);
-						if(!keepDays.contains(date)){
-							deleteFile(file);
-							System.out.printf("删除过期备份文件夹%s%n", filename);
+			if(userdataFiles != null){
+				for (File file : userdataFiles) {
+					if (file.isDirectory()) {
+						String filename = file.getName();
+						String[] split = filename.split("_");
+						if(split.length > 1){
+							String date = split[1].substring(0,8);
+							if(!keepDays.contains(date)){
+								deleteFile(file);
+								System.out.printf("删除过期备份文件夹%s%n", filename);
+							}
 						}
 					}
 				}
@@ -632,15 +637,17 @@ public class NeServerService {
 				for(File module : bakSystemFiles){
 					if(module.isDirectory()){
 						File[] moduleFiles = module.listFiles();
-						for (File f : moduleFiles) {
-							if(f.isFile()){
-								String fname = f.getName();
-								String[] split = fname.split("_");
-								if(split.length > 1){
-									String date = split[1].substring(0,8);
-									if(!keepDays.contains(date)){
-										f.delete();
-										System.out.printf("删除过期备份文件%s%n", fname);
+						if(moduleFiles != null){
+							for (File f : moduleFiles) {
+								if(f.isFile()){
+									String fname = f.getName();
+									String[] split = fname.split("_");
+									if(split.length > 1){
+										String date = split[1].substring(0,8);
+										if(!keepDays.contains(date)){
+											f.delete();
+											System.out.printf("删除过期备份文件%s%n", fname);
+										}
 									}
 								}
 							}
@@ -731,14 +738,16 @@ public class NeServerService {
 		File bakFile = new File(bakPath);
 		if (bakFile != null) {
 			File[] modules = bakFile.listFiles();
-			for (File module : modules) {
-				File[] bakFileByDay = module.listFiles();
-				if (bakFileByDay != null) {
-					for (File f : bakFileByDay) {
-						String day = f.getName();
-						if (!keepDays.contains(day)) {
-							deleteFile(f);
-							logger.info(String.format("删除过期备份文件夹%s%n", f.getAbsolutePath()));
+			if(modules != null){
+				for (File module : modules) {
+					File[] bakFileByDay = module.listFiles();
+					if (bakFileByDay != null) {
+						for (File f : bakFileByDay) {
+							String day = f.getName();
+							if (!keepDays.contains(day)) {
+								deleteFile(f);
+								logger.info(String.format("删除过期备份文件夹%s%n", f.getAbsolutePath()));
+							}
 						}
 					}
 				}

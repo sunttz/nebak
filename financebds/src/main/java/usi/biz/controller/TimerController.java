@@ -18,7 +18,7 @@ public class TimerController {
 	/**
 	 * 定时启动。每天凌晨6点执行一次
      */
-    //@Scheduled(fixedDelay=1000*60*60*24)
+    //@Scheduled(fixedDelay=1000*60*60*24) // test
 	@Scheduled(cron="0 0 6 * * ?")
     public void show() {
     	//先删除日志，再进行备份

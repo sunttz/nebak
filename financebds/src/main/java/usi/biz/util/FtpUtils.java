@@ -149,6 +149,7 @@ public class FtpUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            logger.error("ftp下载", e);
             flag=false;
             // throw new RuntimeException("FTP下载失败", e);
             logger.info("FTP下载失败");
@@ -192,8 +193,13 @@ public class FtpUtils {
             logger.info("=============FTP路径切换失败");
             throw new RuntimeException("FTP路径切换失败");
         }
-        //ftpClient.enterLocalPassiveMode();
+        ftpClient.enterLocalPassiveMode();
         //ftpClient.configure(new FTPClientConfig("usi.biz.util.UnixFTPEntryParser"));
+        //如果当前目录还没有创建，那么就在这里创建
+        File filedown = new File(downloadPath);
+        if(!filedown.exists()){
+            filedown.mkdirs();
+        }
         Date lastDate = getLastDate();
         FTPFile[] files = ftpClient.listFiles();
         for(FTPFile f:files){
@@ -201,28 +207,23 @@ public class FtpUtils {
             if(".".equals(name) || "..".equals(name)){
                 continue;
             }
-            //如果当前目录还没有创建，那么就在这里创建
-            File filedown = new File(downloadPath);
-            if(!filedown.exists()){
-                filedown.mkdirs();
-            }
             String localPath = downloadPath+File.separator+f.getName();
-            ftpClient.enterLocalPassiveMode(); //通知服务器开通给一个端口，防止挂死
             File file = new File(localPath);
             if(f.isFile()){
                 Date lastModifiedDate = f.getTimestamp().getTime(); // 最后修改日期
-                logger.info(String.format("=========文件【%s】最后修改日期:%s", name, lastModifiedDate));
+                logger.info(String.format("文件【%s】最后修改日期:%s", name, lastModifiedDate));
                 // 只有修改日期在今天和昨天的文件才下载备份
                 if(lastModifiedDate.after(lastDate)){
                     FileOutputStream fos = null;
                     fos = new FileOutputStream(file);
                     logger.info("本地文件大小为:"+getFormatSize(f.getSize()));
-                    String path = f.getName();
                     logger.info("==============localPath(本地路径):"+localPath);
-                    logger.info("==============path(目标文件):"+path);
-                    Boolean flag=ftpClient.retrieveFile(path, fos);
+                    logger.info("==============path(目标文件):"+name);
+                    //ftpClient.enterLocalPassiveMode(); //通知服务器开通给一个端口，防止挂死
+                    //Boolean flag=ftpClient.retrieveFile(path, fos);
+                    String fileName = dir + File.separator + name;
+                    Boolean flag=ftpClient.retrieveFile(new String(fileName.getBytes("UTF-8"),"ISO-8859-1"), fos);
                     logger.info("==============flag(返回下载结果):"+flag);
-                    //Boolean flag=ftpClient.retrieveFile(new String(path.getBytes("GBK"),"ISO-8859-1"), fos);
                     IOUtils.closeQuietly(fos);
                 }
             }else if(f.isDirectory()){
