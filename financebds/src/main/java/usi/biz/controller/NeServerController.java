@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -190,25 +191,37 @@ public class NeServerController {
 	 */
 	@RequestMapping(value="uploadZipFile",method= RequestMethod.GET)
 	public void uploadZipFile(String souceFileName,HttpServletResponse response){
-		String zipFilePath = souceFileName+".zip";
+		File souceFile = new File(souceFileName);
+		String zipFilePath = souceFileName;
+		// 文件夹需压缩，文件不压缩
+		boolean isDirectory = souceFile.isDirectory();
+		if(isDirectory){
+			zipFilePath += ".zip";
+		}
 		String fileName=zipFilePath.substring(zipFilePath.lastIndexOf("/")+1);
 		System.out.println(zipFilePath);
-		System.out.println(fileName);
+		// System.out.println(fileName);
 		FileInputStream fis =null;
-		File souceFile = new File(souceFileName);
+		OutputStream out = null;
 		try {
-			zip(souceFile, zipFilePath);
-			OutputStream out = response.getOutputStream();
+			if(isDirectory){
+				zip(souceFile, zipFilePath);
+			}
+			out = new BufferedOutputStream(response.getOutputStream());
 			File file = new File(zipFilePath);
-	        response.setContentType("application/zip ");
-	        response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
-	        fis = new FileInputStream(file);
-			byte[] b = new byte[fis.available()];
-			fis.read(b);
-			out.write(b);
+	        // response.setContentType("application/zip ");
+	        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "utf-8"));
+			response.addHeader("Content-Length", "" + file.length());
+			response.setContentType("application/octet-stream");
+			fis = new FileInputStream(file);
+			// byte[] b = new byte[fis.available()];
+			byte[] b = new byte[1024 * 1024 * 10];
+			int i = -1;
+			while ((i = fis.read(b)) != -1) {
+				out.write(b,0, i);
+			}
 			out.flush();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}finally {
 			if (fis != null) {
@@ -218,8 +231,15 @@ public class NeServerController {
 					e.printStackTrace();
 				}
 			}
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			File file1 = new File(zipFilePath);
-			if(file1.isFile() && file1.exists()){
+			if(isDirectory && file1.isFile() && file1.exists()){
 				file1.delete();
 			}
 		}
@@ -233,7 +253,7 @@ public class NeServerController {
 	        } catch (FileNotFoundException e) {  
 	            e.printStackTrace();  
 	        }  
-	        ZipOutputStream out = new ZipOutputStream(fileOut);  
+	        ZipOutputStream out = new ZipOutputStream(fileOut);
 	        zip(souceFile, out, "");  
 	        out.close();  
 	    }  
@@ -257,7 +277,7 @@ public class NeServerController {
               FileInputStream in = new FileInputStream(souceFile);  
               
               int b;  
-              byte[] by = new byte[1024];  
+              byte[] by = new byte[1024];
               while ((b = in.read(by)) != -1) {  
                   out.write(by, 0, b);  
               }  

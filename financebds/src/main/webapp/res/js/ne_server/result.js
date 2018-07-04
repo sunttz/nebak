@@ -22,6 +22,7 @@ $(document).ready(function() {
 		fit:true,
 		fitColumns:true,
 		rownumbers:true,
+        pageSize : 50,
 		striped:true,
 		pagination:true,
 		singleSelect:false,

@@ -967,15 +967,16 @@ public class NeServerService {
 		if(orgName!=null && !orgName.equals("")&&dateTime!=null && !dateTime.equals("")){
 			flag=3;
 		}
-		System.out.println("===========flag:"+flag);
 		File dir =new File(filePath);
 		File[] files=dir.listFiles();
 		String fileName="";
+		Map<String,Object> map = null;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		for(int i=0;i<files.length;i++){
 			File thisFile=files[i];
-			Map<String,Object> map=new HashMap<String,Object>();
+			map=new HashMap<String,Object>();
 			fileName=files[i].getName();
-			System.out.println("===========file name:"+fileName);
+			// System.out.println("===========file name:"+fileName);
 			boolean isDirectory=files[i].isDirectory();
 			 //if(files[i].isDirectory()){//是文件夹
 				 switch(flag){
@@ -991,7 +992,7 @@ public class NeServerService {
 							 }
 							 //设置文件夹时间
 							 long time = files[i].lastModified();//返回文件最后修改时间，是以个long型毫秒数
-							 String ctime = new SimpleDateFormat("yyyy-MM-dd").format(new Date(time));
+							 String ctime = sdf.format(new Date(time));
 							 map.put("fileDate", ctime);
 							 //设置文件夹大小
 							 if(isDirectory){
@@ -1022,7 +1023,7 @@ public class NeServerService {
 							 }
 							 //设置文件夹时间
 							 long time = files[i].lastModified();//返回文件最后修改时间，是以个long型毫秒数
-							 String ctime = new SimpleDateFormat("yyyy-MM-dd").format(new Date(time));
+							 String ctime = sdf.format(new Date(time));
 							 map.put("fileDate", ctime);
 							 //设置文件夹大小
 							 if(isDirectory){
@@ -1052,7 +1053,7 @@ public class NeServerService {
 							 }
 							 //设置文件夹时间
 							 long time = files[i].lastModified();//返回文件最后修改时间，是以个long型毫秒数
-							 String ctime = new SimpleDateFormat("yyyy-MM-dd").format(new Date(time));
+							 String ctime = sdf.format(new Date(time));
 							 map.put("fileDate", ctime);
 							 //设置文件夹大小
 							 if(isDirectory){
@@ -1082,7 +1083,7 @@ public class NeServerService {
 						 }
 						 //设置文件夹时间
 						 long time = files[i].lastModified();//返回文件最后修改时间，是以个long型毫秒数
-						 String ctime = new SimpleDateFormat("yyyy-MM-dd").format(new Date(time));
+						 String ctime = sdf.format(new Date(time));
 						 map.put("fileDate", ctime);
 						 //设置文件夹大小
 						 if(isDirectory){
@@ -1131,11 +1132,11 @@ public class NeServerService {
         long size = 0;
         File flist[] = f.listFiles();
         size=flist.length;
-        for (int i = 0; i < flist.length; i++) {
-            if (flist[i].isDirectory()) {
-               size++;
-            }
-        }
+//        for (int i = 0; i < flist.length; i++) {
+//            if (flist[i].isDirectory()) {
+//               size++;
+//            }
+//        }
         return size;
     }
 
