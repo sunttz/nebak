@@ -43,6 +43,13 @@
 	    <div data-options="region:'center',border:false" style="padding:3px;">
 			<table id="listTable"></table>
 		</div>
+
+		<div style="display:none;">
+			<div id="progressbarDialog" style="padding:5px;">
+				<div id="progressbar" class="easyui-progressbar" style="width:575px;"></div>
+			</div>
+		</div>
+
 	</body>
 	
 </html>	

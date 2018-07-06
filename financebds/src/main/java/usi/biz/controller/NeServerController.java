@@ -1,5 +1,6 @@
 package usi.biz.controller;
 
+import net.sf.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -183,6 +184,23 @@ public class NeServerController {
 		map.put("rows", autoResult);
 		return map;
 	}
+
+	/**
+	 * 进度条刷新，数据从session当中取
+	 */
+	@RequestMapping(value = "/flushProgress")
+	@ResponseBody
+	public String flushProgress(HttpServletRequest request) throws Exception {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		try {
+			HttpSession session = request.getSession();
+			map.put("percent", session.getAttribute("percent"));// 百分比数字
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		JSONObject jsonObject = JSONObject.fromObject(map);
+		return jsonObject.toString();
+	}
 	
 	/**
 	 * 实现网元文件夹的下载功能
@@ -190,7 +208,7 @@ public class NeServerController {
 	 * @param response
 	 */
 	@RequestMapping(value="uploadZipFile",method= RequestMethod.GET)
-	public void uploadZipFile(String souceFileName,HttpServletResponse response){
+	public void uploadZipFile(String souceFileName,HttpServletRequest request, HttpServletResponse response){
 		File souceFile = new File(souceFileName);
 		String zipFilePath = souceFileName;
 		// 文件夹需压缩，文件不压缩
@@ -203,24 +221,39 @@ public class NeServerController {
 		// System.out.println(fileName);
 		FileInputStream fis =null;
 		OutputStream out = null;
+		long currentLen = 0;// 已读取文件大小
+		long totleLen = 0;// 总文件大小
+		double percent=0.0; //下载进度
 		try {
 			if(isDirectory){
 				zip(souceFile, zipFilePath);
 			}
 			out = new BufferedOutputStream(response.getOutputStream());
 			File file = new File(zipFilePath);
+			totleLen = file.length();
 	        // response.setContentType("application/zip ");
 	        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "utf-8"));
-			response.addHeader("Content-Length", "" + file.length());
+			response.addHeader("Content-Length", "" + totleLen);
 			response.setContentType("application/octet-stream");
 			fis = new FileInputStream(file);
 			// byte[] b = new byte[fis.available()];
 			byte[] b = new byte[1024 * 1024 * 10];
 			int i = -1;
+			HttpSession session = request.getSession();
+			session.removeAttribute("percent");
 			while ((i = fis.read(b)) != -1) {
+				currentLen += i;
 				out.write(b,0, i);
+				// 获取下载进度
+				percent = Math.ceil(currentLen * 1.0 / totleLen * 1000) / 10.0;
+				System.out.println("下载进度:"+percent+"%");
+				session.setAttribute("percent", percent);
 			}
 			out.flush();
+			if(percent == 100) {
+				System.out.println("下载完成了");
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally {

@@ -14,6 +14,45 @@ $(document).ready(function() {
 			$("#org_id").combobox("setValue",option);
 		},
 	});
+
+    $('#progressbarDialog').dialog({
+        title: '',
+        width: 600,
+        height: 'auto',
+        iconCls: 'icon-save',
+        closed: true,
+        cache: false,
+        href: '',
+        modal: true,
+    });
+
+	function download() {
+        $('#progressbarDialog').dialog('open');
+        $('#progressbar').progressbar('setValue', 0);
+        var count = 0; // 防止死循环
+        window.setTimeout(function(){
+            var timer=window.setInterval(function(){
+                $.ajax({
+                    type:'post',
+                    dataType:'json',
+                    url: ctx+"/netElement/flushProgress.do",
+                    success: function(data) {
+                        count ++;
+                        // console.info(data.percent + "————" + count);
+						if(data.percent == null || data.percent=="100.0" || count == 500){
+							window.clearInterval(timer);
+							$('#progressbarDialog').dialog('close');
+						}else{
+                            $('#progressbar').progressbar('setValue', data.percent);
+                        }
+                    },
+                    error:function(data){}
+                });
+            },200);
+        },200);
+
+    }
+
 	
 	//列表初始化
 	$('#listTable').datagrid({
@@ -89,6 +128,7 @@ $(document).ready(function() {
 				} else if(rows.length == 1){
 					var row = $('#listTable').datagrid('getSelected');
 					window.location.href="uploadZipFile.do?souceFileName="+row.filePath;
+                    download();
 				} else {
 					$.messager.alert('提示','请选择您要修改的记录！','info');
 				}
@@ -173,7 +213,9 @@ $(document).ready(function() {
 			filePath:filePath
 		});
 	});
+
 });
+
 
 function editTask(filePath,orgName){
 	tmpfilePath=filePath;
