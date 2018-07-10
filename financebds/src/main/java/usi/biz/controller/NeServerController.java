@@ -224,6 +224,8 @@ public class NeServerController {
 		long currentLen = 0;// 已读取文件大小
 		long totleLen = 0;// 总文件大小
 		double percent=0.0; //下载进度
+		HttpSession session = request.getSession();
+		session.setAttribute("percent", 0);
 		try {
 			if(isDirectory){
 				zip(souceFile, zipFilePath);
@@ -239,8 +241,6 @@ public class NeServerController {
 			// byte[] b = new byte[fis.available()];
 			byte[] b = new byte[1024 * 1024 * 10];
 			int i = -1;
-			HttpSession session = request.getSession();
-			session.removeAttribute("percent");
 			while ((i = fis.read(b)) != -1) {
 				currentLen += i;
 				out.write(b,0, i);
