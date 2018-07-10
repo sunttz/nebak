@@ -46,6 +46,7 @@
 
 		<div style="display:none;">
 			<div id="progressbarDialog" style="padding:5px;">
+				<div id="zipTip">提示：文件夹需压缩打包后下载，请稍等。</div>
 				<div id="progressbar" class="easyui-progressbar" style="width:575px;"></div>
 			</div>
 		</div>

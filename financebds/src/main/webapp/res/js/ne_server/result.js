@@ -39,7 +39,7 @@ $(document).ready(function() {
                     success: function(data) {
                         count ++;
                         // console.info(data.percent + "————" + count);
-						if(data.percent == null || data.percent=="100.0" || count == 500){
+						if(data.percent == null || data.percent=="100.0" || (count == 500 && (data.percent < 0 || data.percent > 100))){
 							window.clearInterval(timer);
 							$('#progressbarDialog').dialog('close');
 						}else{
