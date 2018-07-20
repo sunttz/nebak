@@ -12,6 +12,7 @@ import usi.biz.entity.NeServer;
 import usi.biz.service.BakResultService;
 import usi.biz.service.NeServerService;
 import usi.biz.util.DiskInfoUtil;
+import usi.biz.util.FtpUtils;
 import usi.sys.dto.AuthInfo;
 import usi.sys.dto.PageObj;
 import usi.sys.entity.BusiDict;
@@ -183,6 +184,20 @@ public class NeServerController {
 		map.put("total", pageObj.getTotal());
 		map.put("rows", autoResult);
 		return map;
+	}
+
+	/**
+	 * 网元备份进度
+	 * @return
+	 */
+	@RequestMapping(value = "/nebakDownloading")
+	@ResponseBody
+	public String nebakDownloading(){
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		String downloading = FtpUtils.downloading;
+		map.put("downloading", downloading);
+		JSONObject jsonObject = JSONObject.fromObject(map);
+		return jsonObject.toString();
 	}
 
 	/**

@@ -13,6 +13,17 @@ $(document).ready(function() {
 			$("#org_id").combobox("setValue",option);
 		},
 	});
+
+    $('#progressbarDialog').dialog({
+        title: '',
+        width: 600,
+        height: 'auto',
+        iconCls: 'icon-save',
+        closed: true,
+        cache: false,
+        href: '',
+        modal: true,
+    });
 	
 	//列表初始化
 	$('#listTable').datagrid({
@@ -103,18 +114,16 @@ $(document).ready(function() {
 						}
 					}
 				}
+
 				$.ajax({
-					async : false,
-					cache : false,
 					type : 'POST',
 					dataType : 'text',
 					url : 'bakNow.do',
 					data : {
 						ids : ids
 					},
-					beforeSend:ajaxLoading,//发送请求前打开进度条 
+					beforeSend: ajaxLoading,//发送请求前打开进度条
 					success : function(data) { // 请求成功后处理函数。
-						ajaxLoadEnd();//任务执行成功，关闭进度条 
 						if (data == "") {
 							alert('操作成功!');
 						} else {
@@ -131,6 +140,7 @@ $(document).ready(function() {
 								}
 							});
 						}
+                        ajaxLoadEnd();
 					}
 				});
 			}
@@ -150,13 +160,32 @@ $(document).ready(function() {
 	});
 });
 
-//采用jquery easyui loading css效果 
-function ajaxLoading(){ 
-    $("<div class=\"datagrid-mask\"></div>").css({display:"block",width:"100%",height:$(window).height()}).appendTo("body"); 
-    $("<div class=\"datagrid-mask-msg\"></div>").html("正在处理，请稍候。。。").appendTo("body").css({display:"block",left:($(document.body).outerWidth(true) - 190) / 2,top:($(window).height() - 45) / 2}); 
- } 
- function ajaxLoadEnd(){ 
-     $(".datagrid-mask").remove(); 
-     $(".datagrid-mask-msg").remove();             
+var timer;
+
+function ajaxLoading(){
+	$("#downloading").text("");
+    $('#progressbarDialog').dialog('open');
+    downloading();
+}
+ function ajaxLoadEnd(){
+     window.clearInterval(timer);
+     $('#progressbarDialog').dialog('close');
 } 
 
+function downloading() {
+    window.setTimeout(function(){
+        timer=window.setInterval(function(){
+            $.ajax({
+                type:'post',
+                dataType:'json',
+                url: ctx+"/netElement/nebakDownloading.do",
+                success: function(data) {
+                	var downloading = data.downloading;
+                	console.info(downloading);
+                    $("#downloading").text(downloading)
+                },
+                error:function(data){}
+            });
+        },1000);
+    },200);
+}

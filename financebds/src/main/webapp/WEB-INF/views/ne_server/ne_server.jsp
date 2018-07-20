@@ -87,5 +87,11 @@
 			<table id="listTable"></table>
 		</div>
 	</body>
-	
+	<div style="display:none;">
+		<div id="progressbarDialog" style="padding:5px;">
+			<div>网元备份中，请稍等。。。</div>
+			<div>正在备份文件：<span id="downloading"></span></div>
+		</div>
+	</div>
+
 </html>	

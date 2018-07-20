@@ -26,6 +26,7 @@ import java.util.Date;
 
 public class FtpUtils {
 
+    public static String downloading = ""; // 正在下载的文件
     private static Logger logger = LoggerFactory.getLogger(FtpUtils.class);
 
     /**
@@ -142,6 +143,7 @@ public class FtpUtils {
             ftpClient = getFTPClient(hostname, port, username, password,activeTime);
             ftpClient.setBufferSize(1024);
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            downloading = "";
             if(fileName==null||fileName.equals("")){
             	iterateDown(ftpClient,dir,downloadPath);
             }else{
@@ -216,7 +218,9 @@ public class FtpUtils {
                 if(lastModifiedDate.after(lastDate)){
                     FileOutputStream fos = null;
                     fos = new FileOutputStream(file);
-                    logger.info("本地文件大小为:"+getFormatSize(f.getSize()));
+                    String size = getFormatSize(f.getSize());
+                    downloading = name + " 【" + size + "】";
+                    logger.info("本地文件大小为:"+size);
                     logger.info("==============localPath(本地路径):"+localPath);
                     logger.info("==============path(目标文件):"+name);
                     //ftpClient.enterLocalPassiveMode(); //通知服务器开通给一个端口，防止挂死
