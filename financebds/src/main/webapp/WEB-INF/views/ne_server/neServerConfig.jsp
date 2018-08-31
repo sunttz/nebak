@@ -47,6 +47,7 @@
 								<option value="ENS">ENS</option>
 								<option value="IMSCSCF">IMSCSCF</option>
 								<option value="IMSHSS">IMSHSS</option>
+								<option value="CG">CG</option>
 							</select>
 						</td>
 						<td align="right" style="width: 100px;">设备名称：</td>
@@ -133,6 +134,7 @@
 								<option value="ENS">ENS</option>
 								<option value="IMSCSCF">IMSCSCF</option>
 								<option value="IMSHSS">IMSHSS</option>
+								<option value="CG">CG</option>
 							</select>
 							<span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
