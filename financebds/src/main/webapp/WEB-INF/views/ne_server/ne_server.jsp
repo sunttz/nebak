@@ -43,6 +43,8 @@
 								<option value="IMSCSCF">IMSCSCF</option>
 								<option value="IMSHSS">IMSHSS</option>
 								<option value="CG">CG</option>
+								<option value="MGCF">MGCF</option>
+								<option value="CE">CE</option>
 							</select>
 						</td>
 						<td align="right" style="width: 100px;">设备名称：</td>
