@@ -107,6 +107,33 @@ public class NeServerController {
 	}
 
 	/**
+	 * 获取所有网元类型
+	 * @return
+	 */
+	@RequestMapping(value = "/getAllDeviceType.do")
+	@ResponseBody
+	public List<BusiDict> getAllDeviceType(){
+		List<BusiDict> result = neServerService.getAllDeviceType();
+		return result;
+	}
+
+	/**
+	 * 获取所有网元类型
+	 * @return
+	 */
+	@RequestMapping(value = "/getAllDeviceType2.do")
+	@ResponseBody
+	public List<BusiDict> getAllDeviceType2(){
+		List<BusiDict> result = new ArrayList<>();
+		BusiDict busiDict = new BusiDict();
+		busiDict.setDicCode("-1");
+		busiDict.setDicName("全部");
+		result.add(busiDict);
+		result.addAll(neServerService.getAllDeviceType());
+		return result;
+	}
+
+	/**
 	 * 获取所有网元列表
 	 * @return
 	 */

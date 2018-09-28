@@ -29,6 +29,8 @@
 						</td>
 						<td align="right" style="width: 100px;">网元类型：</td>
 						<td align="left"  style="width: 200px;">
+							<input type="text" id="device_type" name="device_type">
+							<!--
 							<select id="device_type" class="easyui-combobox" name="device_type" style="width:130px;">
 							    <option value="-1" selected>全部</option>
 							    <option value="MSC SERVER">MSC SERVER</option>
@@ -51,6 +53,7 @@
 								<option value="MGCF">MGCF</option>
 								<option value="CE">CE</option>
 							</select>
+							-->
 						</td>
 						<td align="right" style="width: 100px;">设备名称：</td>
 						<td align="left"  style="width: 200px;">
@@ -118,6 +121,7 @@
 					<tr style="height:30px;white-space: nowrap;">
 						<td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>网元类型</td>
 						<td id="deviceType_box">
+							<!--
 							<select id="deviceType" class="easyui-combobox" name="deviceType" style="width:425px;">
 								<option value=""></option>
 								<option value="MSC SERVER">MSC SERVER</option>
@@ -140,6 +144,8 @@
 								<option value="MGCF">MGCF</option>
 								<option value="CE">CE</option>
 							</select>
+							-->
+							<input type="text" id="deviceType" name="deviceType" style="width:425px;">
 							<span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
 							</span>

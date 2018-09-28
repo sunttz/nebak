@@ -10,6 +10,7 @@ public interface NeServerDao {
 	public List<NeServer> getAllOrg();
 	List<NeServer> getAllOrg2();
 	List<BusiDict> getAllFirms();
+	List<BusiDict> getAllDeviceType();
 	public List<NeServer> getPageAllNE(PageObj pageObj,Long orgId,String deviceType,String deviceName,String bakType,String saveType,String saveDay);
 	public List<NeServer> getAllNE();
 	public List<NeServer> getNeServerById(Long serverId);

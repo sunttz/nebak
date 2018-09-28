@@ -53,6 +53,10 @@ public class NeServerService {
 		return neServerDao.getAllFirms();
 	}
 
+	public List<BusiDict> getAllDeviceType(){
+		return neServerDao.getAllDeviceType();
+	}
+
 	/**
 	 * 查询所有网元信息（分页）
 	 * @return

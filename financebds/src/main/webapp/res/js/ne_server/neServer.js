@@ -14,6 +14,22 @@ $(document).ready(function() {
 		},
 	});
 
+    // 网元类型
+    $("#device_type").combobox({
+        url:'getAllDeviceType2.do',
+        method:'post',
+        valueField:'dicCode',
+        textField:'dicName',
+        editable:false,
+        multiple:false,
+        cascadeCheck:false,
+        onLoadSuccess: function () {
+            //加载完成后,设置选中第一项
+            var option = $("#device_type").combobox("getData")[0].dicCode;
+            $("#device_type").combobox("setValue",option);
+        },
+    });
+
     $('#progressbarDialog').dialog({
         title: '',
         width: 600,
@@ -38,7 +54,7 @@ $(document).ready(function() {
         pageSize : 20,
 		queryParams: {
 			orgId:$('#org_id').combobox('getValue'),
-			deviceType:$('#device_type').combobox('getValue'),
+			deviceType:"-1",
             deviceName:$('#device_name').val(),
             bakType:$('#bak_type').combobox('getValue'),
             saveType:$('#save_type').combobox('getValue'),

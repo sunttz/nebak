@@ -18,7 +18,7 @@ import java.util.List;
 
 @OracleDb
 @Repository
-public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerDao{
+public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDao{
 
 	@Override
 	public List<NeServer> getAllOrg() {
@@ -50,6 +50,20 @@ public class NeServerDaoImpl  extends JdbcDaoSupport4oracle implements NeServerD
 	@Override
 	public List<BusiDict> getAllFirms() {
 		String sql = "SELECT DIC_CODE,DIC_NAME FROM SYS_DIC WHERE BUSI_SCENE_CODE = 'FIRMS' AND STATUS = 1";
+		return this.getJdbcTemplate().query(sql, new RowMapper<BusiDict>() {
+			@Override
+			public BusiDict mapRow(ResultSet rs, int i) throws SQLException {
+				BusiDict record = new BusiDict();
+				record.setDicCode(rs.getString(1));
+				record.setDicName(rs.getString(2));
+				return record;
+			}
+		});
+	}
+
+	@Override
+	public List<BusiDict> getAllDeviceType() {
+		String sql = "SELECT DIC_CODE,DIC_NAME FROM SYS_DIC WHERE BUSI_SCENE_CODE = 'DEVICE_TYPE' AND STATUS = 1";
 		return this.getJdbcTemplate().query(sql, new RowMapper<BusiDict>() {
 			@Override
 			public BusiDict mapRow(ResultSet rs, int i) throws SQLException {

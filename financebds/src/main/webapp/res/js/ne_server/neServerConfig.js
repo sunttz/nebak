@@ -8,9 +8,26 @@ $(document).ready(function() {
         editable:false,
         multiple:false,
         cascadeCheck:false,
-        onLoadSuccess: function () { //加载完成后,设置选中第一项
+        onLoadSuccess: function () {
+            //加载完成后,设置选中第一项
             var option = $("#org_id").combobox("getData")[0].orgId;
             $("#org_id").combobox("setValue",option);
+        },
+    });
+
+    // 网元类型
+    $("#device_type").combobox({
+        url:'getAllDeviceType2.do',
+        method:'post',
+        valueField:'dicCode',
+        textField:'dicName',
+        editable:false,
+        multiple:false,
+        cascadeCheck:false,
+        onLoadSuccess: function () {
+            //加载完成后,设置选中第一项
+            var option = $("#device_type").combobox("getData")[0].dicCode;
+            $("#device_type").combobox("setValue",option);
         },
     });
 
@@ -27,7 +44,7 @@ $(document).ready(function() {
 		singleSelect:false,
 		queryParams: {
 			orgId:$('#org_id').combobox('getValue'),
-			deviceType:$('#device_type').combobox('getValue'),
+			deviceType:"-1",
             deviceName:$('#device_name').val(),
             bakType:$('#bak_type').combobox('getValue'),
             saveType:$('#save_type').combobox('getValue'),
@@ -173,6 +190,19 @@ $(document).ready(function() {
         url:'getAllFirms.do',
         method:'post',
         valueField:'dicName',
+        textField:'dicName',
+        editable:false,
+        multiple:false,
+        cascadeCheck:false,
+        onLoadSuccess: function () {
+        },
+    });
+
+    // 网元类型
+    $("#deviceType").combobox({
+        url:'getAllDeviceType.do',
+        method:'post',
+        valueField:'dicCode',
         textField:'dicName',
         editable:false,
         multiple:false,
