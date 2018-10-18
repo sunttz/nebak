@@ -204,7 +204,7 @@ public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDa
 		if(!dateTime.equals("")){
 			sql+=" and to_char(b.create_date, 'yyyymmdd') ='"+ dateTime +"'";
 		}
-		sql+=" order by a.org_id";
+		//sql+=" order by a.org_id";
 		return this.queryByPage(sql,  new RowMapper<AutoLogDto>(){
 			@Override
 			public AutoLogDto mapRow(ResultSet rs, int rowNum) throws SQLException {
