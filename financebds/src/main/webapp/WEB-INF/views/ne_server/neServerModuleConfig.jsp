@@ -27,7 +27,7 @@
 
 <div style="display:none;">
     <div id="neServerModuleDialog" style="padding:5px;">
-        <form id="neServerModuleForm" method="post" style="height: 200px;">
+        <form id="neServerModuleForm" method="post" style="height: 230px;">
             <input name="moduleId" id="moduleId" type="text" style="display: none;" />
             <input name="neServerModuleId" id="neServerModuleId" type="text" style="display: none;" />
             <table style="width:100%;" class="info_table">
@@ -35,6 +35,18 @@
                     <td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>模块名称</td>
                     <td id="moduleName_box">
                         <input id="moduleName" name="moduleName"  style="width:300px;" class="input" size="30" />
+                        <span class="validate_box">
+								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
+							</span>
+                    </td>
+                </tr>
+                <tr id="bakProtocolTr" style="height:30px;white-space: nowrap;">
+                    <td style="width:16%;background:#FAFAFA;" ><span style="color:red;">*</span>备份协议</td>
+                    <td id="bakProtocol_box">
+                        <input id="bakProtocol1" name="bakProtocol" type="radio" value="0" style="margin-left:10px;vertical-align:middle;" checked="checked" />
+                        <label for="bakProtocol1" style="vertical-align:middle;display:inline-block;">FTP</label>
+                        <input id="bakProtocol2" name="bakProtocol" type="radio" value="1" style="margin-left:25px;vertical-align:middle;" />
+                        <label for="bakProtocol2" style="vertical-align:middle;display:inline-block;">SFTP</label>
                         <span class="validate_box">
 								<span style="margin-right:5px;">●</span><span class="validate_msg"></span>
 							</span>

@@ -17,6 +17,8 @@ public class NeServerModule {
     private String userName;
     //密码
     private String passWord;
+    //备份协议(0=ftp、1=sftp)
+    private String bakProtocol;
 
     public Long getModuleId() {
         return moduleId;
@@ -80,5 +82,13 @@ public class NeServerModule {
 
     public void setPassWord(String passWord) {
         this.passWord = passWord;
+    }
+
+    public String getBakProtocol() {
+        return bakProtocol;
+    }
+
+    public void setBakProtocol(String bakProtocol) {
+        this.bakProtocol = bakProtocol;
     }
 }

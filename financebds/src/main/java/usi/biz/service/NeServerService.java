@@ -10,6 +10,7 @@ import usi.biz.dao.NeServerDao;
 import usi.biz.dao.NeServerModuleDao;
 import usi.biz.entity.*;
 import usi.biz.util.FtpUtils;
+import usi.biz.util.SftpUtils;
 import usi.sys.dto.PageObj;
 import usi.sys.entity.BusiDict;
 import usi.sys.util.ConfigUtil;
@@ -98,9 +99,9 @@ public class NeServerService {
 		String result="";
 		//本地地址 
 		String downloadPath="";
-		//ftp上文件地址
+		//文件地址
 		String dir="";
-		//ftp上要下载的文件名 
+		//要下载的文件名
 		String fileName="";
 		//主机名
 		String hostname="";
@@ -110,6 +111,8 @@ public class NeServerService {
 		String username="";
 		//密码
 		String password="";
+		//备份协议(0:ftp,1:sftp)
+		String protocol="";
 		//模块名称
 		String moduleName="";
 		//当天日期
@@ -158,6 +161,7 @@ public class NeServerService {
 							}
 							username = neServerModule.getUserName();
 							password = neServerModule.getPassWord();
+							protocol = neServerModule.getBakProtocol();
 							logger.info("==============moduleName(模块名):"+moduleName);
 							logger.info("==============moduleDownloadPath(模块下载路径):"+moduleDownloadPath);
 							logger.info("==============dir(ftp服务器路径):"+dir);
@@ -165,7 +169,17 @@ public class NeServerService {
 							logger.info("==============port(端口):"+port);
 							logger.info("==============username(用户名):"+username);
 							logger.info("==============password(密码):"+password);
-							Boolean flag=FtpUtils.fileDownload(moduleDownloadPath,dir,fileName,hostname,port,username,password,activeTime);
+							logger.info("==============protocol(备份协议):"+(("1".equals(protocol))?"sftp":"ftp"));
+							Boolean flag = false;
+							// sftp
+							if("1".equals(protocol)){
+								SftpUtils sftp = new SftpUtils(hostname,username,password,port);
+								flag = sftp.batchDownload(dir, moduleDownloadPath);
+							}
+							// ftp
+							else{
+								flag = FtpUtils.fileDownload(moduleDownloadPath,dir,fileName,hostname,port,username,password,activeTime);
+							}
 							logger.info("==============flag(返回标志位):"+flag);
 							if(!flag){
 								bakResult = false;

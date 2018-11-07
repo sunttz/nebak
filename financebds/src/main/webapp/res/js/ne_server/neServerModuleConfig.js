@@ -19,6 +19,16 @@ $(document).ready(function() {
             {field:'moduleId',title:'主键ID',hidden:true,halign:'center',align:'center',width:100},
             {field:'neServerModuleId',title:'关联ID',hidden:true,halign:'center',align:'center',width:100},
             {field:'moduleName',title:'模块名',halign:'center',align:'center',width:80},
+            {field:'bakProtocol',title:'备份协议',halign:'center',align:'center',width:50,
+                formatter: function(value, row, index) {
+                var bakProtocol = value;
+                if(value=='0'){
+                    bakProtocol = "FTP";
+                }else if(value=='1'){
+                    bakProtocol = "SFTP";
+                }
+                return bakProtocol;
+            }},
             {field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:80},
             {field:'devicePort',title:'设备端口',halign:'center',align:'center',width:50},
             {field:'bakPath',title:'备份路径',halign:'center',align:'center',width:100},
@@ -57,6 +67,7 @@ function addModule() {
 function saveNeServerModule() {
     var moduleId = $("#moduleId").val().trim(); // 模块ID
     var moduleName = $("#moduleName").val().trim(); // 模块名称
+    var bakProtocol = $('input:radio[name="bakProtocol"]:checked').val(); // 备份协议
     var deviceAddr = $("#deviceAddr").val().trim(); // 设备地址
     var devicePort = $("#devicePort").val().trim(); // 设备端口
     var userName = $("#userName").val().trim(); // 用户名
@@ -72,6 +83,14 @@ function saveNeServerModule() {
     } else {
         $('#moduleName_box .validate_box').hide();
         $('#moduleName_box .validate_msg').html('');
+    }
+    if(bakProtocol == undefined) {
+        $('#bakProtocol_box .validate_box').show();
+        $('#bakProtocol_box .validate_msg').html('必选字段');
+        flag = false;
+    } else {
+        $('#bakProtocol_box .validate_box').hide();
+        $('#bakProtocol_box .validate_msg').html('');
     }
     if(deviceAddr.length == 0) {
         $('#deviceAddr_box .validate_box').show();
@@ -132,7 +151,7 @@ function saveNeServerModule() {
         dataType : 'json',
         url : ctx+'/neServerModule/addNeserverModule.do',
         data : {
-            moduleId:moduleId,moduleName:moduleName,deviceAddr:deviceAddr,devicePort:devicePort,userName:userName,passWord:passWord,bakPath:bakPath,neServerModuleId:neServerModuleId
+            moduleId:moduleId,moduleName:moduleName,deviceAddr:deviceAddr,devicePort:devicePort,userName:userName,passWord:passWord,bakPath:bakPath,neServerModuleId:neServerModuleId,bakProtocol:bakProtocol
         },
         beforeSend:ajaxLoading,//发送请求前打开进度条
         success : function(data) { // 请求成功后处理函数。

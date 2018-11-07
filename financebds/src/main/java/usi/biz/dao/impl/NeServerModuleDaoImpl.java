@@ -20,7 +20,7 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
 
     @Override
     public List<NeServerModule> getPageAllModule(PageObj pageObj, String neServerModuleId) {
-        String sql = "SELECT MODULE_ID,MODULE_NAME,DEVICE_ADDR,DEVICE_PORT,USER_NAME,PASS_WORD,BAK_PATH,NESERVER_MODULE_ID FROM NE_SERVER_MODULE WHERE NESERVER_MODULE_ID = '"+neServerModuleId+"' ORDER BY MODULE_ID";
+        String sql = "SELECT MODULE_ID,MODULE_NAME,DEVICE_ADDR,DEVICE_PORT,USER_NAME,PASS_WORD,BAK_PATH,NESERVER_MODULE_ID,BAK_PROTOCOL FROM NE_SERVER_MODULE WHERE NESERVER_MODULE_ID = '"+neServerModuleId+"' ORDER BY MODULE_ID";
         return this.queryByPage(sql, new RowMapper<NeServerModule>() {
             @Override
             public NeServerModule mapRow(ResultSet rs, int i) throws SQLException {
@@ -33,6 +33,7 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
                 nsm.setPassWord(rs.getString(6));
                 nsm.setBakPath(rs.getString(7));
                 nsm.setNeServerModuleId(rs.getString(8));
+                nsm.setBakProtocol(rs.getString(9));
                 return nsm;
             }
         },pageObj);
@@ -40,7 +41,7 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
 
     @Override
     public List<NeServerModule> getAllModule(String neServerModuleId) {
-        String sql = "SELECT MODULE_ID,MODULE_NAME,DEVICE_ADDR,DEVICE_PORT,USER_NAME,PASS_WORD,BAK_PATH,NESERVER_MODULE_ID FROM NE_SERVER_MODULE WHERE NESERVER_MODULE_ID = '"+neServerModuleId+"' ORDER BY MODULE_ID";
+        String sql = "SELECT MODULE_ID,MODULE_NAME,DEVICE_ADDR,DEVICE_PORT,USER_NAME,PASS_WORD,BAK_PATH,NESERVER_MODULE_ID,BAK_PROTOCOL FROM NE_SERVER_MODULE WHERE NESERVER_MODULE_ID = '"+neServerModuleId+"' ORDER BY MODULE_ID";
         return this.getJdbcTemplate().query(sql, new RowMapper<NeServerModule>() {
             @Override
             public NeServerModule mapRow(ResultSet rs, int i) throws SQLException {
@@ -53,6 +54,7 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
                 nsm.setPassWord(rs.getString(6));
                 nsm.setBakPath(rs.getString(7));
                 nsm.setNeServerModuleId(rs.getString(8));
+                nsm.setBakProtocol(rs.getString(9));
                 return nsm;
             }
         });
@@ -60,7 +62,7 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
 
     @Override
     public int saveNeServerModule(final NeServerModule neServerModule) {
-        String sql = "INSERT INTO NE_SERVER_MODULE (MODULE_ID,MODULE_NAME,DEVICE_ADDR,DEVICE_PORT,USER_NAME,PASS_WORD,BAK_PATH,NESERVER_MODULE_ID) VALUES (NE_SERVER_MODULE_SEQ.nextval,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO NE_SERVER_MODULE (MODULE_ID,MODULE_NAME,DEVICE_ADDR,DEVICE_PORT,USER_NAME,PASS_WORD,BAK_PATH,NESERVER_MODULE_ID,BAK_PROTOCOL) VALUES (NE_SERVER_MODULE_SEQ.nextval,?,?,?,?,?,?,?,?)";
         return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps) throws SQLException {
@@ -71,13 +73,14 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
                 ps.setString(5,neServerModule.getPassWord());
                 ps.setString(6,neServerModule.getBakPath());
                 ps.setString(7,neServerModule.getNeServerModuleId());
+                ps.setString(8,neServerModule.getBakProtocol());
             }
         });
     }
 
     @Override
     public int updateNeServerModule(final NeServerModule neServerModule) {
-        String sql = "UPDATE NE_SERVER_MODULE SET MODULE_NAME=?,DEVICE_ADDR=?,DEVICE_PORT=?,USER_NAME=?,PASS_WORD=?,BAK_PATH=? WHERE MODULE_ID = ?";
+        String sql = "UPDATE NE_SERVER_MODULE SET MODULE_NAME=?,DEVICE_ADDR=?,DEVICE_PORT=?,USER_NAME=?,PASS_WORD=?,BAK_PATH=?,BAK_PROTOCOL=? WHERE MODULE_ID = ?";
         return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps) throws SQLException {
@@ -87,7 +90,8 @@ public class NeServerModuleDaoImpl extends JdbcDaoSupport4oracle implements NeSe
                 ps.setString(4,neServerModule.getUserName());
                 ps.setString(5,neServerModule.getPassWord());
                 ps.setString(6,neServerModule.getBakPath());
-                ps.setLong(7,neServerModule.getModuleId());
+                ps.setString(7,neServerModule.getBakProtocol());
+                ps.setLong(8,neServerModule.getModuleId());
             }
         });
     }

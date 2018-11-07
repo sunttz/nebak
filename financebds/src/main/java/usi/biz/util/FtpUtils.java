@@ -141,8 +141,9 @@ public class FtpUtils {
         Boolean flag=true;
         try {
             ftpClient = getFTPClient(hostname, port, username, password,activeTime);
-            ftpClient.setBufferSize(1024);
+            ftpClient.setBufferSize(1024 * 4);
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            ftpClient.enterLocalPassiveMode();
             downloading = "";
             if(fileName==null||fileName.equals("")){
             	iterateDown(ftpClient,dir,downloadPath);
@@ -195,7 +196,7 @@ public class FtpUtils {
             logger.info("=============FTP路径切换失败");
             throw new RuntimeException("FTP路径切换失败");
         }
-        ftpClient.enterLocalPassiveMode();
+        // ftpClient.enterLocalPassiveMode();
         //ftpClient.configure(new FTPClientConfig("usi.biz.util.UnixFTPEntryParser"));
         //如果当前目录还没有创建，那么就在这里创建
         File filedown = new File(downloadPath);
@@ -241,7 +242,7 @@ public class FtpUtils {
      * 获取前一天零点日期
      * @return
      */
-    private static Date getLastDate() {
+    public static Date getLastDate() {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
