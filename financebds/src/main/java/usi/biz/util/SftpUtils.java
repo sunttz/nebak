@@ -76,6 +76,7 @@ public class SftpUtils {
             // 参数sftp指明要打开的连接是sftp连接
             channelSftp = (ChannelSftp) session.openChannel("sftp");
             channelSftp.connect();
+            log.info("sftp连接成功");
         } catch (JSchException e) {
             log.error("sftp异常：连接失败", e);
         }
@@ -146,6 +147,11 @@ public class SftpUtils {
         // 得到连接
         channelSftp = GetConnectSftp();
         FtpUtils.downloading = "";
+        // 如果本地目录还没有创建，那么就在这里创建
+        File filedown = new File(dstPath);
+        if(!filedown.exists()){
+            filedown.mkdirs();
+        }
         //批量下载管理
         try {
             batchDownMag(pathName, dstPath, channelSftp);
