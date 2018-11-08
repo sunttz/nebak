@@ -5,16 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 import java.util.Vector;
 
 
 public class SftpUtils {
-    // todo 下载前两天文件筛选、下载内容实时更新
+
     private static final Logger log = LoggerFactory.getLogger(SftpUtils.class); // 用来记录日志
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     Session session = null;
-
     String privateKey = null;
     String passphrase = null;
     String host = null; // sftp服务器的IP
@@ -24,7 +26,6 @@ public class SftpUtils {
     int port = 22; // 端口号
 
     public SftpUtils() {
-
     }
 
     public SftpUtils(String host, String username, String password, int port) {
@@ -144,6 +145,7 @@ public class SftpUtils {
         ChannelSftp channelSftp = null;
         // 得到连接
         channelSftp = GetConnectSftp();
+        FtpUtils.downloading = "";
         //批量下载管理
         try {
             batchDownMag(pathName, dstPath, channelSftp);
@@ -178,6 +180,7 @@ public class SftpUtils {
                 if (vv == null && vv.size() == 0) {
                     return;
                 } else {
+                    Date lastDate = FtpUtils.getLastDate(); // 前一天日期
                     // 遍历当前目录所有文件及子文件夹
                     for (Object object : vv) {
                         ChannelSftp.LsEntry entry = (ChannelSftp.LsEntry) object;
@@ -199,7 +202,19 @@ public class SftpUtils {
                             batchDownMag(pathName + "/" + filename,
                                     dstPathChild, channelSftp);
                         } else {
-                            download(pathName, filename, dstPath, channelSftp);
+                            SftpATTRS attrs = entry.getAttrs();
+                            int mtime = attrs.getMTime(); // 最后修改日期
+                            String size = FtpUtils.getFormatSize(attrs.getSize()); // 大小
+                            long millions = new Long(mtime).longValue() * 1000;
+                            String lastModifiedStr = sdf.format(millions);
+                            Date lastModifiedDate = sdf.parse(lastModifiedStr);
+                            log.info(String.format("文件【%s】最后修改日期:%s", filename, lastModifiedStr));
+                            log.info("文件大小为：" + size);
+                            // 只有修改日期在今天和昨天的文件才下载备份
+                            if (lastModifiedDate.after(lastDate)) {
+                                FtpUtils.downloading = filename + " 【" + size + "】";
+                                download(pathName, filename, dstPath, channelSftp);
+                            }
                         }
                     }
                 }
@@ -369,6 +384,5 @@ public class SftpUtils {
             e.printStackTrace();
         }
         return isDirExistFlag;
-
     }
 }

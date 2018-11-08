@@ -170,7 +170,7 @@ public class NeServerService {
 							logger.info("==============username(用户名):"+username);
 							logger.info("==============password(密码):"+password);
 							logger.info("==============protocol(备份协议):"+(("1".equals(protocol))?"sftp":"ftp"));
-							Boolean flag = false;
+							boolean flag = false;
 							// sftp
 							if("1".equals(protocol)){
 								SftpUtils sftp = new SftpUtils(hostname,username,password,port);
@@ -312,6 +312,8 @@ public class NeServerService {
 		String username="";
 		//密码
 		String password="";
+		//备份协议(0:ftp,1:sftp)
+		String protocol="";
 		//超时时间
 		int activeTime=3000;
 		// 备份结果（1成功0失败）
@@ -405,6 +407,7 @@ public class NeServerService {
 									}
 									username = neServerModule.getUserName();
 									password = neServerModule.getPassWord();
+									protocol = neServerModule.getBakProtocol();
 									logger.info("==============moduleName(模块名):"+moduleName);
 									logger.info("==============moduleDownloadPath(模块下载路径):"+moduleDownloadPath);
 									logger.info("==============dir(ftp服务器路径):"+dir);
@@ -412,7 +415,17 @@ public class NeServerService {
 									logger.info("==============port(端口):"+port);
 									logger.info("==============username(用户名):"+username);
 									logger.info("==============password(密码):"+password);
-									Boolean flag=FtpUtils.fileDownload(moduleDownloadPath,dir,fileName,hostname,port,username,password,activeTime);
+									logger.info("==============protocol(备份协议):"+(("1".equals(protocol))?"sftp":"ftp"));
+									boolean flag = false;
+									// sftp
+									if("1".equals(protocol)){
+										SftpUtils sftp = new SftpUtils(hostname,username,password,port);
+										flag = sftp.batchDownload(dir, moduleDownloadPath);
+									}
+									// ftp
+									else{
+										flag = FtpUtils.fileDownload(moduleDownloadPath,dir,fileName,hostname,port,username,password,activeTime);
+									}
 									logger.info("==============flag(返回标志位):"+flag);
 									if(!flag){
 										bakGetResult = false;
