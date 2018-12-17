@@ -13,7 +13,7 @@
 	<context:property-placeholder location="classpath:jdbc.properties" />
 	
 	<!-- 支持定时任务、异步方法等 -->
-	<task:annotation-driven />
+	<!--<task:annotation-driven />-->
 	<!-- 支持缓存 -->
 	<cache:annotation-driven />
 

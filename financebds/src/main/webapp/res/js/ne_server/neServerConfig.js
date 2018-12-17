@@ -169,6 +169,20 @@ $(document).ready(function() {
                     }
                 });
             }
+        },{
+            iconCls: 'icon-export',
+            text: '导出新增模板',
+            handler: function () {
+                window.location.href = ctx+'/netElement/downloadInsertTemplet.do';
+            }
+        },{
+            iconCls: 'icon-export',
+            text: '导出修改模板',
+            handler: addNeServer
+        },{
+            iconCls: 'icon-import',
+            text: '批量导入',
+            handler: addNeServer
         }]
 	});
 

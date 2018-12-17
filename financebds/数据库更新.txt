@@ -115,3 +115,11 @@ cache 10;
 -- 2018.11.5 增加备份协议字段
 alter table NE_SERVER_MODULE add bak_protocol char(1);
 UPDATE NE_SERVER_MODULE SET BAK_PROTOCOL = '0';
+
+-- 2018.12.17 Create sequence
+create sequence sys_opt_log_seq
+minvalue 1
+maxvalue 999999999999999999999999999
+start with 100000
+increment by 1
+cache 10;
