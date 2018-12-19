@@ -1255,7 +1255,8 @@ public class NeServerService {
     }
 
     /**
-     * 生成excel导出模板
+     * 生成excel新增模板
+     *
      * @return 临时文件路径
      * @throws Exception
      */
@@ -1284,5 +1285,40 @@ public class NeServerService {
         paraMap.put("firms", tmpStrs.toArray(new String[tmpStrs.size()]));
         tmpStrs.clear();
         return ExcelUtil_Nebak.createNebakInsertTemplet(paraMap);
+    }
+
+    /**
+     * 生成excel修改模板
+     *
+     * @param serverIds 待修改网元ID集合
+     * @return 临时文件路径
+     * @throws Exception
+     */
+    public String createUpdateTemplet(String serverIds) throws Exception {
+        Map<String, String[]> paraMap = new HashMap();
+        List<String> tmpStrs = new ArrayList<>();
+        // 所属地区
+        List<NeServer> areas = neServerDao.getAllOrg2();
+        for (NeServer neServer : areas) {
+            tmpStrs.add(neServer.getOrgName());
+        }
+        paraMap.put("areas", tmpStrs.toArray(new String[tmpStrs.size()]));
+        // 网元类型
+        tmpStrs.clear();
+        List<BusiDict> deviceTypes = neServerDao.getAllDeviceType();
+        for (BusiDict busiDict : deviceTypes) {
+            tmpStrs.add(busiDict.getDicName());
+        }
+        paraMap.put("deviceTypes", tmpStrs.toArray(new String[tmpStrs.size()]));
+        // 厂家
+        tmpStrs.clear();
+        List<BusiDict> firms = neServerDao.getAllFirms();
+        for (BusiDict busiDict : firms) {
+            tmpStrs.add(busiDict.getDicName());
+        }
+        paraMap.put("firms", tmpStrs.toArray(new String[tmpStrs.size()]));
+        tmpStrs.clear();
+        List<NeServerPojo> neServerPojos = neServerDao.batchSelect(serverIds); // 待修改网元信息
+        return ExcelUtil_Nebak.createNebakUpdateTemplet(paraMap, neServerPojos);
     }
 }

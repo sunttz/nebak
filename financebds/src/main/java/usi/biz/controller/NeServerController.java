@@ -578,6 +578,53 @@ public class NeServerController {
                 e.printStackTrace();
             }
         }
+    }
 
+    /**
+     * 下载批量修改模板
+     * @param request
+     * @param response
+     */
+    @RequestMapping(value = "/downloadUpdateTemplet.do", method = RequestMethod.POST)
+    public void downloadUpdateTemplet(String serverIds, HttpServletRequest request, HttpServletResponse response) {
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        File tmpFile = null;
+        String filename = "网元配置修改模板.xls";
+        try{
+            String tmpFilename = neServerService.createUpdateTemplet(serverIds);
+            tmpFile = new File(tmpFilename);
+            request.setCharacterEncoding("UTF-8");
+            String agent = request.getHeader("User-Agent").toUpperCase();
+            if ((agent.indexOf("MSIE") > 0) || ((agent.indexOf("RV") != -1) && (agent.indexOf("FIREFOX") == -1)))
+                filename = URLEncoder.encode(filename, "UTF-8");
+            else {
+                filename = new String(filename.getBytes("UTF-8"), "ISO8859-1");
+            }
+            response.setContentType("application/x-msdownload;");
+            response.setHeader("Content-disposition", "attachment; filename=" + filename);
+            response.setHeader("Content-Length", String.valueOf(tmpFile.length()));
+            bis = new BufferedInputStream(new FileInputStream(tmpFile));
+            bos = new BufferedOutputStream(response.getOutputStream());
+            byte[] buff = new byte[2048];
+            int bytesRead;
+            while (-1 != (bytesRead = bis.read(buff, 0, buff.length)))
+                bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (bis != null) {
+                    bis.close();
+                }
+                if (bos != null) {
+                    bos.close();
+                }
+                tmpFile.delete();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

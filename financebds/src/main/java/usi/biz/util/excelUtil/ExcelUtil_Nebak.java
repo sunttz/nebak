@@ -9,6 +9,7 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import usi.biz.entity.NeServerPojo;
 import usi.biz.util.FileUtil;
 import usi.biz.util.PropertyUtil;
 
@@ -24,23 +25,27 @@ import java.util.*;
 public class ExcelUtil_Nebak {
 
     /**
-     * 标题样式
+     * 标题样式（蓝）
      */
     private final static String STYLE_HEADER = "header";
     /**
-     * 标题样式1
+     * 标题样式（绿）
      */
     private final static String STYLE_HEADER1 = "header1";
+    /**
+     * 标题样式（灰）
+     */
+    private final static String STYLE_HEADER2 = "header2";
     /**
      * 表头样式
      */
     private final static String STYLE_TITLE = "title";
     /**
-     * 数据样式
+     * 数据样式（黑）
      */
     private final static String STYLE_DATA = "data";
     /**
-     * 数据样式
+     * 数据样式（灰）
      */
     private final static String STYLE_DATA1 = "data1";
 
@@ -194,6 +199,7 @@ public class ExcelUtil_Nebak {
             throws IOException {
         FileOutputStream fos = new FileOutputStream(filePath);
         if (CollectionUtils.isNotEmpty(excelSheets)) {
+            cellStyleMap.clear();
             Workbook wb = createWorkBook(version, excelSheets, isInsert);
             wb.write(fos);
             fos.close();
@@ -211,7 +217,6 @@ public class ExcelUtil_Nebak {
             Sheet tempSheet = wb.createSheet(WorkbookUtil.createSafeSheetName(excelSheetPO.getSheetName()));
             buildSheetData(wb, tempSheet, excelSheetPO, version, isInsert);
         }
-        cellStyleMap.clear();
         return wb;
     }
 
@@ -235,19 +240,25 @@ public class ExcelUtil_Nebak {
         String[] saveList = {"按天", "按周"};
         String[] protocolList = {"FTP", "SFTP"};
         Map<String, String[]> paraMap = excelSheetPO.getParaMap();
+        int endRow = 0;
+        if (isInsert) {
+            endRow = 500;
+        } else {
+            endRow = excelSheetPO.getDataList().size() + 1;
+        }
         // 设置下拉菜单
         if (paraMap.get("areas") != null) {
-            setHSSFValidation(sheet, paraMap.get("areas"), 2, 500, 0, 0); // 所属地区
+            setHSSFValidation(sheet, paraMap.get("areas"), 2, endRow, 0, 0); // 所属地区
         }
         if (paraMap.get("deviceTypes") != null) {
-            setHSSFValidation(sheet, paraMap.get("deviceTypes"), 2, 500, 2, 2); // 网元类型
+            setHSSFValidation(sheet, paraMap.get("deviceTypes"), 2, endRow, 2, 2); // 网元类型
         }
         if (paraMap.get("firms") != null) {
-            setHSSFValidation(sheet, paraMap.get("firms"), 2, 500, 3, 3); // 所属厂家
+            setHSSFValidation(sheet, paraMap.get("firms"), 2, endRow, 3, 3); // 所属厂家
         }
-        setHSSFValidation(sheet, saveList, 2, 500, 4, 4); // 保存类型
+        setHSSFValidation(sheet, saveList, 2, endRow, 4, 4); // 保存类型
         if (excelSheetPO.getSheetName().equals("被动取")) {
-            setHSSFValidation(sheet, protocolList, 2, 500, 8, 8); // 备份协议
+            setHSSFValidation(sheet, protocolList, 2, endRow, 8, 8); // 备份协议
         }
     }
 
@@ -258,15 +269,20 @@ public class ExcelUtil_Nebak {
             Row row = sheet.createRow(2 + i);
             for (int j = 0; j < values.size() && j < version.getMaxColumn(); j++) {
                 Cell cell = row.createCell(j);
+                // 新增模板的示例数据置灰
                 if (isInsert && i >= 0 && i < 2) {
+                    cell.setCellStyle(getStyle(STYLE_DATA1, wb));
+                }
+                // 修改模板的Id字段置灰
+                else if (!isInsert && (("被动取".equals(excelSheetPO.getSheetName()) && j > 13) || ("主动推".equals(excelSheetPO.getSheetName()) && j > 8))) {
                     cell.setCellStyle(getStyle(STYLE_DATA1, wb));
                 } else {
                     cell.setCellStyle(getStyle(STYLE_DATA, wb));
                 }
-                cell.setCellValue(values.get(j).toString());
+                cell.setCellValue(values.get(j) != null ? values.get(j).toString() : "");
             }
         }
-        // 新增模板默认设置1000行单元格样式，修改模板按数据量设置单元格样式
+        // 新增模板默认设置500行单元格样式，修改模板按数据量设置单元格样式
         if (isInsert) {
             int tmpNum = 500;
             for (int k = 2 + dataList.size(); k < 2 + dataList.size() + tmpNum; k++) {
@@ -286,7 +302,9 @@ public class ExcelUtil_Nebak {
             sheet.setColumnWidth(13, 8000);
             for (int i = 0; i < headers.length && i < version.getMaxColumn(); i++) {
                 Cell cellHeader = row.createCell(i);
-                if (i > 6) {
+                if (i > 13) {
+                    cellHeader.setCellStyle(getStyle(STYLE_HEADER2, wb));
+                } else if (i > 6) {
                     cellHeader.setCellStyle(getStyle(STYLE_HEADER1, wb));
                 } else {
                     cellHeader.setCellStyle(getStyle(STYLE_HEADER, wb));
@@ -298,7 +316,11 @@ public class ExcelUtil_Nebak {
             sheet.setColumnWidth(8, 15000);
             for (int i = 0; i < headers.length && i < version.getMaxColumn(); i++) {
                 Cell cellHeader = row.createCell(i);
-                cellHeader.setCellStyle(getStyle(STYLE_HEADER, wb));
+                if (i > 8) {
+                    cellHeader.setCellStyle(getStyle(STYLE_HEADER2, wb));
+                } else {
+                    cellHeader.setCellStyle(getStyle(STYLE_HEADER, wb));
+                }
                 cellHeader.setCellValue(headers[i]);
             }
         } else {
@@ -360,6 +382,15 @@ public class ExcelUtil_Nebak {
             style.setFont(font);
             style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             style.setFillForegroundColor(IndexedColors.LIME.index);
+        } else if (STYLE_HEADER2.equals(type)) {
+            style.setAlignment(HorizontalAlignment.CENTER);
+            style.setVerticalAlignment(VerticalAlignment.CENTER);
+            Font font = wb.createFont();
+            font.setFontHeightInPoints((short) 16);
+            font.setFontName("黑体");
+            style.setFont(font);
+            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
         } else if (STYLE_TITLE.equals(type)) {
             style.setAlignment(HorizontalAlignment.CENTER);
             style.setVerticalAlignment(VerticalAlignment.CENTER);
@@ -439,14 +470,14 @@ public class ExcelUtil_Nebak {
     /**
      * 生成网元配置新增模板
      *
-     * @param paraMap
+     * @param paraMap 下拉菜单字典值
      */
     public static String createNebakInsertTemplet(Map<String, String[]> paraMap) throws Exception {
         List<ExcelSheetPO> excelSheets = new ArrayList<>();
         // 被动取
         ExcelSheetPO excelSheetPO_get = new ExcelSheetPO();
         excelSheetPO_get.setSheetName("被动取");
-        excelSheetPO_get.setTitle("被动取类型配置：蓝色区域为网元配置，绿色区域为模块配置；针对多模块网元，配置为多条数据，其中蓝色网元配置部分必须相同\n第3-4行为多模块网元配置示例数据，请勿删除");
+        excelSheetPO_get.setTitle("被动取类型配置：蓝色区域为网元配置，绿色区域为模块配置；针对多模块网元，配置为多条数据，其中蓝色网元配置部分必须相同；\n第3-4行为多模块网元配置示例数据，请勿删除");
         excelSheetPO_get.setHeaders(new String[]{"所属地区", "设备名称", "网元类型", "所属厂家", "保存类型", "保存份数", "备注", "模块名称", "备份协议", "设备地址", "设备端口", "用户名", "密码", "备份路径"});
         excelSheetPO_get.setParaMap(paraMap);
         List<List<Object>> data_get = new ArrayList<>();
@@ -504,16 +535,83 @@ public class ExcelUtil_Nebak {
         data_put.add(row_put);
         excelSheetPO_put.setDataList(data_put);
         excelSheets.add(excelSheetPO_put);
-        String tmpFilename = PropertyUtil.getStringValue("tmp.file.path") + File.separator + "insertTemplet("+sdf.format(new Date())+").xls";
+        String tmpFilename = PropertyUtil.getStringValue("tmp.file.path") + File.separator + "insertTemplet(" + sdf.format(new Date()) + ").xls";
         createWorkbookAtDisk(ExcelVersion.V2003, excelSheets, tmpFilename, true);
         return tmpFilename;
     }
 
     /**
      * 生成网元配置修改模板
+     *
+     * @param paraMap       下拉菜单字典值
+     * @param neServerPojos 待修改数据
+     * @return
      */
-    public static void createNebakUpdateTemplet() {
-
+    public static String createNebakUpdateTemplet(Map<String, String[]> paraMap, List<NeServerPojo> neServerPojos) throws Exception {
+        List<ExcelSheetPO> excelSheets = new ArrayList<>();
+        // 被动取
+        ExcelSheetPO excelSheetPO_get = new ExcelSheetPO();
+        excelSheetPO_get.setSheetName("被动取");
+        excelSheetPO_get.setTitle("被动取类型配置：蓝色区域为网元配置，绿色区域为模块配置；针对多模块网元，配置为多条数据，其中蓝色网元配置部分必须相同；\n请勿修改灰色区域网元ID及模块ID");
+        excelSheetPO_get.setHeaders(new String[]{"所属地区", "设备名称", "网元类型", "所属厂家", "保存类型", "保存份数", "备注", "模块名称", "备份协议", "设备地址", "设备端口", "用户名", "密码", "备份路径", "网元ID", "模块ID"});
+        excelSheetPO_get.setParaMap(paraMap);
+        List<List<Object>> data_get = new ArrayList<>();
+        List<Object> row = null;
+        NeServerPojo nsp = null;
+        for (int i = 0; i < neServerPojos.size(); i++) {
+            nsp = neServerPojos.get(i);
+            if ("0".equals(nsp.getBakType())) {
+                row = new ArrayList<>();
+                row.add(nsp.getOrgName());
+                row.add(nsp.getDeviceName());
+                row.add(nsp.getDeviceType());
+                row.add(nsp.getFirms());
+                row.add(nsp.getSaveType());
+                row.add(nsp.getSaveDay());
+                row.add(nsp.getRemarks());
+                row.add(nsp.getModuleName());
+                row.add(nsp.getBakProtocol());
+                row.add(nsp.getDeviceAddr());
+                row.add(nsp.getDevicePort());
+                row.add(nsp.getUserName());
+                row.add(nsp.getPassWord());
+                row.add(nsp.getBakPath());
+                row.add(nsp.getServerId());
+                row.add(nsp.getModuleId());
+                data_get.add(row);
+            }
+        }
+        excelSheetPO_get.setDataList(data_get);
+        excelSheets.add(excelSheetPO_get);
+        // 主动推
+        ExcelSheetPO excelSheetPO_put = new ExcelSheetPO();
+        excelSheetPO_put.setSheetName("主动推");
+        excelSheetPO_put.setTitle("主动推类型配置：请勿修改灰色区域网元ID");
+        excelSheetPO_put.setHeaders(new String[]{"所属地区", "设备名称", "网元类型", "所属厂家", "保存类型", "保存份数", "备注", "用户数据路径", "系统数据路径", "网元ID"});
+        excelSheetPO_put.setParaMap(paraMap);
+        List<List<Object>> data_put = new ArrayList<>();
+        for (int j = 0; j < neServerPojos.size(); j++) {
+            nsp = neServerPojos.get(j);
+            if ("1".equals(nsp.getBakType())) {
+                row = new ArrayList<>();
+                row.add(nsp.getOrgName());
+                row.add(nsp.getDeviceName());
+                row.add(nsp.getDeviceType());
+                row.add(nsp.getFirms());
+                row.add(nsp.getSaveType());
+                row.add(nsp.getSaveDay());
+                row.add(nsp.getRemarks());
+                row.add(nsp.getBakUserdata());
+                row.add(nsp.getBakSystem());
+                row.add(nsp.getServerId());
+                data_put.add(row);
+            }
+        }
+        excelSheetPO_put.setDataList(data_put);
+        excelSheets.add(excelSheetPO_put);
+        String tmpFilename = PropertyUtil.getStringValue("tmp.file.path") + File.separator + "updateTemplet(" + sdf.format(new Date()) + ").xls";
+        createWorkbookAtDisk(ExcelVersion.V2003, excelSheets, tmpFilename, false);
+        return tmpFilename;
     }
 
 }

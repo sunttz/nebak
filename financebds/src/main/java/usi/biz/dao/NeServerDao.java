@@ -2,6 +2,7 @@ package usi.biz.dao;
 
 import usi.biz.entity.AutoLogDto;
 import usi.biz.entity.NeServer;
+import usi.biz.entity.NeServerPojo;
 import usi.sys.dto.PageObj;
 import usi.sys.entity.BusiDict;
 
@@ -56,5 +57,12 @@ public interface NeServerDao {
 	 * @return
 	 */
 	String getNameByHeadchar(String str);
+
+	/**
+	 * 批量查询网元列表
+	 * @param ids id集合
+	 * @return
+	 */
+	List<NeServerPojo> batchSelect(String ids);
 
 }
