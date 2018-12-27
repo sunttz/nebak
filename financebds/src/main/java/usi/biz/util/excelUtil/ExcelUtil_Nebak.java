@@ -270,7 +270,7 @@ public class ExcelUtil_Nebak {
             for (int j = 0; j < values.size() && j < version.getMaxColumn(); j++) {
                 Cell cell = row.createCell(j);
                 // 新增模板的示例数据置灰
-                if (isInsert && i >= 0 && i < 2) {
+                if (isInsert && (("被动取".equals(excelSheetPO.getSheetName()) && i >= 0 && i < 2) || ("主动推".equals(excelSheetPO.getSheetName()) && i == 0))) {
                     cell.setCellStyle(getStyle(STYLE_DATA1, wb));
                 }
                 // 修改模板的Id字段置灰
@@ -470,9 +470,10 @@ public class ExcelUtil_Nebak {
     /**
      * 生成网元配置新增模板
      *
-     * @param paraMap 下拉菜单字典值
+     * @param paraMap       下拉菜单字典值
+     * @param neServerPojos 待新增数据
      */
-    public static String createNebakInsertTemplet(Map<String, String[]> paraMap) throws Exception {
+    public static String createNebakInsertTemplet(Map<String, String[]> paraMap, List<NeServerPojo> neServerPojos) throws Exception {
         List<ExcelSheetPO> excelSheets = new ArrayList<>();
         // 被动取
         ExcelSheetPO excelSheetPO_get = new ExcelSheetPO();
@@ -480,6 +481,8 @@ public class ExcelUtil_Nebak {
         excelSheetPO_get.setTitle("被动取类型配置：蓝色区域为网元配置，绿色区域为模块配置；针对多模块网元，配置为多条数据，其中蓝色网元配置部分必须相同；\n第3-4行为多模块网元配置示例数据，请勿删除");
         excelSheetPO_get.setHeaders(new String[]{"所属地区", "设备名称", "网元类型", "所属厂家", "保存类型", "保存份数", "备注", "模块名称", "备份协议", "设备地址", "设备端口", "用户名", "密码", "备份路径"});
         excelSheetPO_get.setParaMap(paraMap);
+        List<Object> row = null;
+        NeServerPojo nsp = null;
         List<List<Object>> data_get = new ArrayList<>();
         List<Object> row0 = new ArrayList<>();
         row0.add("合肥");
@@ -513,6 +516,31 @@ public class ExcelUtil_Nebak {
         row1.add("123");
         row1.add("/Images/nodeB");
         data_get.add(row1);
+        if (neServerPojos != null) {
+            for (int i = 0; i < neServerPojos.size(); i++) {
+                nsp = neServerPojos.get(i);
+                if ("0".equals(nsp.getBakType())) {
+                    row = new ArrayList<>();
+                    row.add(nsp.getOrgName());
+                    row.add(nsp.getDeviceName());
+                    row.add(nsp.getDeviceType());
+                    row.add(nsp.getFirms());
+                    row.add(nsp.getSaveType());
+                    row.add(nsp.getSaveDay());
+                    row.add(nsp.getRemarks());
+                    row.add(nsp.getModuleName());
+                    row.add(nsp.getBakProtocol());
+                    row.add(nsp.getDeviceAddr());
+                    row.add(nsp.getDevicePort());
+                    row.add(nsp.getUserName());
+                    row.add(nsp.getPassWord());
+                    row.add(nsp.getBakPath());
+                    row.add(nsp.getServerId());
+                    row.add(nsp.getModuleId());
+                    data_get.add(row);
+                }
+            }
+        }
         excelSheetPO_get.setDataList(data_get);
         excelSheets.add(excelSheetPO_get);
         // 主动推
@@ -532,6 +560,25 @@ public class ExcelUtil_Nebak {
         row_put.add("HFCG09BHW系统数据");
         row_put.add("/zzyf/bak/HF_HSS/HFHSS06/UserData/81/db");
         row_put.add("/zzyf/bak/HF_HSS/HFHSS06/System/HFHSS06BE01/");
+        if (neServerPojos != null) {
+            for (int j = 0; j < neServerPojos.size(); j++) {
+                nsp = neServerPojos.get(j);
+                if ("1".equals(nsp.getBakType())) {
+                    row = new ArrayList<>();
+                    row.add(nsp.getOrgName());
+                    row.add(nsp.getDeviceName());
+                    row.add(nsp.getDeviceType());
+                    row.add(nsp.getFirms());
+                    row.add(nsp.getSaveType());
+                    row.add(nsp.getSaveDay());
+                    row.add(nsp.getRemarks());
+                    row.add(nsp.getBakUserdata());
+                    row.add(nsp.getBakSystem());
+                    row.add(nsp.getServerId());
+                    data_put.add(row);
+                }
+            }
+        }
         data_put.add(row_put);
         excelSheetPO_put.setDataList(data_put);
         excelSheets.add(excelSheetPO_put);

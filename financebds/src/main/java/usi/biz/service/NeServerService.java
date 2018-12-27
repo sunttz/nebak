@@ -1261,30 +1261,9 @@ public class NeServerService {
      * @throws Exception
      */
     public String createInsertTemplet() throws Exception {
-        Map<String, String[]> paraMap = new HashMap();
-        List<String> tmpStrs = new ArrayList<>();
-        // 所属地区
-        List<NeServer> areas = neServerDao.getAllOrg2();
-        for (NeServer neServer : areas) {
-            tmpStrs.add(neServer.getOrgName());
-        }
-        paraMap.put("areas", tmpStrs.toArray(new String[tmpStrs.size()]));
-        // 网元类型
-        tmpStrs.clear();
-        List<BusiDict> deviceTypes = neServerDao.getAllDeviceType();
-        for (BusiDict busiDict : deviceTypes) {
-            tmpStrs.add(busiDict.getDicName());
-        }
-        paraMap.put("deviceTypes", tmpStrs.toArray(new String[tmpStrs.size()]));
-        // 厂家
-        tmpStrs.clear();
-        List<BusiDict> firms = neServerDao.getAllFirms();
-        for (BusiDict busiDict : firms) {
-            tmpStrs.add(busiDict.getDicName());
-        }
-        paraMap.put("firms", tmpStrs.toArray(new String[tmpStrs.size()]));
-        tmpStrs.clear();
-        return ExcelUtil_Nebak.createNebakInsertTemplet(paraMap);
+        Map<String, String[]> paraMap = getParaMap();
+        List<NeServerPojo> neServerPojos = neServerDao.batchSelect("197,189");
+        return ExcelUtil_Nebak.createNebakInsertTemplet(paraMap, neServerPojos);
     }
 
     /**
@@ -1295,6 +1274,16 @@ public class NeServerService {
      * @throws Exception
      */
     public String createUpdateTemplet(String serverIds) throws Exception {
+        Map<String, String[]> paraMap = getParaMap();
+        List<NeServerPojo> neServerPojos = neServerDao.batchSelect(serverIds); // 待修改网元信息
+        return ExcelUtil_Nebak.createNebakUpdateTemplet(paraMap, neServerPojos);
+    }
+
+    /**
+     * 获取批量导出excel模板中的下拉字典值列表
+     * @return
+     */
+    private Map<String, String[]> getParaMap() {
         Map<String, String[]> paraMap = new HashMap();
         List<String> tmpStrs = new ArrayList<>();
         // 所属地区
@@ -1318,7 +1307,6 @@ public class NeServerService {
         }
         paraMap.put("firms", tmpStrs.toArray(new String[tmpStrs.size()]));
         tmpStrs.clear();
-        List<NeServerPojo> neServerPojos = neServerDao.batchSelect(serverIds); // 待修改网元信息
-        return ExcelUtil_Nebak.createNebakUpdateTemplet(paraMap, neServerPojos);
+        return paraMap;
     }
 }
