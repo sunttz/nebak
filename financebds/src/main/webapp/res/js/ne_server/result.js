@@ -218,6 +218,10 @@ $(document).ready(function() {
 
 
 function editTask(filePath,orgName){
+	if(filePath.indexOf("UserData") != -1) {
+		$.messager.alert('提示','对不起，您无权访问该文件！','error');
+		return;
+	}
 	tmpfilePath=filePath;
 	if(orgName!=undefined&&orgName!=""){
 		tmpOrgName=orgName;

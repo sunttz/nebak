@@ -18,9 +18,9 @@ $(document).ready(function() {
 		columns:[[
 				{field:'serverId',title:'主键ID',hidden:true,halign:'center',align:'center',width:100},
 				{field:'orgId',title:'机构ID',hidden:true,halign:'center',align:'center',width:100},
-				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:100},
+				{field:'orgName',title:'所属地区',halign:'center',align:'center',width:60},
 				{field:'deviceName',title:'设备名称',halign:'center',align:'center',width:100},
-				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:100},
+				{field:'deviceType',title:'网元类型',halign:'center',align:'center',width:60},
 				// {field:'deviceAddr',title:'设备地址',halign:'center',align:'center',width:100,
                  //    formatter: function(value, row, index) {
                  //        if(value == null || value == ""){
@@ -47,7 +47,7 @@ $(document).ready(function() {
                         return value;
                 }},
 				{field:'remarks',title:'备注',halign:'center',align:'center',width:100},
-				{field:'bakFlag',title:'操作结果',halign:'center',align:'center',width:100,
+				{field:'bakFlag',title:'操作结果',halign:'center',align:'center',width:50,
 					formatter: function(value,row,index){
 		        		if(value==0){
 		        			return "<font color='red'>失败</font>";
@@ -56,7 +56,14 @@ $(document).ready(function() {
 		        		}
 		        	}
 				},
-				{field:'createDate',title:'备份时间',halign:'center',align:'center',width:100}
+                {field:'failReason',title:'失败原因',halign:'center',align:'center',width:100,
+                    formatter: function(value,row,index){
+                        var num =Math.round(Math.random());
+                        var val = num == 1 ? "<span title='网元备份文件不完全'>网元备份文件不完全</span>" : "<span title='无当天可用文件'>无当天可用文件</span>";
+                        return val;
+                    }
+                },
+				{field:'createDate',title:'备份时间',halign:'center',align:'center',width:80}
 		]]
 	});
 	

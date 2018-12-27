@@ -43,7 +43,7 @@
 	      		<div class="loginBanner"></div>
 	      		<div class="login">
 	      			<p class="zhdl">
-	      				<span style="color:#FE7A02;font-size:24px;">登录</span>${uiInfo.name }
+	      				<span style="color:#0000FF;font-size:24px;">登录</span>${uiInfo.name }
 		        	</p>
 		        	<form>
 		            	<div class="login_err_panel" id="err_area">
