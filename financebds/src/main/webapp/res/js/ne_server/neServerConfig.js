@@ -48,7 +48,8 @@ $(document).ready(function () {
             deviceName: $('#device_name').val(),
             bakType: $('#bak_type').combobox('getValue'),
             saveType: $('#save_type').combobox('getValue'),
-            saveDay: $('#save_day').val()
+            saveDay: $('#save_day').val(),
+            createDate: $("#create_date").val()
         },
         columns: [[
             {field: 'ck', title: '全选', checkbox: true, halign: 'center', align: 'center', width: 100},
@@ -108,6 +109,7 @@ $(document).ready(function () {
             },
             {field: 'saveDay', title: '保存份数', halign: 'center', align: 'center', width: 40},
             {field: 'remarks', title: '备注', halign: 'center', align: 'center', width: 100},
+            {field: 'createDate', title: '创建时间', halign: 'center', align: 'center', width: 50},
             {
                 field: 'operate', title: '操作', halign: 'center', align: 'center', width: 70,
                 formatter: function (value, row, index) {
@@ -181,7 +183,7 @@ $(document).ready(function () {
             iconCls: 'icon-export',
             text: '导出新增模板',
             handler: function () {
-                window.location.href = ctx + '/netElement/downloadInsertTemplet.do';
+                window.location.href = ctx + '/netElement/downloadTemplet.do?type=insert';
             }
         }, {
             iconCls: 'icon-export',
@@ -200,7 +202,7 @@ $(document).ready(function () {
                         ids += "," + row[i].serverId;
                     }
                 }
-                var url = ctx + '/netElement/downloadUpdateTemplet.do';
+                var url = ctx + '/netElement/downloadTemplet.do?type=update';
                 var form = $("<form></form>").attr("action", url).attr("method", "post");
                 form.append($("<input></input>").attr("type", "hidden").attr("name", "serverIds").attr("value", ids));
                 form.appendTo('body').submit().remove();
@@ -208,7 +210,17 @@ $(document).ready(function () {
         }, {
             iconCls: 'icon-import',
             text: '批量导入',
-            handler: addNeServer
+            handler: function () {
+                $("#filename").val('');
+                $('#excelFile').val('');
+                $("#importing").html("请选择导入文件");
+                $("#successNum_get").html("0");
+                $("#successNum_put").html("0");
+                $("#failNum_get").html("0");
+                $("#failNum_put").html("0");
+                $("#importResult").hide();
+                $('#importFile').dialog('open');
+            }
         }]
     });
 
@@ -259,7 +271,8 @@ $(document).ready(function () {
             deviceName: $('#device_name').val(),
             bakType: $('#bak_type').combobox('getValue'),
             saveType: $('#save_type').combobox('getValue'),
-            saveDay: $('#save_day').val()
+            saveDay: $('#save_day').val(),
+            createDate: $("#create_date").val()
         });
     });
 
@@ -714,4 +727,61 @@ function getModuleNum() {
             }
         }
     });
+}
+
+// 上传excel
+function doUpload() {
+    $("#importing").html("导入中...");
+    $("#importFileBtn").attr("disabled", true);
+    var formData = new FormData($("#excelForm")[0]);
+    $.ajax({
+        url: ctx + '/netElement/importExcel.do',
+        type: 'POST',
+        data: formData,
+        async: false,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+            console.info(data);
+            if(data.status == 500 || data.status == 555){
+                $("#importing").html("导入失败：" + data.msg);
+            }else if(data.status == 200){
+                $("#importing").html("导入结果");
+                if(data.data != null) {
+                    $("#successNum_get").html(data.data.successNum_get);
+                    $("#successNum_put").html(data.data.successNum_put);
+                    $("#failNum_get").html(data.data.failNum_get);
+                    $("#failNum_put").html(data.data.failNum_put);
+                }
+                $("#importResult").show();
+                // $('#importFile').dialog('close');
+                $('#listTable').datagrid('load', {});
+            }
+            $("#importFileBtn").attr("disabled", false);
+        },
+        error: function (data) {
+            console.error(data);
+            $("#importFileBtn").attr("disabled", false);
+        }
+    });
+}
+
+// 查看当天导入数据
+function getImportDataToday() {
+    $("#create_date").val(getDateStr(0));
+    $('#listTable').datagrid('load', {
+        create_date: $("#create_date").val()
+    });
+    $('#importFile').dialog('close');
+}
+
+//获取addDayCount天后的日期
+function getDateStr(addDayCount){
+    var dd = new Date();
+    dd.setDate(dd.getDate()+addDayCount);
+    var y = dd.getFullYear();
+    var m = (dd.getMonth()+1)<10?"0"+(dd.getMonth()+1):(dd.getMonth()+1);//获取当前月份的日期，不足10补0
+    var d = dd.getDate()<10?"0"+dd.getDate():dd.getDate(); //获取当前几号，不足10补0
+    return y+"-"+m+"-"+d;
 }

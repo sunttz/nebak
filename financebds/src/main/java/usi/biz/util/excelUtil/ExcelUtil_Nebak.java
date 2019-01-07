@@ -121,7 +121,15 @@ public class ExcelUtil_Nebak {
                 // 解析sheet 的列
                 for (int k = 0; k < readColumnCount; k++) {
                     Cell cell = row.getCell(k);
-                    rowValue.add(getCellValue(wb, cell));
+                    Object cellValue = getCellValue(wb, cell);
+                    // 首列为空则读取数据结束
+                    if (k == 0 && (cellValue == null || "".equals(cellValue))) {
+                        break;
+                    }
+                    rowValue.add(cellValue);
+                }
+                if (rowValue.size() == 0) {
+                    break;
                 }
                 dataList.add(rowValue);
             }
@@ -247,18 +255,20 @@ public class ExcelUtil_Nebak {
             endRow = excelSheetPO.getDataList().size() + 1;
         }
         // 设置下拉菜单
-        if (paraMap.get("areas") != null) {
-            setHSSFValidation(sheet, paraMap.get("areas"), 2, endRow, 0, 0); // 所属地区
-        }
-        if (paraMap.get("deviceTypes") != null) {
-            setHSSFValidation(sheet, paraMap.get("deviceTypes"), 2, endRow, 2, 2); // 网元类型
-        }
-        if (paraMap.get("firms") != null) {
-            setHSSFValidation(sheet, paraMap.get("firms"), 2, endRow, 3, 3); // 所属厂家
-        }
-        setHSSFValidation(sheet, saveList, 2, endRow, 4, 4); // 保存类型
-        if (excelSheetPO.getSheetName().equals("被动取")) {
-            setHSSFValidation(sheet, protocolList, 2, endRow, 8, 8); // 备份协议
+        if(endRow >= 2) {
+            if (paraMap.get("areas") != null) {
+                setHSSFValidation(sheet, paraMap.get("areas"), 2, endRow, 0, 0); // 所属地区
+            }
+            if (paraMap.get("deviceTypes") != null) {
+                setHSSFValidation(sheet, paraMap.get("deviceTypes"), 2, endRow, 2, 2); // 网元类型
+            }
+            if (paraMap.get("firms") != null) {
+                setHSSFValidation(sheet, paraMap.get("firms"), 2, endRow, 3, 3); // 所属厂家
+            }
+            setHSSFValidation(sheet, saveList, 2, endRow, 4, 4); // 保存类型
+            if (excelSheetPO.getSheetName().equals("被动取")) {
+                setHSSFValidation(sheet, protocolList, 2, endRow, 8, 8); // 备份协议
+            }
         }
     }
 
@@ -659,6 +669,19 @@ public class ExcelUtil_Nebak {
         String tmpFilename = PropertyUtil.getStringValue("tmp.file.path") + File.separator + "updateTemplet(" + sdf.format(new Date()) + ").xls";
         createWorkbookAtDisk(ExcelVersion.V2003, excelSheets, tmpFilename, false);
         return tmpFilename;
+    }
+
+    /**
+     * 读取新增模板中的数据
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static List<ExcelSheetPO> readNebakInsertTemplet(File file) throws IOException {
+        List<Integer> startRows = new ArrayList<>();
+        startRows.add(4); // 被动取类型从第四行开始读
+        startRows.add(3); // 主动推类型从第三行开始读
+        return readExcel(file, null, null, startRows);
     }
 
 }

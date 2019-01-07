@@ -9,12 +9,47 @@
 		<script>
 			var ctx='${ctx}';
 		</script>
+		<!-- My97DatePicker -->
+		<script type="text/javascript" src="${ctx }/res/My97DatePicker/WdatePicker.js"></script>
 		<script type="text/javascript" src="${ctx }/res/js/ne_server/neServerConfig.js"></script>
 		<style type="text/css">
 			.info_table{border-collapse:collapse;border-spacing:0;}
 			.info_table td{padding:0 15px;border:1px solid #DCDCDC;}
 			.input{height:20px;line-height:15px;font-size:12px;}
 			.validate_box{color:#b11516;margin-left:5px;display:none;}
+			.upload{
+				padding: 4px 10px;
+				height: 20px;
+				line-height: 20px;
+				position: relative;
+				border: 1px solid #999;
+				text-decoration: none;
+				color: #666;
+			}
+			.change{
+				width: 0px;
+				position: absolute;
+				overflow: hidden;
+				right: 0;
+				top: 0;
+				opacity: 0;
+			}
+			.button {
+				background-color: #63B8FF;
+				border: none;
+				color: white;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 14px;
+				margin: 4px 2px;
+				cursor: pointer;
+				-webkit-transition-duration: 0.4s; /* Safari */
+				transition-duration: 0.4s;
+			}
+			.button2:hover {
+				box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+			}
 		</style>
 	</head>	
 	
@@ -23,12 +58,12 @@
 			<div id="searchPanel" class="easyui-panel" data-options="fit:true,title:'备份配置列表'" style="background:#F4F4F4;">
 				<table style="height:100%;">
 					<tr>
-						<td align="right" style="width: 100px;">所属地区：</td>
-						<td align="left"  style="width: 200px;">
+						<td align="right" style="width: 80px;">所属地区：</td>
+						<td align="left"  style="width: 160px;">
 							<input type="text" id="org_id" name="org_id">
 						</td>
-						<td align="right" style="width: 100px;">网元类型：</td>
-						<td align="left"  style="width: 200px;">
+						<td align="right" style="width: 80px;">网元类型：</td>
+						<td align="left"  style="width: 160px;">
 							<input type="text" id="device_type" name="device_type">
 							<!--
 							<select id="device_type" class="easyui-combobox" name="device_type" style="width:130px;">
@@ -55,35 +90,37 @@
 							</select>
 							-->
 						</td>
-						<td align="right" style="width: 100px;">设备名称：</td>
-						<td align="left"  style="width: 200px;">
+						<td align="right" style="width: 80px;">设备名称：</td>
+						<td align="left"  style="width: 160px;">
 							<input type="text" id="device_name" name="device_name">
 						</td>
-						<td style="padding-left: 20px;">
+						<td align="right" style="width: 80px;">创建时间：</td>
+						<td align="left"  style="width: 160px;">
+							<input type="text" id="create_date" name="create_date" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd'});">
 						</td>
 					</tr>
 					<tr>
-						<td align="right" style="width: 100px;">备份类型：</td>
-						<td align="left"  style="width: 200px;">
+						<td align="right" style="width: 80px;">备份类型：</td>
+						<td align="left"  style="width: 160px;">
 							<select id="bak_type" class="easyui-combobox" name="bak_type" style="width:130px;">
 								<option value="" selected>全部</option>
 								<option value="0">被动取</option>
 								<option value="1">主动推</option>
 							</select>
 						</td>
-						<td align="right" style="width: 100px;">保存类型：</td>
-						<td align="left"  style="width: 200px;">
+						<td align="right" style="width: 80px;">保存类型：</td>
+						<td align="left"  style="width: 160px;">
 							<select id="save_type" class="easyui-combobox" name="save_type" style="width:130px;">
 								<option value="" selected>全部</option>
 								<option value="D">按天</option>
 								<option value="W">按周</option>
 							</select>
 						</td>
-						<td align="right" style="width: 100px;">保存份数：</td>
-						<td align="left"  style="width: 200px;">
+						<td align="right" style="width: 80px;">保存份数：</td>
+						<td align="left"  style="width: 160px;">
 							<input type="text" id="save_day" name="save_day" onkeyup="value=value.replace(/[^\d]/g,'')" placeholder="只能输入数字">
 						</td>
-						<td style="padding-left: 20px;width: 80px;">
+						<td colspan="2" style="padding-left: 20px;width: 80px;">
 							<a id="job_log_btn" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'">搜索</a>
 						</td>
 					</tr>
@@ -294,6 +331,33 @@
 			<a href="javascript:void(0)" style="margin-left: 10px;" class="easyui-linkbutton"
 			   data-options="iconCls:'icon-cancel',plain:true" onclick="$('#neServerDialog').dialog('close');">取消</a>
 		</div>
+	</div>
+
+	<div id="importFile" class="easyui-dialog" title="导入数据" style="width:400px;height:230px;padding:10px"
+		 data-options="iconCls: 'icon-import',buttons: '#importFile-buttons',closed:true,modal: true">
+		<div style="height: 50px;width: 100%;text-align: center;">
+			<form id="excelForm"  method="post" >
+				<a href="javascript:;" class="upload">
+					<span onclick="javascript:$('#excelFile').click();">选择文件</span><input type="file" class="change" id="excelFile" name="excelFile" accept=".xls,.xlsx" onchange="document.getElementById('filename').value=this.files[0].name"/>
+					<input type="text" id="filename" readonly="readonly" onclick="javascript:$('#excelFile').click();">
+					<input id="importFileBtn" type="button" class="button button2" onclick="doUpload()" value="导  入" />
+				</a>
+			</form>
+		</div>
+		<div style="height: 60px;width: 100%;text-align: center;">
+			<hr/>
+			<span id="importing">请选择导入文件</span>
+			<div id="importResult" style="display: none;">
+				<span style="display: block;">被动取类型导入成功&nbsp;<span id="successNum_get" style="font-weight: bold">0</span>&nbsp;条，失败&nbsp;<span id="failNum_get" style="font-weight: bold">0</span>&nbsp;条。</span>
+				<span style="display: block;">主动推类型导入成功&nbsp;<span id="successNum_put" style="font-weight: bold">0</span>&nbsp;条，失败&nbsp;<span id="failNum_put" style="font-weight: bold">0</span>&nbsp;条。</span>
+				<span style="display: block;"><a href="#" onclick="getImportDataToday();">查看当天导入数据</a></span>
+			</div>
+		</div>
+		<div></div>
+	</div>
+	<div id="importFile-buttons">
+		<span style="float: left;">仅允许导入"xls"或"xlsx"格式文件！</span>
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#importFile').dialog('close')">关闭</a>
 	</div>
 
 </html>	

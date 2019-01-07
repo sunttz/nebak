@@ -123,3 +123,6 @@ maxvalue 999999999999999999999999999
 start with 100000
 increment by 1
 cache 10;
+
+-- 2019.1.7 增加插入时间字段
+alter table NE_SERVER add create_date date default sysdate;

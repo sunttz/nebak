@@ -1,18 +1,23 @@
 package usi.biz.controller;
 
 import net.sf.json.JSONObject;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import usi.biz.entity.AutoLogDto;
 import usi.biz.entity.BakResult;
+import usi.biz.entity.JsonResult;
 import usi.biz.entity.NeServer;
 import usi.biz.service.BakResultService;
 import usi.biz.service.NeServerService;
 import usi.biz.util.DiskInfoUtil;
 import usi.biz.util.FtpUtils;
+import usi.biz.util.PropertyUtil;
 import usi.sys.dto.AuthInfo;
 import usi.sys.dto.PageObj;
 import usi.sys.entity.BusiDict;
@@ -151,7 +156,8 @@ public class NeServerController {
         String bakType = request.getParameter("bakType");
         String saveType = request.getParameter("saveType");
         String saveDay = request.getParameter("saveDay");
-        return neServerService.getPageAllNE(getAllJob, orgId, deviceType, deviceName, bakType, saveType, saveDay);
+        String createDate = request.getParameter("createDate");
+        return neServerService.getPageAllNE(getAllJob, orgId, deviceType, deviceName, bakType, saveType, saveDay, createDate);
     }
 
     /**
@@ -532,19 +538,28 @@ public class NeServerController {
     }
 
     /**
-     * 下载批量新增模板
+     * 导出excel模板
      *
+     * @param type 模板类型
      * @param request
      * @param response
      */
-    @RequestMapping(value = "/downloadInsertTemplet.do", method = RequestMethod.GET)
-    public void downloadInsertTemplet(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(value = "/downloadTemplet.do")
+    public void downloadTemplet(String type, HttpServletRequest request, HttpServletResponse response) {
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;
         File tmpFile = null;
-        String filename = "网元配置新增模板.xls";
-        try{
-            String tmpFilename = neServerService.createInsertTemplet();
+        String filename = ""; // 下载文件名
+        String tmpFilename = ""; // 临时文件路径
+        try {
+            if ("insert".equals(type)) {
+                tmpFilename = neServerService.createInsertTemplet(null);
+                filename = "网元配置新增模板.xls";
+            } else if ("update".equals(type)) {
+                String serverIds = request.getParameter("serverIds");
+                tmpFilename = neServerService.createUpdateTemplet(serverIds);
+                filename = "网元配置修改模板.xls";
+            }
             tmpFile = new File(tmpFilename);
             request.setCharacterEncoding("UTF-8");
             String agent = request.getHeader("User-Agent").toUpperCase();
@@ -563,7 +578,7 @@ public class NeServerController {
             while (-1 != (bytesRead = bis.read(buff, 0, buff.length)))
                 bos.write(buff, 0, bytesRead);
             bos.flush();
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
@@ -581,50 +596,53 @@ public class NeServerController {
     }
 
     /**
-     * 下载批量修改模板
+     * 导入excel模板
+     *
+     * @param file
      * @param request
-     * @param response
+     * @return
      */
-    @RequestMapping(value = "/downloadUpdateTemplet.do", method = RequestMethod.POST)
-    public void downloadUpdateTemplet(String serverIds, HttpServletRequest request, HttpServletResponse response) {
-        BufferedInputStream bis = null;
-        BufferedOutputStream bos = null;
-        File tmpFile = null;
-        String filename = "网元配置修改模板.xls";
-        try{
-            String tmpFilename = neServerService.createUpdateTemplet(serverIds);
-            tmpFile = new File(tmpFilename);
-            request.setCharacterEncoding("UTF-8");
-            String agent = request.getHeader("User-Agent").toUpperCase();
-            if ((agent.indexOf("MSIE") > 0) || ((agent.indexOf("RV") != -1) && (agent.indexOf("FIREFOX") == -1)))
-                filename = URLEncoder.encode(filename, "UTF-8");
-            else {
-                filename = new String(filename.getBytes("UTF-8"), "ISO8859-1");
+    @RequestMapping(value = "/importExcel.do")
+    @ResponseBody
+    public JsonResult importExcel(@RequestParam("excelFile") CommonsMultipartFile file, HttpServletRequest request) {
+        if (!file.isEmpty()) {
+            String originalFilename = file.getOriginalFilename();
+            String fileType = originalFilename.substring(originalFilename.indexOf("."));// 取文件格式后缀名
+            if (!fileType.equals(".xls") && !fileType.equals(".xlsx")) {
+                return JsonResult.errorMsg("仅允许导入'xls'或'xlsx'格式文件!");
             }
-            response.setContentType("application/x-msdownload;");
-            response.setHeader("Content-disposition", "attachment; filename=" + filename);
-            response.setHeader("Content-Length", String.valueOf(tmpFile.length()));
-            bis = new BufferedInputStream(new FileInputStream(tmpFile));
-            bos = new BufferedOutputStream(response.getOutputStream());
-            byte[] buff = new byte[2048];
-            int bytesRead;
-            while (-1 != (bytesRead = bis.read(buff, 0, buff.length)))
-                bos.write(buff, 0, bytesRead);
-            bos.flush();
-        }catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+            String excelType = "";
+            if (originalFilename.indexOf("新增") > -1) {
+                excelType = "insert";
+            } else if (originalFilename.indexOf("修改") > -1) {
+                excelType = "update";
+            } else {
+                return JsonResult.errorMsg("excel模板名称错误！");
+            }
+            String filename = excelType + System.currentTimeMillis() + fileType;// 取当前时间戳作为文件名
+            String path = PropertyUtil.getStringValue("tmp.file.path") + File.separator + filename;// 存放位置
+            File destFile = new File(path);
             try {
-                if (bis != null) {
-                    bis.close();
+                FileUtils.copyInputStreamToFile(file.getInputStream(), destFile);// 复制临时文件到指定目录下
+                // todo 导入excel逻辑
+                Map<String, String> result = null;
+                if("insert".equals(excelType)){
+                    result = neServerService.importInsertTemplet(destFile);
+                }else if("update".equals(excelType)){
+
                 }
-                if (bos != null) {
-                    bos.close();
-                }
-                tmpFile.delete();
+                return JsonResult.ok(result);
             } catch (Exception e) {
                 e.printStackTrace();
+                return JsonResult.errorException(e.getMessage());
             }
+        } else {
+            return JsonResult.errorMsg("上传文件为空！");
         }
     }
+
+    /*@RequestMapping("/wb")
+    public String wb() {
+        return "websocket";
+    }*/
 }

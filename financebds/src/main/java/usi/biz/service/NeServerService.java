@@ -11,6 +11,7 @@ import usi.biz.dao.NeServerModuleDao;
 import usi.biz.entity.*;
 import usi.biz.util.FtpUtils;
 import usi.biz.util.SftpUtils;
+import usi.biz.util.excelUtil.ExcelSheetPO;
 import usi.biz.util.excelUtil.ExcelUtil_Nebak;
 import usi.sys.dto.PageObj;
 import usi.sys.entity.BusiDict;
@@ -64,9 +65,9 @@ public class NeServerService {
      *
      * @return
      */
-    public Map<String, Object> getPageAllNE(PageObj pageObj, Long orgId, String deviceType, String deviceName, String bakType, String saveType, String saveDay) {
+    public Map<String, Object> getPageAllNE(PageObj pageObj, Long orgId, String deviceType, String deviceName, String bakType, String saveType, String saveDay, String createDate) {
         Map<String, Object> map = new HashMap<String, Object>();
-        List<NeServer> list = neServerDao.getPageAllNE(pageObj, orgId, deviceType, deviceName, bakType, saveType, saveDay);
+        List<NeServer> list = neServerDao.getPageAllNE(pageObj, orgId, deviceType, deviceName, bakType, saveType, saveDay, createDate);
         map.put("total", pageObj.getTotal());
         map.put("rows", list);
         return map;
@@ -1255,32 +1256,8 @@ public class NeServerService {
     }
 
     /**
-     * 生成excel新增模板
-     *
-     * @return 临时文件路径
-     * @throws Exception
-     */
-    public String createInsertTemplet() throws Exception {
-        Map<String, String[]> paraMap = getParaMap();
-        List<NeServerPojo> neServerPojos = neServerDao.batchSelect("197,189");
-        return ExcelUtil_Nebak.createNebakInsertTemplet(paraMap, neServerPojos);
-    }
-
-    /**
-     * 生成excel修改模板
-     *
-     * @param serverIds 待修改网元ID集合
-     * @return 临时文件路径
-     * @throws Exception
-     */
-    public String createUpdateTemplet(String serverIds) throws Exception {
-        Map<String, String[]> paraMap = getParaMap();
-        List<NeServerPojo> neServerPojos = neServerDao.batchSelect(serverIds); // 待修改网元信息
-        return ExcelUtil_Nebak.createNebakUpdateTemplet(paraMap, neServerPojos);
-    }
-
-    /**
      * 获取批量导出excel模板中的下拉字典值列表
+     *
      * @return
      */
     private Map<String, String[]> getParaMap() {
@@ -1308,5 +1285,324 @@ public class NeServerService {
         paraMap.put("firms", tmpStrs.toArray(new String[tmpStrs.size()]));
         tmpStrs.clear();
         return paraMap;
+    }
+
+    /**
+     * 生成excel新增模板
+     *
+     * @param neServerPojos 导入失败列表
+     * @return 临时文件路径
+     * @throws Exception
+     */
+    public String createInsertTemplet(List<NeServerPojo> neServerPojos) throws Exception {
+        Map<String, String[]> paraMap = getParaMap();
+        return ExcelUtil_Nebak.createNebakInsertTemplet(paraMap, neServerPojos);
+    }
+
+    /**
+     * 生成excel修改模板
+     *
+     * @param serverIds 待修改网元ID集合
+     * @return 临时文件路径
+     * @throws Exception
+     */
+    public String createUpdateTemplet(String serverIds) throws Exception {
+        Map<String, String[]> paraMap = getParaMap();
+        List<NeServerPojo> neServerPojos = neServerDao.batchSelect(serverIds); // 待修改网元信息
+        return ExcelUtil_Nebak.createNebakUpdateTemplet(paraMap, neServerPojos);
+    }
+
+    /**
+     * 导入新增数据
+     *
+     * @param tmpFile
+     * @return 导入成功数，导入结果（成功返回空字符串，失败则生成失败excel，返回excel名）
+     * @throws Exception
+     */
+    public Map<String, String> importInsertTemplet(File tmpFile) throws Exception {
+        Map<String, String> result = new HashMap<>();
+        List<ExcelSheetPO> excelSheetPOs = ExcelUtil_Nebak.readNebakInsertTemplet(tmpFile); // 导入数据
+        //List<NeServerPojo> neServerPojos = new ArrayList<>(); // 导入失败列表
+        int successNum_get = 0; // 导入成功数量（被动取）
+        int successNum_put = 0; // 导入成功数量（主动推）
+        int failNum_get = 0; // 导入失败数量（被动取）
+        int failNum_put = 0; // 导入失败数量（主动推）
+        //String insertFailTempletName = ""; // 导入失败excel名称
+        /*
+         * 1、解析数据到NeServer和NeServerModule对象中，若校验失败则不处理
+         * 2、执行插入数据库逻辑，若执行失败则不处理
+         * 3、返回执行成功、失败数量
+         */
+        if (excelSheetPOs.size() == 2) {
+            ExcelSheetPO excelSheetPO = null;
+            List<List<Object>> dataList = null;
+            NeServerPojo neServerPojo = null;
+            NeServer neServer = null;
+            NeServerModule neServerModule = null;
+
+            //网元信息
+            Long orgId = null; //机构ID
+            String orgName; //机构名称
+            String deviceName; //设备名称
+            String deviceType; //设备类型
+            String remarks; //备注
+            String bakType; //备份类型(0被动取1主动推)
+            String saveTypeTmp;
+            String saveType; // 保存类型(D按天W按周)
+            Long saveDay = null; // 保存份数
+            String firms; // 厂家
+            String bakUserdata; // 用户数据路径
+            String bakSystem; // 系统数据路径
+            String neServerModuleId = ""; // 关联ID
+
+            // 模块信息
+            String moduleName; //模块名
+            String deviceAddr; //设备地址
+            Long devicePort; //设备端口
+            String bakPath; //备份路径
+            String userName; //用户名
+            String passWord; //密码
+            String bakProtocolTmp;
+            String bakProtocol; //备份协议(0=ftp、1=sftp)
+
+            // 上一条网元信息(用于判断是否多模块网元)
+            String orgNamePrev = ""; //机构名称
+            String deviceNamePrev = ""; //设备名称
+            String deviceTypePrev = ""; //设备类型
+            String remarksPrev = ""; //备注
+            String saveTypePrev = ""; // 保存类型(D按天W按周)
+            Long saveDayPrev = null; // 保存份数
+            String firmsPrev = ""; // 厂家
+
+            excelSheetPO = excelSheetPOs.get(0); // 被动取的数据
+            if ("被动取".equals(excelSheetPO.getSheetName())) {
+                dataList = excelSheetPO.getDataList();
+                for (int i = 0; i < dataList.size(); i++) {
+                    List<Object> row = dataList.get(i); // 行数据
+                    bakType = "0";
+                    try {
+                        // 网元数据
+                        orgName = row.get(0) != null ? row.get(0).toString() : null;
+                        if (StringUtils.isNotEmpty(orgName)) {
+                            String orgIdTmp = neServerDao.getOrgIdByName(orgName);
+                            orgId = StringUtils.isNotEmpty(orgIdTmp) ? Long.valueOf(orgIdTmp) : null;
+                        }
+                        deviceName = row.get(1) != null ? row.get(1).toString() : null;
+                        deviceType = row.get(2) != null ? row.get(2).toString() : null;
+                        firms = row.get(3) != null ? row.get(3).toString() : null;
+                        saveTypeTmp = row.get(4) != null ? row.get(4).toString() : null;
+                        saveType = "按周".equals(saveTypeTmp) ? "W" : "D";
+                        saveDay = row.get(5) != null ? Long.valueOf(row.get(5).toString()) : null;
+                        remarks = row.get(6) != null ? row.get(6).toString() : null;
+                        // 模块数据
+                        moduleName = row.get(7) != null ? row.get(7).toString() : null;
+                        bakProtocolTmp = row.get(8) != null ? row.get(8).toString() : null;
+                        bakProtocol = "SFTP".equals(bakProtocolTmp) ? "1" : "0";
+                        deviceAddr = row.get(9) != null ? row.get(9).toString() : null;
+                        devicePort = row.get(10) != null ? Long.valueOf(row.get(10).toString()) : null;
+                        userName = row.get(11) != null ? row.get(11).toString() : null;
+                        passWord = row.get(12) != null ? row.get(12).toString() : null;
+                        bakPath = row.get(13) != null ? row.get(13).toString() : null;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.error("行数据解析出错：" + row);
+                        failNum_get++;
+                        continue;
+                    }
+
+                    // 校验数据
+                    if (StringUtils.isEmpty(orgName) || StringUtils.isEmpty(deviceName) || StringUtils.isEmpty(deviceType) || StringUtils.isEmpty(firms)
+                            || StringUtils.isEmpty(saveType) || saveDay == null || StringUtils.isEmpty(remarks) || StringUtils.isEmpty(moduleName)
+                            || StringUtils.isEmpty(bakProtocol) || StringUtils.isEmpty(deviceAddr) || !deviceAddr.matches("^(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)$") || devicePort == null || StringUtils.isEmpty(userName)
+                            || StringUtils.isEmpty(passWord) || StringUtils.isEmpty(bakPath)) {
+                        /*neServerPojo = new NeServerPojo();
+                        neServerPojo.setBakType("0");
+                        neServerPojo.setOrgName(orgName);
+                        neServerPojo.setDeviceName(deviceName);
+                        neServerPojo.setDeviceType(deviceType);
+                        neServerPojo.setFirms(firms);
+                        neServerPojo.setSaveType(saveTypeTmp);
+                        neServerPojo.setSaveDay(saveDay);
+                        neServerPojo.setRemarks(remarks);
+                        neServerPojo.setModuleName(moduleName);
+                        neServerPojo.setBakProtocol(bakProtocolTmp);
+                        neServerPojo.setDeviceAddr(deviceAddr);
+                        neServerPojo.setDevicePort(devicePort);
+                        neServerPojo.setUserName(userName);
+                        neServerPojo.setPassWord(passWord);
+                        neServerPojo.setBakPath(bakPath);
+                        neServerPojos.add(neServerPojo);*/
+                        failNum_get++;
+                        continue;
+                    }
+                    // 入库
+                    try {
+                        // 若网元信息和上一条相同，则只更新模块信息
+                        if (!orgName.equals(orgNamePrev) || !deviceName.equals(deviceNamePrev) || !deviceType.equals(deviceTypePrev) || !remarks.equals(remarksPrev)
+                                || !saveType.equals(saveTypePrev) || saveDay != saveDayPrev || !firms.equals(firmsPrev)) {
+                            neServerModuleId = generateModuleId();
+                            neServer = new NeServer();
+                            neServer.setOrgId(orgId);
+                            neServer.setOrgName(orgName);
+                            neServer.setDeviceType(deviceType);
+                            neServer.setDeviceName(deviceName);
+                            neServer.setRemarks(remarks);
+                            neServer.setSaveType(saveType);
+                            neServer.setSaveDay(saveDay);
+                            neServer.setBakType(bakType);
+                            neServer.setFirms(firms);
+                            neServer.setDevicePort(0L);
+                            neServer.setNeServerModuleId(neServerModuleId);
+                            neServerDao.saveNeServer(neServer);
+                        }
+                        // 设置上一条数据
+                        orgNamePrev = orgName;
+                        deviceNamePrev = deviceName;
+                        deviceTypePrev = deviceType;
+                        remarksPrev = remarks;
+                        saveTypePrev = saveType;
+                        saveDayPrev = saveDay;
+                        firmsPrev = firms;
+
+                        neServerModule = new NeServerModule();
+                        neServerModule.setModuleName(moduleName);
+                        neServerModule.setDeviceAddr(deviceAddr);
+                        neServerModule.setDevicePort(devicePort);
+                        neServerModule.setUserName(userName);
+                        neServerModule.setPassWord(passWord);
+                        neServerModule.setBakPath(bakPath);
+                        neServerModule.setBakProtocol(bakProtocol);
+                        neServerModule.setNeServerModuleId(neServerModuleId);
+                        neServerModuleDao.saveNeServerModule(neServerModule);
+                        successNum_get++;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.error("入库失败：" + row);
+                        /*neServerPojo = new NeServerPojo();
+                        neServerPojo.setBakType("0");
+                        neServerPojo.setOrgName(orgName);
+                        neServerPojo.setDeviceName(deviceName);
+                        neServerPojo.setDeviceType(deviceType);
+                        neServerPojo.setFirms(firms);
+                        neServerPojo.setSaveType(saveTypeTmp);
+                        neServerPojo.setSaveDay(saveDay);
+                        neServerPojo.setRemarks(remarks);
+                        neServerPojo.setModuleName(moduleName);
+                        neServerPojo.setBakProtocol(bakProtocolTmp);
+                        neServerPojo.setDeviceAddr(deviceAddr);
+                        neServerPojo.setDevicePort(devicePort);
+                        neServerPojo.setUserName(userName);
+                        neServerPojo.setPassWord(passWord);
+                        neServerPojo.setBakPath(bakPath);
+                        neServerPojos.add(neServerPojo);*/
+                        failNum_get++;
+                        continue;
+                    }
+                }
+            }
+            excelSheetPO = excelSheetPOs.get(1); // 主动推的数据
+            if ("主动推".equals(excelSheetPO.getSheetName())) {
+                dataList = excelSheetPO.getDataList();
+                for (int i = 0; i < dataList.size(); i++) {
+                    List<Object> row = dataList.get(i); // 行数据
+                    bakType = "1";
+                    try {
+                        // 网元数据
+                        orgName = row.get(0) != null ? row.get(0).toString() : null;
+                        if (StringUtils.isNotEmpty(orgName)) {
+                            String orgIdTmp = neServerDao.getOrgIdByName(orgName);
+                            orgId = StringUtils.isNotEmpty(orgIdTmp) ? Long.valueOf(orgIdTmp) : null;
+                        }
+                        deviceName = row.get(1) != null ? row.get(1).toString() : null;
+                        deviceType = row.get(2) != null ? row.get(2).toString() : null;
+                        firms = row.get(3) != null ? row.get(3).toString() : null;
+                        saveTypeTmp = row.get(4) != null ? row.get(4).toString() : null;
+                        saveType = "按周".equals(saveTypeTmp) ? "W" : "D";
+                        saveDay = row.get(5) != null ? Long.valueOf(row.get(5).toString()) : null;
+                        remarks = row.get(6) != null ? row.get(6).toString() : null;
+                        bakUserdata = row.get(7) != null ? row.get(7).toString() : null;
+                        bakSystem = row.get(8) != null ? row.get(8).toString() : null;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.error("行数据解析出错：" + row);
+                        failNum_put++;
+                        continue;
+                    }
+
+                    // 校验数据
+                    if (StringUtils.isEmpty(orgName) || StringUtils.isEmpty(deviceName) || StringUtils.isEmpty(deviceType) || StringUtils.isEmpty(firms)
+                            || StringUtils.isEmpty(saveType) || saveDay == null || StringUtils.isEmpty(remarks) || (StringUtils.isEmpty(bakSystem) && StringUtils.isEmpty(bakUserdata))) {
+                        /*neServerPojo = new NeServerPojo();
+                        neServerPojo.setOrgName(orgName);
+                        neServerPojo.setDeviceName(deviceName);
+                        neServerPojo.setDeviceType(deviceType);
+                        neServerPojo.setFirms(firms);
+                        neServerPojo.setSaveType(saveTypeTmp);
+                        neServerPojo.setSaveDay(saveDay);
+                        neServerPojo.setRemarks(remarks);
+                        neServerPojo.setBakUserdata(bakUserdata);
+                        neServerPojo.setBakSystem(bakSystem);
+                        neServerPojos.add(neServerPojo);*/
+                        failNum_put++;
+                        continue;
+                    }
+                    // 入库
+                    try {
+                        neServerModuleId = generateModuleId();
+                        neServer = new NeServer();
+                        neServer.setOrgId(orgId);
+                        neServer.setOrgName(orgName);
+                        neServer.setDeviceType(deviceType);
+                        neServer.setDeviceName(deviceName);
+                        neServer.setRemarks(remarks);
+                        neServer.setSaveType(saveType);
+                        neServer.setSaveDay(saveDay);
+                        neServer.setBakType(bakType);
+                        neServer.setFirms(firms);
+                        neServer.setBakUserdata(bakUserdata);
+                        neServer.setBakSystem(bakSystem);
+                        neServer.setDevicePort(0L);
+                        neServer.setNeServerModuleId(neServerModuleId);
+                        neServerDao.saveNeServer(neServer);
+                        successNum_put++;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.error("入库失败：" + row);
+                        /*neServerPojo = new NeServerPojo();
+                        neServerPojo.setBakType("1");
+                        neServerPojo.setOrgName(orgName);
+                        neServerPojo.setDeviceName(deviceName);
+                        neServerPojo.setDeviceType(deviceType);
+                        neServerPojo.setFirms(firms);
+                        neServerPojo.setSaveType(saveTypeTmp);
+                        neServerPojo.setSaveDay(saveDay);
+                        neServerPojo.setRemarks(remarks);
+                        neServerPojo.setBakUserdata(bakUserdata);
+                        neServerPojo.setBakSystem(bakSystem);
+                        neServerPojos.add(neServerPojo);*/
+                        failNum_put++;
+                        continue;
+                    }
+                }
+            }
+        }
+        /*if (neServerPojos.size() > 0) {
+            insertFailTempletName = createInsertTemplet(neServerPojos);
+            if(StringUtils.isNotEmpty(insertFailTempletName)){
+                int len = insertFailTempletName.lastIndexOf(File.separator);
+                insertFailTempletName = insertFailTempletName.substring(len + 1);
+            }
+        }*/
+        // result.put("insertFailTempletName", insertFailTempletName);
+        result.put("successNum_get", String.valueOf(successNum_get));
+        result.put("successNum_put", String.valueOf(successNum_put));
+        result.put("failNum_get", String.valueOf(failNum_get));
+        result.put("failNum_put", String.valueOf(failNum_put));
+        return result;
+    }
+
+    private String generateModuleId() {
+        String s = UUID.randomUUID().toString();
+        return s.substring(0, 8) + s.substring(9, 13) + s.substring(14, 18) + s.substring(19, 23) + s.substring(24);
     }
 }

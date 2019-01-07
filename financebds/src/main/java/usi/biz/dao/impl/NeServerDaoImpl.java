@@ -79,8 +79,8 @@ public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDa
     }
 
     @Override
-    public List<NeServer> getPageAllNE(PageObj pageObj, Long orgId, String deviceType, String deviceName, String bakType, String saveType, String saveDay) {
-        String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type,t.firms,t.device_port,t.neserver_moduleid,case when t.neserver_moduleid is not null then (select count(*) num from ne_server_module where neserver_module_id = t.neserver_moduleid) else 0 end modulenum from ne_server t"
+    public List<NeServer> getPageAllNE(PageObj pageObj, Long orgId, String deviceType, String deviceName, String bakType, String saveType, String saveDay, String createDate) {
+        String sql = "select t.server_id,t.org_id,t.org_name,t.device_name,t.device_type,t.remarks,t.device_addr,t.bak_path,t.user_name,t.pass_word,t.bak_type,t.save_day,t.bak_userdata,t.bak_system,t.save_type,t.firms,t.device_port,t.neserver_moduleid,case when t.neserver_moduleid is not null then (select count(*) num from ne_server_module where neserver_module_id = t.neserver_moduleid) else 0 end modulenum,to_char(t.create_date, 'yyyy-mm-dd') as create_date from ne_server t"
                 + " WHERE 1=1";
 
         if (orgId != null && !orgId.equals("") && orgId != -1L) {
@@ -100,6 +100,9 @@ public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDa
         }
         if (saveDay != null && !"".equals(saveDay)) {
             sql += " and t.save_day = '" + saveDay + "'";
+        }
+        if(createDate != null && !"".equals(createDate)){
+            sql += " and to_char(t.create_date, 'yyyy-mm-dd') ='" + createDate + "'";
         }
         sql += " order by t.device_type,t.firms,t.server_id";
         return this.queryByPage(sql, new RowMapper<NeServer>() {
@@ -125,6 +128,7 @@ public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDa
                 record.setDevicePort(rs.getLong(17));
                 record.setNeServerModuleId(rs.getString(18));
                 record.setModuleNum(rs.getInt(19));
+                record.setCreateDate(rs.getString(20));
                 return record;
             }
         }, pageObj);
@@ -433,5 +437,20 @@ public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDa
                 return record;
             }
         });
+    }
+
+    @Override
+    public String getOrgIdByName(String orgName) {
+        String sql = "SELECT ORG_ID FROM SYS_ORG WHERE PARENT_ORG_ID = 0 AND ORG_ID <> 1 AND STATUS = 1 AND ORG_NAME LIKE '%" + orgName + "%'";
+        List<String> results = this.getJdbcTemplate().query(sql, new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getString(1);
+            }
+        });
+        if (results != null && results.size() > 0) {
+            return results.get(0);
+        }
+        return "";
     }
 }

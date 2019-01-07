@@ -44,6 +44,8 @@ public class NeServer {
     private String neServerModuleId;
     // 模块数
     private int moduleNum;
+    // 创建时间
+    private String createDate;
 
     public Long getServerId() {
         return serverId;
@@ -195,5 +197,13 @@ public class NeServer {
 
     public void setModuleNum(int moduleNum) {
         this.moduleNum = moduleNum;
+    }
+
+    public String getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
     }
 }
