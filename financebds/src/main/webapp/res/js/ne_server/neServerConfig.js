@@ -109,7 +109,7 @@ $(document).ready(function () {
             },
             {field: 'saveDay', title: '保存份数', halign: 'center', align: 'center', width: 40},
             {field: 'remarks', title: '备注', halign: 'center', align: 'center', width: 100},
-            {field: 'createDate', title: '创建时间', halign: 'center', align: 'center', width: 50},
+            {field: 'createDate', title: '更新时间', halign: 'center', align: 'center', width: 50},
             {
                 field: 'operate', title: '操作', halign: 'center', align: 'center', width: 70,
                 formatter: function (value, row, index) {
@@ -383,7 +383,12 @@ function delOne(serverId) {
                     } else {
                         $('#listTable').datagrid('load', {
                             orgId: $('#org_id').combobox('getValue'),
-                            deviceType: $('#device_type').combobox('getValue')
+                            deviceType: $('#device_type').combobox('getValue'),
+                            deviceName: $('#device_name').val(),
+                            bakType: $('#bak_type').combobox('getValue'),
+                            saveType: $('#save_type').combobox('getValue'),
+                            saveDay: $('#save_day').val(),
+                            createDate: $("#create_date").val()
                         });
                     }
                 }
@@ -619,7 +624,8 @@ function saveNeServer() {
                     deviceName: $('#device_name').val(),
                     bakType: $('#bak_type').combobox('getValue'),
                     saveType: $('#save_type').combobox('getValue'),
-                    saveDay: $('#save_day').val()
+                    saveDay: $('#save_day').val(),
+                    createDate: $("#create_date").val()
                 });
             } else {
                 $.messager.alert('提示', '保存失败！', 'info');
@@ -743,12 +749,14 @@ function doUpload() {
         contentType: false,
         processData: false,
         success: function (data) {
-            console.info(data);
+            //console.info(data);
             if(data.status == 500 || data.status == 555){
                 $("#importing").html("导入失败：" + data.msg);
             }else if(data.status == 200){
-                $("#importing").html("导入结果");
+                $("#importing").html("【导入结果】");
                 if(data.data != null) {
+                    $("#filename").val('');
+                    $('#excelFile').val('');
                     $("#successNum_get").html(data.data.successNum_get);
                     $("#successNum_put").html(data.data.successNum_put);
                     $("#failNum_get").html(data.data.failNum_get);
@@ -756,7 +764,15 @@ function doUpload() {
                 }
                 $("#importResult").show();
                 // $('#importFile').dialog('close');
-                $('#listTable').datagrid('load', {});
+                $('#listTable').datagrid('load', {
+                    orgId: $('#org_id').combobox('getValue'),
+                    deviceType: $('#device_type').combobox('getValue'),
+                    deviceName: $('#device_name').val(),
+                    bakType: $('#bak_type').combobox('getValue'),
+                    saveType: $('#save_type').combobox('getValue'),
+                    saveDay: $('#save_day').val(),
+                    createDate: $("#create_date").val()
+                });
             }
             $("#importFileBtn").attr("disabled", false);
         },
@@ -771,7 +787,13 @@ function doUpload() {
 function getImportDataToday() {
     $("#create_date").val(getDateStr(0));
     $('#listTable').datagrid('load', {
-        create_date: $("#create_date").val()
+        orgId: $('#org_id').combobox('getValue'),
+        deviceType: $('#device_type').combobox('getValue'),
+        deviceName: $('#device_name').val(),
+        bakType: $('#bak_type').combobox('getValue'),
+        saveType: $('#save_type').combobox('getValue'),
+        saveDay: $('#save_day').val(),
+        createDate: $("#create_date").val()
     });
     $('#importFile').dialog('close');
 }

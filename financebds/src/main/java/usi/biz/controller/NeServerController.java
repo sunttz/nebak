@@ -540,7 +540,7 @@ public class NeServerController {
     /**
      * 导出excel模板
      *
-     * @param type 模板类型
+     * @param type     模板类型
      * @param request
      * @param response
      */
@@ -624,17 +624,22 @@ public class NeServerController {
             File destFile = new File(path);
             try {
                 FileUtils.copyInputStreamToFile(file.getInputStream(), destFile);// 复制临时文件到指定目录下
-                // todo 导入excel逻辑
                 Map<String, String> result = null;
-                if("insert".equals(excelType)){
+                if ("insert".equals(excelType)) {
                     result = neServerService.importInsertTemplet(destFile);
-                }else if("update".equals(excelType)){
-
+                } else if ("update".equals(excelType)) {
+                    result = neServerService.importUpdateTemplet(destFile);
                 }
                 return JsonResult.ok(result);
             } catch (Exception e) {
                 e.printStackTrace();
                 return JsonResult.errorException(e.getMessage());
+            } finally {
+                try {
+                    destFile.delete();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             return JsonResult.errorMsg("上传文件为空！");

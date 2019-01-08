@@ -272,7 +272,7 @@ public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDa
 
     @Override
     public int updateNeServer(final NeServer neServer) {
-        String sql = "UPDATE NE_SERVER SET ORG_NAME=?,DEVICE_NAME=?,DEVICE_TYPE=?,REMARKS=?,DEVICE_ADDR=?,BAK_PATH=?,USER_NAME=?,PASS_WORD=?,ORG_ID=?,BAK_TYPE=?,SAVE_DAY=?,BAK_USERDATA=?,BAK_SYSTEM=?,SAVE_TYPE=?,FIRMS=?,DEVICE_PORT=?,NESERVER_MODULEID=? WHERE SERVER_ID=?";
+        String sql = "UPDATE NE_SERVER SET ORG_NAME=?,DEVICE_NAME=?,DEVICE_TYPE=?,REMARKS=?,DEVICE_ADDR=?,BAK_PATH=?,USER_NAME=?,PASS_WORD=?,ORG_ID=?,BAK_TYPE=?,SAVE_DAY=?,BAK_USERDATA=?,BAK_SYSTEM=?,SAVE_TYPE=?,FIRMS=?,DEVICE_PORT=?,CREATE_DATE=sysdate WHERE SERVER_ID=?";
         return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps) throws SQLException {
@@ -292,8 +292,8 @@ public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDa
                 ps.setString(14, neServer.getSaveType());
                 ps.setString(15, neServer.getFirms());
                 ps.setLong(16, neServer.getDevicePort());
-                ps.setString(17, neServer.getNeServerModuleId());
-                ps.setLong(18, neServer.getServerId());
+                //ps.setString(17, neServer.getNeServerModuleId());
+                ps.setLong(17, neServer.getServerId());
             }
         });
     }
@@ -402,6 +402,7 @@ public class NeServerDaoImpl extends JdbcDaoSupport4oracle implements NeServerDa
             }
         }
         query.append(")");
+        query.append(" ORDER BY NS.SERVER_ID");
         return this.getJdbcTemplate().query(query.toString(), new PreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps) throws SQLException {

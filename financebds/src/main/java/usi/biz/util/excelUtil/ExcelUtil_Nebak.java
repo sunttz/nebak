@@ -488,7 +488,7 @@ public class ExcelUtil_Nebak {
         // 被动取
         ExcelSheetPO excelSheetPO_get = new ExcelSheetPO();
         excelSheetPO_get.setSheetName("被动取");
-        excelSheetPO_get.setTitle("被动取类型配置：蓝色区域为网元配置，绿色区域为模块配置；针对多模块网元，配置为多条数据，其中蓝色网元配置部分必须相同；\n第3-4行为多模块网元配置示例数据，请勿删除");
+        excelSheetPO_get.setTitle("被动取类型配置：蓝色区域为网元配置，绿色区域为模块配置；针对多模块网元，需配置为多条数据，其中蓝色网元配置部分必须相同；\n第3-4行为多模块网元配置示例数据，请勿删除");
         excelSheetPO_get.setHeaders(new String[]{"所属地区", "设备名称", "网元类型", "所属厂家", "保存类型", "保存份数", "备注", "模块名称", "备份协议", "设备地址", "设备端口", "用户名", "密码", "备份路径"});
         excelSheetPO_get.setParaMap(paraMap);
         List<Object> row = null;
@@ -609,7 +609,7 @@ public class ExcelUtil_Nebak {
         // 被动取
         ExcelSheetPO excelSheetPO_get = new ExcelSheetPO();
         excelSheetPO_get.setSheetName("被动取");
-        excelSheetPO_get.setTitle("被动取类型配置：蓝色区域为网元配置，绿色区域为模块配置；针对多模块网元，配置为多条数据，其中蓝色网元配置部分必须相同；\n请勿修改灰色区域网元ID及模块ID");
+        excelSheetPO_get.setTitle("被动取类型配置：蓝色区域为网元配置，绿色区域为模块配置；针对多模块网元，需配置为多条数据，其中蓝色网元配置部分必须相同；\n请勿修改灰色区域网元ID及模块ID");
         excelSheetPO_get.setHeaders(new String[]{"所属地区", "设备名称", "网元类型", "所属厂家", "保存类型", "保存份数", "备注", "模块名称", "备份协议", "设备地址", "设备端口", "用户名", "密码", "备份路径", "网元ID", "模块ID"});
         excelSheetPO_get.setParaMap(paraMap);
         List<List<Object>> data_get = new ArrayList<>();
@@ -643,7 +643,7 @@ public class ExcelUtil_Nebak {
         // 主动推
         ExcelSheetPO excelSheetPO_put = new ExcelSheetPO();
         excelSheetPO_put.setSheetName("主动推");
-        excelSheetPO_put.setTitle("主动推类型配置：请勿修改灰色区域网元ID");
+        excelSheetPO_put.setTitle("主动推类型配置：蓝色区域为网元配置；请勿修改灰色区域网元ID");
         excelSheetPO_put.setHeaders(new String[]{"所属地区", "设备名称", "网元类型", "所属厂家", "保存类型", "保存份数", "备注", "用户数据路径", "系统数据路径", "网元ID"});
         excelSheetPO_put.setParaMap(paraMap);
         List<List<Object>> data_put = new ArrayList<>();
@@ -681,6 +681,19 @@ public class ExcelUtil_Nebak {
         List<Integer> startRows = new ArrayList<>();
         startRows.add(4); // 被动取类型从第四行开始读
         startRows.add(3); // 主动推类型从第三行开始读
+        return readExcel(file, null, null, startRows);
+    }
+
+    /**
+     * 读取修改模板中的数据
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static List<ExcelSheetPO> readNebakUpdateTemplet(File file) throws IOException {
+        List<Integer> startRows = new ArrayList<>();
+        startRows.add(2); // 被动取类型从第四行开始读
+        startRows.add(2); // 主动推类型从第三行开始读
         return readExcel(file, null, null, startRows);
     }
 

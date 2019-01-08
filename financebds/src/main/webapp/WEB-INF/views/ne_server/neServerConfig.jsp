@@ -350,7 +350,7 @@
 			<div id="importResult" style="display: none;">
 				<span style="display: block;">被动取类型导入成功&nbsp;<span id="successNum_get" style="font-weight: bold">0</span>&nbsp;条，失败&nbsp;<span id="failNum_get" style="font-weight: bold">0</span>&nbsp;条。</span>
 				<span style="display: block;">主动推类型导入成功&nbsp;<span id="successNum_put" style="font-weight: bold">0</span>&nbsp;条，失败&nbsp;<span id="failNum_put" style="font-weight: bold">0</span>&nbsp;条。</span>
-				<span style="display: block;"><a href="#" onclick="getImportDataToday();">查看当天导入数据</a></span>
+				<span style="display: block;"><a href="#" onclick="javascript:getImportDataToday();">查看当天导入数据</a></span>
 			</div>
 		</div>
 		<div></div>

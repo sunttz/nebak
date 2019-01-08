@@ -19,7 +19,7 @@ public class NeServerServiceTest {
     @Test
     public void createInsertTemplet() {
         try {
-            neServerService.createInsertTemplet();
+            neServerService.createInsertTemplet(null);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -44,7 +44,7 @@ public class NeServer {
     private String neServerModuleId;
     // 模块数
     private int moduleNum;
-    // 创建时间
+    // 更新时间
     private String createDate;
 
     public Long getServerId() {
