@@ -18,7 +18,7 @@
 			.input{height:20px;line-height:15px;font-size:12px;}
 			.validate_box{color:#b11516;margin-left:5px;display:none;}
 			.upload{
-				padding: 4px 10px;
+				padding: 7px 10px;
 				height: 20px;
 				line-height: 20px;
 				position: relative;

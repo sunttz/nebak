@@ -646,8 +646,4 @@ public class NeServerController {
         }
     }
 
-    /*@RequestMapping("/wb")
-    public String wb() {
-        return "websocket";
-    }*/
 }

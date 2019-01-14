@@ -210,6 +210,7 @@ public class ExcelUtil_Nebak {
             cellStyleMap.clear();
             Workbook wb = createWorkBook(version, excelSheets, isInsert);
             wb.write(fos);
+            wb.close();
             fos.close();
         }
     }

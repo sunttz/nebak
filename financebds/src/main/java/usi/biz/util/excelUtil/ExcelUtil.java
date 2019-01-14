@@ -331,10 +331,5 @@ public class ExcelUtil {
         List<ExcelSheetPO> sheets = new ArrayList<>();
         sheets.add(excelSheetPO);
         ExcelUtil.createWorkbookAtDisk(ExcelVersion.V2007, sheets, "/Users/taotaosun/Downloads/test2.xlsx");
-        File f = new File("/Users/taotaosun/Desktop/网元配置模板.xlsx");
-        List<Integer> startRows = new ArrayList<>();
-        startRows.add(2);
-        startRows.add(2);
-        //List<ExcelSheetPO> pos = ExcelUtil.readExcel(f, null, null, startRows);
     }
 }
